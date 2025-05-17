@@ -12,9 +12,9 @@ try
 }
 catch (Exception ex)
 {
-    if (ex is LexerException)
+    if (ex is RazeException)
     {
-        Console.WriteLine(ex);
+        Console.WriteLine(ex.Message);
     }
     else
     {

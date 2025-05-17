@@ -1,18 +1,9 @@
 ﻿namespace Raze.Script.Core.Exceptions;
 
-public class LexerException : Exception
+public abstract class LexerException : RazeException
 {
-    public int Line;
-    public int Column;
-
-    public LexerException(string message, int line, int column) : base(message)
+    public LexerException(string error, int line, int column, string className)
+        : base(error, line, column, className)
     {
-        Line = line;
-        Column = column;
-    }
-
-    public override string ToString()
-    {
-        return $"{this.GetType().Name} -> {Message}. At line {Line}, column {Column}.";
     }
 }

@@ -105,7 +105,7 @@ internal class Lexer
                 }
                 else
                 {
-                    throw new LexerException($"Invalid character found: \"{Current()}\"", _currentLine, _currentColumn);
+                    throw new UnexpectedCharacterException(Current(), _currentLine, _currentColumn);
                 }
                 break;
         }

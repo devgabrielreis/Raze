@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Lexer;
+﻿using Raze.Script.Core.Exceptions;
+using Raze.Script.Core.Lexer;
 
 namespace Raze.Script.Core.AST;
 
@@ -74,7 +75,7 @@ internal class Parser
         }
         else
         {
-            throw new Exception("token invalido encontrado");
+            throw new UnexpectedTokenException(Current());
         }
 
         Advance();
