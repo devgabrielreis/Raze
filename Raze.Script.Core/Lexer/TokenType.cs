@@ -12,5 +12,10 @@ public enum TokenType
 
     IntegerLiteral,
 
-    AssignmentOperator
+    AssignmentOperator,
+    AdditionOperator,
+    SubtractionOperator,
+    MultiplicationOperator,
+    DivisionOperator,
+    ModuloOperator
 }

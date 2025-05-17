@@ -85,10 +85,25 @@ internal class Lexer
         switch (Current())
         {
             case ';':
-                ProcessSemiColon();
+                ProcessSingleCharacter(TokenType.SemiColon);
                 break;
             case '=':
-                ProcessEqual();
+                ProcessSingleCharacter(TokenType.AssignmentOperator);
+                break;
+            case '+':
+                ProcessSingleCharacter(TokenType.AdditionOperator);
+                break;
+            case '-':
+                ProcessSingleCharacter(TokenType.SubtractionOperator);
+                break;
+            case '*':
+                ProcessSingleCharacter(TokenType.MultiplicationOperator);
+                break;
+            case '/':
+                ProcessSingleCharacter(TokenType.DivisionOperator);
+                break;
+            case '%':
+                ProcessSingleCharacter(TokenType.ModuloOperator);
                 break;
             default:
                 if (CharUtils.IsAsciiLetter(Current()))
@@ -111,15 +126,9 @@ internal class Lexer
         }
     }
 
-    private void ProcessSemiColon()
+    private void ProcessSingleCharacter(TokenType tokenType)
     {
-        _tokens.Add(new Token(TokenType.SemiColon, Current().ToString(), _currentLine, _currentColumn));
-        Advance();
-    }
-
-    private void ProcessEqual()
-    {
-        _tokens.Add(new Token(TokenType.AssignmentOperator, Current().ToString(), _currentLine, _currentColumn));
+        _tokens.Add(new Token(tokenType, Current().ToString(), _currentLine, _currentColumn));
         Advance();
     }
 
