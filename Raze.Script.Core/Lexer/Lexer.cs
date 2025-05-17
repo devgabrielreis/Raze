@@ -36,7 +36,7 @@ internal class Lexer
         HasProcessed = false;
     }
 
-    public IEnumerable<Token> Tokenize()
+    public IList<Token> Tokenize()
     {
         if (HasProcessed)
         {

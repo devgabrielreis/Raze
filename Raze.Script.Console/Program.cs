@@ -3,7 +3,7 @@ using Raze.Script.Core.Exceptions;
 
 try
 {
-    var tokens = new RazeScript().Tokenize("var integer nome = 10;");
+    var tokens = new RazeScript().Tokenize("nome 10 foo bar 12");
 
     foreach (var token in tokens)
     {
