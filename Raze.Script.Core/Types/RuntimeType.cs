@@ -1,0 +1,14 @@
+﻿using Raze.Script.Core.AST;
+
+namespace Raze.Script.Core.Types;
+
+public abstract class RuntimeType
+{
+    public abstract object? Value { get; }
+
+    public abstract string TypeName { get; }
+
+    public abstract RuntimeType ExecuteBinaryOperation(string op, RuntimeType other, BinaryExpression source);
+
+    public abstract override string ToString();
+}

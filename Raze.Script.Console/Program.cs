@@ -1,23 +1,40 @@
 ﻿using Raze.Script.Core;
 using Raze.Script.Core.Exceptions;
 
-try
+internal class Program
 {
-    var tokens = new RazeScript().Tokenize("nome 10 foo bar 12");
+    private static void Main(string[] args)
+    {
+        RunInterpreter();
+    }
 
-    foreach (var token in tokens)
+    private static void RunInterpreter()
     {
-        Console.WriteLine(token);
-    }
-}
-catch (Exception ex)
-{
-    if (ex is RazeException)
-    {
-        Console.WriteLine(ex.Message);
-    }
-    else
-    {
-        throw ex;
+        while (true)
+        {
+            Console.Write("> ");
+            string command = Console.ReadLine()!;
+
+            if (command == "exit()")
+            {
+                break;
+            }
+
+            try
+            {
+                Console.WriteLine(RazeScript.Evaluate(command));
+            }
+            catch (Exception ex)
+            {
+                if (ex is RazeException)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
     }
 }

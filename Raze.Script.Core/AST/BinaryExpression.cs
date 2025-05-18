@@ -1,6 +1,6 @@
 ﻿namespace Raze.Script.Core.AST;
 
-internal class BinaryExpression : Expression
+public class BinaryExpression : Expression
 {
     public Expression Left { get; private set; }
     public string Operator { get; private set; }
