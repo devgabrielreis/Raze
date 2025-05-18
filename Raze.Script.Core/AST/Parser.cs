@@ -121,16 +121,25 @@ internal class Parser
     }
 
     private Expression ParsePrimaryExpression()
-    {
-        if (Current().TokenType == TokenType.Identifier)
+    {        
+        switch (Current().TokenType)
         {
-            return new IdentifierExpression(Current().Lexeme, Current().Line, Current().Column);
-        }
-        else if (Current().TokenType == TokenType.IntegerLiteral)
-        {
-            return new IntegerLiteralExpression(int.Parse(Current().Lexeme), Current().Line, Current().Column);
-        }
+            case TokenType.Identifier:
+                return new IdentifierExpression(Current().Lexeme, Current().Line, Current().Column);
+            case TokenType.IntegerLiteral:
+                return new IntegerLiteralExpression(int.Parse(Current().Lexeme), Current().Line, Current().Column);
+            case TokenType.OpenParenthesis:
+                Advance();
+                Expression expr = ParseAdditiveExpression();
+                Advance();
+                if (Current().TokenType != TokenType.CloseParenthesis)
+                {
+                    throw new UnexpectedTokenException(Current());
+                }
+                return expr;
+            default:
+                throw new UnexpectedTokenException(Current());
 
-        throw new UnexpectedTokenException(Current());
+        }
     }
 }

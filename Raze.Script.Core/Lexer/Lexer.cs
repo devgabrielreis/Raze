@@ -87,6 +87,12 @@ internal class Lexer
             case ';':
                 ProcessSingleCharacter(TokenType.SemiColon);
                 break;
+            case '(':
+                ProcessSingleCharacter(TokenType.OpenParenthesis);
+                break;
+            case ')':
+                ProcessSingleCharacter(TokenType.CloseParenthesis);
+                break;
             case '=':
                 ProcessSingleCharacter(TokenType.AssignmentOperator);
                 break;

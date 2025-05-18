@@ -5,6 +5,9 @@ public enum TokenType
     EOF,
     SemiColon,
 
+    OpenParenthesis,
+    CloseParenthesis,
+
     Identifier,
 
     Var,
