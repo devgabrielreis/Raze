@@ -19,7 +19,7 @@ internal static class Interpreter
             case BinaryExpression binaryExpression:
                 return EvaluateBinaryExpression(binaryExpression);
             default:
-                throw new InvalidExpressionException("Statement ainda nao suportado pelo interpretador", statement.StartLine, statement.StartColumn);
+                throw new InvalidStatementException(statement.GetType().Name, statement.StartLine, statement.StartColumn);
         }
     }
 
