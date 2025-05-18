@@ -1,6 +1,6 @@
-﻿using System.Reflection;
-using Raze.Script.Core.AST;
+﻿using Raze.Script.Core.Engine;
 using Raze.Script.Core.Types;
+using System.Reflection;
 
 namespace Raze.Script.Core;
 
@@ -12,11 +12,11 @@ public static class RazeScript
 
     public static RuntimeType Evaluate(string source)
     {
-        var tokens = new Lexer.Lexer(source).Tokenize();
+        var tokens = new Lexer(source).Tokenize();
 
         var program = new Parser(tokens).Parse();
 
-        var result = Interpreter.Interpreter.Evaluate(program);
+        var result = Interpreter.Evaluate(program);
 
         return result;
     }

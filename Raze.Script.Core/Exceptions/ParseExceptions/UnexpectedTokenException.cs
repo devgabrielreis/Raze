@@ -1,6 +1,6 @@
-﻿using Raze.Script.Core.Lexer;
+﻿using Raze.Script.Core.Tokens;
 
-namespace Raze.Script.Core.Exceptions
+namespace Raze.Script.Core.Exceptions.ParseExceptions
 {
     public class UnexpectedTokenException : ParseException
     {

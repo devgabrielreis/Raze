@@ -1,4 +1,4 @@
-﻿namespace Raze.Script.Core.Exceptions;
+﻿namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public class NullValueException : RuntimeException
 {

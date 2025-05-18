@@ -1,4 +1,4 @@
-﻿namespace Raze.Script.Core.AST;
+﻿namespace Raze.Script.Core.Statements.Expressions;
 
 public abstract class Expression : Statement
 {

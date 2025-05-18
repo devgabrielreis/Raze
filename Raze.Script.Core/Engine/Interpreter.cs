@@ -1,8 +1,9 @@
-﻿using Raze.Script.Core.AST;
-using Raze.Script.Core.Exceptions;
+﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+using Raze.Script.Core.Statements;
+using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Types;
 
-namespace Raze.Script.Core.Interpreter;
+namespace Raze.Script.Core.Engine;
 
 internal static class Interpreter
 {
@@ -19,7 +20,7 @@ internal static class Interpreter
             case BinaryExpression binaryExpression:
                 return EvaluateBinaryExpression(binaryExpression);
             default:
-                throw new InvalidStatementException(statement.GetType().Name, statement.StartLine, statement.StartColumn);
+                throw new UnsupportedStatementException(statement.GetType().Name, statement.StartLine, statement.StartColumn);
         }
     }
 

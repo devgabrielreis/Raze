@@ -1,4 +1,4 @@
-﻿using Raze.Script.Core.AST;
+﻿using Raze.Script.Core.Statements.Expressions;
 
 namespace Raze.Script.Core.Types;
 

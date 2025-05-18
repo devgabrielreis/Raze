@@ -1,4 +1,4 @@
-﻿namespace Raze.Script.Core.AST;
+﻿namespace Raze.Script.Core.Statements.Expressions;
 
 internal abstract class PrimaryExpression : Expression
 {

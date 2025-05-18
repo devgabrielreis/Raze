@@ -1,4 +1,4 @@
-﻿namespace Raze.Script.Core.Exceptions;
+﻿namespace Raze.Script.Core.Exceptions.LexerExceptions;
 
 public abstract class LexerException : RazeException
 {

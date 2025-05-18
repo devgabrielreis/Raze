@@ -1,7 +1,9 @@
-﻿using Raze.Script.Core.Exceptions;
-using Raze.Script.Core.Lexer;
+﻿using Raze.Script.Core.Exceptions.ParseExceptions;
+using Raze.Script.Core.Statements;
+using Raze.Script.Core.Statements.Expressions;
+using Raze.Script.Core.Tokens;
 
-namespace Raze.Script.Core.AST;
+namespace Raze.Script.Core.Engine;
 
 internal class Parser
 {
@@ -78,7 +80,7 @@ internal class Parser
     {
         Expression? left = ParseMultiplicativeExpression();
         Advance();
-        
+
         while (Current().TokenType == TokenType.AdditionOperator || Current().TokenType == TokenType.SubtractionOperator)
         {
             string op = Current().Lexeme;
@@ -121,7 +123,7 @@ internal class Parser
     }
 
     private Expression ParsePrimaryExpression()
-    {        
+    {
         switch (Current().TokenType)
         {
             case TokenType.Identifier:

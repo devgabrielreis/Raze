@@ -1,7 +1,8 @@
-﻿using Raze.Script.Core.Exceptions;
+﻿using Raze.Script.Core.Exceptions.LexerExceptions;
+using Raze.Script.Core.Tokens;
 using Raze.Shared.Utils;
 
-namespace Raze.Script.Core.Lexer;
+namespace Raze.Script.Core.Engine;
 
 internal class Lexer
 {
@@ -23,7 +24,7 @@ internal class Lexer
     public Lexer(string sourceCode)
     {
         _sourceCode = sourceCode;
-        
+
         Reset();
     }
 

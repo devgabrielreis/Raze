@@ -1,4 +1,4 @@
-﻿namespace Raze.Script.Core.Lexer;
+﻿namespace Raze.Script.Core.Tokens;
 
 public enum TokenType
 {
