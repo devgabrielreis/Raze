@@ -1,8 +1,13 @@
-﻿using Raze.Script.Core;
+﻿using System.Reflection;
+using Raze.Script.Core;
 using Raze.Script.Core.Exceptions;
 
 internal class Program
 {
+    public static Version Version => Assembly.GetExecutingAssembly()
+                                             .GetName()
+                                             .Version!;
+
     private static void Main(string[] args)
     {
         RunInterpreter();
@@ -10,6 +15,16 @@ internal class Program
 
     private static void RunInterpreter()
     {
+        Console.WriteLine("Raze Interpreter");
+        Console.WriteLine($"Raze.Core    version {RazeScript.Version.ToString()}");
+        Console.WriteLine($"Raze.Console version {Version.ToString()}");
+
+#if !RELEASE
+        Console.WriteLine($"[development build {DateTime.Now.ToString("yyyyMMdd_HHmmss")}]");
+#endif
+
+        Console.WriteLine();
+
         while (true)
         {
             Console.Write("> ");
@@ -26,9 +41,9 @@ internal class Program
             }
             catch (Exception ex)
             {
-                if (ex is RazeException)
+                if (ex is RazeException razeEx)
                 {
-                    Console.WriteLine(ex.Message);
+                    PrettyPrintRazeException(razeEx, command);
                 }
                 else
                 {
@@ -36,5 +51,19 @@ internal class Program
                 }
             }
         }
+    }
+
+    private static void PrettyPrintRazeException(RazeException ex, string source)
+    {
+        Console.WriteLine(ex.Message);
+        Console.WriteLine(source);
+        
+        for (int i = 0; i < ex.Column; i++)
+        {
+            Console.Write(" ");
+        }
+
+        Console.WriteLine("^");
+        Console.WriteLine();
     }
 }
