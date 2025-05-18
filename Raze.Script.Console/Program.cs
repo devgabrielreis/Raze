@@ -20,7 +20,7 @@ internal class Program
         Console.WriteLine($"Raze.Console version {Version.ToString()}");
 
 #if !RELEASE
-        Console.WriteLine($"[development build {DateTime.Now.ToString("yyyyMMdd_HHmmss")}]");
+        Console.WriteLine($"[development build]");
 #endif
 
         Console.WriteLine();
