@@ -11,7 +11,7 @@ internal class Parser
 
     private IList<Token> _tokens;
     private int _currentIndex;
-    private ProgramStatement _program;
+    private ProgramExpression _program;
 
     public Parser(IList<Token> tokens)
     {
@@ -33,7 +33,7 @@ internal class Parser
         HasProcessed = false;
     }
 
-    public ProgramStatement Parse()
+    public ProgramExpression Parse()
     {
         if (HasProcessed)
         {
