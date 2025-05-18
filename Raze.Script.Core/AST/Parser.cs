@@ -42,7 +42,7 @@ internal class Parser
 
         while (!HasEnded())
         {
-            _program.Body.Add(ProcessCurrent());
+            _program.Body.Add(ParseCurrent());
             Advance();
         }
 
@@ -69,47 +69,58 @@ internal class Parser
         return Current().TokenType == TokenType.EOF;
     }
 
-    private Statement ProcessCurrent()
+    private Statement ParseCurrent()
     {
-        return ProcessAdditiveExpression();
+        return ParseAdditiveExpression();
     }
 
-    private BinaryExpression ProcessAdditiveExpression()
+    private Expression ParseAdditiveExpression()
     {
-        BinaryExpression? result = null;
-
-        Expression? left = ProcessPrimaryExpression();
+        Expression? left = ParseMultiplicativeExpression();
         Advance();
         
         while (Current().TokenType == TokenType.AdditionOperator || Current().TokenType == TokenType.SubtractionOperator)
         {
-            if (left is null)
-            {
-                left = result;
-            }
-
             string op = Current().Lexeme;
             Advance();
 
-            PrimaryExpression right = ProcessPrimaryExpression();
+            Expression right = ParseMultiplicativeExpression();
             Advance();
 
-            result = new BinaryExpression(left!, op, right, left!.StartLine, left.StartColumn);
-            left = null;
-        }
-
-        if (result is null)
-        {
-            throw new InvalidExpressionException("Invalid additive expression", left!.StartLine, left.StartColumn);
+            left = new BinaryExpression(left!, op, right, left!.StartLine, left.StartColumn);
         }
 
         // coloca o indice de volta no lugar
         Return();
 
-        return result;
+        return left;
     }
 
-    private PrimaryExpression ProcessPrimaryExpression()
+    private Expression ParseMultiplicativeExpression()
+    {
+        Expression? left = ParsePrimaryExpression();
+        Advance();
+
+        while (Current().TokenType == TokenType.MultiplicationOperator
+            || Current().TokenType == TokenType.DivisionOperator
+            || Current().TokenType == TokenType.ModuloOperator)
+        {
+            string op = Current().Lexeme;
+            Advance();
+
+            Expression right = ParsePrimaryExpression();
+            Advance();
+
+            left = new BinaryExpression(left!, op, right, left!.StartLine, left.StartColumn);
+        }
+
+        // coloca o indice de volta no lugar
+        Return();
+
+        return left;
+    }
+
+    private Expression ParsePrimaryExpression()
     {
         if (Current().TokenType == TokenType.Identifier)
         {
