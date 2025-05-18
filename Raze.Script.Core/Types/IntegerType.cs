@@ -18,6 +18,17 @@ public class IntegerType : RuntimeType
 
     public override RuntimeType ExecuteBinaryOperation(string op, RuntimeType other, BinaryExpression source)
     {
+        if (other.TypeName != TypeName)
+        {
+            throw new UnsupportedBinaryOperationException(
+                TypeName,
+                other.TypeName,
+                op,
+                source.StartLine,
+                source.StartColumn
+            );
+        }
+
         if (Value is null || other.Value is null)
         {
             throw new NullValueException(source.StartLine, source.StartColumn);
