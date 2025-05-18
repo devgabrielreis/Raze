@@ -14,6 +14,8 @@ internal static class Interpreter
                 return EvaluateProgramStatement(program);
             case IntegerLiteralExpression integerLiteralExpression:
                 return EvaluateIntegerLiteralExpression(integerLiteralExpression);
+            case NullLiteralExpression nullLiteralExpression:
+                return EvaluateNullLiteralExpression(nullLiteralExpression);
             case BinaryExpression binaryExpression:
                 return EvaluateBinaryExpression(binaryExpression);
             default:
@@ -36,6 +38,11 @@ internal static class Interpreter
     private static IntegerType EvaluateIntegerLiteralExpression(IntegerLiteralExpression expression)
     {
         return new IntegerType(expression.Value);
+    }
+
+    private static NullType EvaluateNullLiteralExpression(NullLiteralExpression expression)
+    {
+        return new NullType();
     }
 
     private static RuntimeType EvaluateBinaryExpression(BinaryExpression expression)

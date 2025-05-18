@@ -128,6 +128,8 @@ internal class Parser
                 return new IdentifierExpression(Current().Lexeme, Current().Line, Current().Column);
             case TokenType.IntegerLiteral:
                 return new IntegerLiteralExpression(int.Parse(Current().Lexeme), Current().Line, Current().Column);
+            case TokenType.NullLiteral:
+                return new NullLiteralExpression(Current().Line, Current().Column);
             case TokenType.OpenParenthesis:
                 Advance();
                 Expression expr = ParseAdditiveExpression();

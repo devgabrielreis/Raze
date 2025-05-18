@@ -14,6 +14,7 @@ public enum TokenType
     IntegerType,
 
     IntegerLiteral,
+    NullLiteral,
 
     AssignmentOperator,
     AdditionOperator,
