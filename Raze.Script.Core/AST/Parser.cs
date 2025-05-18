@@ -94,14 +94,13 @@ internal class Parser
             PrimaryExpression right = ProcessPrimaryExpression();
             Advance();
 
-            result = new BinaryExpression(left!, op, right);
+            result = new BinaryExpression(left!, op, right, left!.StartLine, left.StartColumn);
             left = null;
         }
 
         if (result is null)
         {
-            // todo: colocar linha e coluna nos statments
-            throw new InvalidExpressionException("Invalid additive expression", 0, 0);
+            throw new InvalidExpressionException("Invalid additive expression", left!.StartLine, left.StartColumn);
         }
 
         // coloca o indice de volta no lugar
@@ -114,11 +113,11 @@ internal class Parser
     {
         if (Current().TokenType == TokenType.Identifier)
         {
-            return new IdentifierExpression(Current().Lexeme);
+            return new IdentifierExpression(Current().Lexeme, Current().Line, Current().Column);
         }
         else if (Current().TokenType == TokenType.IntegerLiteral)
         {
-            return new IntegerLiteralExpression(int.Parse(Current().Lexeme));
+            return new IntegerLiteralExpression(int.Parse(Current().Lexeme), Current().Line, Current().Column);
         }
 
         throw new UnexpectedTokenException(Current());
