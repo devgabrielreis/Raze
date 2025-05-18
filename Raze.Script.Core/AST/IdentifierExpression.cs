@@ -1,6 +1,6 @@
 ﻿namespace Raze.Script.Core.AST;
 
-internal class IdentifierExpression : Expression
+internal class IdentifierExpression : PrimaryExpression
 {
     public string Symbol { get; set; }
 

@@ -13,6 +13,11 @@ internal class Parser
 
     public Parser(IList<Token> tokens)
     {
+        if (tokens.Count == 0 || tokens.Last().TokenType != TokenType.EOF)
+        {
+            throw new Exception("Invalid token list");
+        }
+
         _tokens = tokens;
 
         Reset();
@@ -37,7 +42,8 @@ internal class Parser
 
         while (!HasEnded())
         {
-            ProcessCurrent();
+            _program.Body.Add(ProcessCurrent());
+            Advance();
         }
 
         return _program;
@@ -53,31 +59,68 @@ internal class Parser
         _currentIndex++;
     }
 
+    private void Return()
+    {
+        _currentIndex--;
+    }
+
     private bool HasEnded()
     {
-        return (Current().TokenType == TokenType.EOF) || !(_currentIndex < _tokens.Count);
+        return Current().TokenType == TokenType.EOF;
     }
 
-    private void ProcessCurrent()
+    private Statement ProcessCurrent()
     {
-        ProcessPrimaryExpression();
+        return ProcessAdditiveExpression();
     }
 
-    private void ProcessPrimaryExpression()
+    private BinaryExpression ProcessAdditiveExpression()
+    {
+        BinaryExpression? result = null;
+
+        Expression? left = ProcessPrimaryExpression();
+        Advance();
+        
+        while (Current().TokenType == TokenType.AdditionOperator || Current().TokenType == TokenType.SubtractionOperator)
+        {
+            if (left is null)
+            {
+                left = result;
+            }
+
+            string op = Current().Lexeme;
+            Advance();
+
+            PrimaryExpression right = ProcessPrimaryExpression();
+            Advance();
+
+            result = new BinaryExpression(left!, op, right);
+            left = null;
+        }
+
+        if (result is null)
+        {
+            // todo: colocar linha e coluna nos statments
+            throw new InvalidExpressionException("Invalid additive expression", 0, 0);
+        }
+
+        // coloca o indice de volta no lugar
+        Return();
+
+        return result;
+    }
+
+    private PrimaryExpression ProcessPrimaryExpression()
     {
         if (Current().TokenType == TokenType.Identifier)
         {
-            _program.Body.Add(new IdentifierExpression(Current().Lexeme));
+            return new IdentifierExpression(Current().Lexeme);
         }
         else if (Current().TokenType == TokenType.IntegerLiteral)
         {
-            _program.Body.Add(new IntegerLiteralExpression(int.Parse(Current().Lexeme)));
-        }
-        else
-        {
-            throw new UnexpectedTokenException(Current());
+            return new IntegerLiteralExpression(int.Parse(Current().Lexeme));
         }
 
-        Advance();
+        throw new UnexpectedTokenException(Current());
     }
 }

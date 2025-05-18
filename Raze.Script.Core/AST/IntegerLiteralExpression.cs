@@ -1,6 +1,6 @@
 ﻿namespace Raze.Script.Core.AST;
 
-internal class IntegerLiteralExpression : Expression
+internal class IntegerLiteralExpression : PrimaryExpression
 {
     public int Value { get; set; }
 
