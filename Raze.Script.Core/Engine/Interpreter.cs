@@ -1,4 +1,4 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Exceptions.InterpreterExceptions;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Types;
