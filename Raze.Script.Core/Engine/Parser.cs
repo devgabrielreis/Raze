@@ -138,11 +138,15 @@ internal class Parser
                 Advance();
                 if (Current().TokenType != TokenType.CloseParenthesis)
                 {
-                    throw new UnexpectedTokenException(Current());
+                    throw new UnexpectedTokenException(
+                        Current().TokenType.ToString(), Current().Lexeme, Current().Line, Current().Column
+                    );
                 }
                 return expr;
             default:
-                throw new UnexpectedTokenException(Current());
+                throw new UnexpectedTokenException(
+                    Current().TokenType.ToString(), Current().Lexeme, Current().Line, Current().Column
+                );
 
         }
     }

@@ -8,7 +8,7 @@ public abstract class RuntimeType
 
     public abstract string TypeName { get; }
 
-    public abstract RuntimeType ExecuteBinaryOperation(string op, RuntimeType other, BinaryExpression source);
+    internal abstract RuntimeType ExecuteBinaryOperation(string op, RuntimeType other, BinaryExpression source);
 
     public abstract override string ToString();
 }

@@ -1,17 +1,16 @@
 ﻿using Raze.Script.Core.Tokens;
 
-namespace Raze.Script.Core.Exceptions.ParseExceptions
+namespace Raze.Script.Core.Exceptions.ParseExceptions;
+
+public class UnexpectedTokenException : ParseException
 {
-    public class UnexpectedTokenException : ParseException
+    public UnexpectedTokenException(string tokenType, string lexeme, int line, int column)
+        : base(
+              $"Unexpected token of type {tokenType} found: {lexeme}",
+              line,
+              column,
+              nameof(UnexpectedTokenException)
+          )
     {
-        public UnexpectedTokenException(Token token)
-            : base(
-                  $"Unexpected token of type {token.TokenType.ToString()} found: {token.Lexeme}",
-                  token.Line,
-                  token.Column,
-                  nameof(UnexpectedTokenException)
-              )
-        {
-        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Raze.Script.Core.Tokens;
 
-public enum TokenType
+internal enum TokenType
 {
     EOF,
     SemiColon,

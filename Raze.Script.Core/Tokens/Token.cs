@@ -1,6 +1,6 @@
 ﻿namespace Raze.Script.Core.Tokens;
 
-public class Token
+internal class Token
 {
     public TokenType TokenType { get; private set; }
     public string Lexeme { get; private set; }

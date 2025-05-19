@@ -9,7 +9,7 @@ public class NullType : RuntimeType
 
     public override string TypeName => "NULL";
 
-    public override RuntimeType ExecuteBinaryOperation(string op, RuntimeType other, BinaryExpression source)
+    internal override RuntimeType ExecuteBinaryOperation(string op, RuntimeType other, BinaryExpression source)
     {
         throw new UnsupportedBinaryOperationException(
             TypeName,

@@ -16,7 +16,7 @@ public class IntegerType : RuntimeType
         _value = value;
     }
 
-    public override RuntimeType ExecuteBinaryOperation(string op, RuntimeType other, BinaryExpression source)
+    internal override RuntimeType ExecuteBinaryOperation(string op, RuntimeType other, BinaryExpression source)
     {
         if (other.TypeName != TypeName)
         {

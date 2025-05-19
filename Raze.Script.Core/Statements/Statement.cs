@@ -1,6 +1,6 @@
 ﻿namespace Raze.Script.Core.Statements;
 
-public abstract class Statement
+internal abstract class Statement
 {
     public int StartLine { get; private set; }
     public int StartColumn { get; private set; }
