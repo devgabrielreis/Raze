@@ -16,8 +16,8 @@ internal class Lexer
 
     private static Dictionary<string, TokenType> _keywords = new()
     {
-        { "var", TokenType.Var},
-        { "integer", TokenType.IntegerType },
+        { "var", TokenType.KeywordVar},
+        { "integer", TokenType.KeywordInteger },
         { "NULL", TokenType.NullLiteral }
     };
 

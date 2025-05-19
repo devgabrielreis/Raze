@@ -10,8 +10,8 @@ public enum TokenType
 
     Identifier,
 
-    Var,
-    IntegerType,
+    KeywordVar,
+    KeywordInteger,
 
     IntegerLiteral,
     NullLiteral,
