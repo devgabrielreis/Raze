@@ -139,7 +139,11 @@ internal class Parser
                 if (Current().TokenType != TokenType.CloseParenthesis)
                 {
                     throw new UnexpectedTokenException(
-                        Current().TokenType.ToString(), Current().Lexeme, Current().Line, Current().Column
+                        Current().TokenType.ToString(),
+                        TokenType.CloseParenthesis.ToString(),
+                        Current().Lexeme,
+                        Current().Line,
+                        Current().Column
                     );
                 }
                 return expr;
