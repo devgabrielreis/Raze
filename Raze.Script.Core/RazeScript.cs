@@ -1,4 +1,5 @@
 ﻿using Raze.Script.Core.Engine;
+using Raze.Script.Core.Scopes;
 using Raze.Script.Core.Types;
 using System.Reflection;
 
@@ -10,13 +11,13 @@ public static class RazeScript
                                              .GetName()
                                              .Version!;
 
-    public static RuntimeType Evaluate(string source)
+    public static RuntimeType Evaluate(string source, Scope scope)
     {
         var tokens = new Lexer(source).Tokenize();
 
         var program = new Parser(tokens).Parse();
 
-        var result = Interpreter.Evaluate(program);
+        var result = Interpreter.Evaluate(program, scope);
 
         return result;
     }

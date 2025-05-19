@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Raze.Script.Core;
 using Raze.Script.Core.Exceptions;
+using Raze.Script.Core.Scopes;
 
 internal class Program
 {
@@ -25,6 +26,8 @@ internal class Program
 
         Console.WriteLine();
 
+        InterpreterScope scope = new();
+
         while (true)
         {
             Console.Write("> ");
@@ -37,7 +40,7 @@ internal class Program
 
             try
             {
-                Console.WriteLine(RazeScript.Evaluate(command));
+                Console.WriteLine(RazeScript.Evaluate(command, scope));
             }
             catch (Exception ex)
             {
