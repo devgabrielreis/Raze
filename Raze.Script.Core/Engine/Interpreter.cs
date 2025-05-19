@@ -12,7 +12,7 @@ internal static class Interpreter
         switch (statement)
         {
             case ProgramExpression program:
-                return EvaluateProgramStatement(program);
+                return EvaluateProgramExpression(program);
             case IntegerLiteralExpression integerLiteralExpression:
                 return EvaluateIntegerLiteralExpression(integerLiteralExpression);
             case NullLiteralExpression nullLiteralExpression:
@@ -24,7 +24,7 @@ internal static class Interpreter
         }
     }
 
-    private static RuntimeType EvaluateProgramStatement(ProgramExpression program)
+    private static RuntimeType EvaluateProgramExpression(ProgramExpression program)
     {
         RuntimeType lastValue = new NullType();
 
