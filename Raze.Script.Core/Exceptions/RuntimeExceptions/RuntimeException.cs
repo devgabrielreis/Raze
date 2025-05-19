@@ -6,4 +6,9 @@ public abstract class RuntimeException : RazeException
         : base(error, line, column, className)
     {
     }
+
+    public RuntimeException(int line, int column, string className)
+        : base(line, column, className)
+    {
+    }
 }

@@ -11,4 +11,11 @@ public abstract class RazeException : Exception
         Line = line;
         Column = column;
     }
+
+    public RazeException(int line, int column, string className)
+        : base($"{className}. At line {line}, column {column}.")
+    {
+        Line = line;
+        Column = column;
+    }
 }

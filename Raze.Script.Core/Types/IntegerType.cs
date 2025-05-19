@@ -43,6 +43,10 @@ public class IntegerType : RuntimeType
             case "*":
                 return new IntegerType((int)Value * (int)other.Value);
             case "/":
+                if ((int)other.Value == 0)
+                {
+                    throw new DivisionByZeroException(source.StartLine, source.StartColumn);
+                }
                 return new IntegerType((int)Value / (int)other.Value);
             case "%":
                 return new IntegerType((int)Value % (int)other.Value);
