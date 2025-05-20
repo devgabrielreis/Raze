@@ -23,7 +23,7 @@ internal class Parser
     {
         if (tokens.Count == 0 || tokens.Last() is not EOF)
         {
-            throw new Exception("Invalid token list");
+            throw new InvalidTokenListException();
         }
 
         _tokens = tokens;
