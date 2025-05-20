@@ -5,6 +5,7 @@ using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Symbols.Variables;
 using Raze.Script.Core.Tokens.Operators;
+using Raze.Script.Core.Tokens.Primitives;
 using Raze.Script.Core.Types;
 
 namespace Raze.Script.Core.Engine;
@@ -18,16 +19,19 @@ internal static class Interpreter
             case ProgramExpression program:
                 return EvaluateProgramExpression(program, scope);
 
-            case IntegerLiteralExpression integerLiteralExpression:
-                return EvaluateIntegerLiteralExpression(integerLiteralExpression);
-            case NullLiteralExpression nullLiteralExpression:
-                return EvaluateNullLiteralExpression(nullLiteralExpression);
+            case IntegerLiteralExpression expr:
+                return EvaluateIntegerLiteralExpression(expr);
+            case NullLiteralExpression expr:
+                return EvaluateNullLiteralExpression(expr);
 
-            case IdentifierExpression identifierExpression:
-                return EvaluateIdentifierExpression(identifierExpression, scope);
+            case IdentifierExpression expr:
+                return EvaluateIdentifierExpression(expr, scope);
 
-            case BinaryExpression binaryExpression:
-                return EvaluateBinaryExpression(binaryExpression, scope);
+            case VariableDeclarationStatement stmt:
+                return EvaluateVariableDeclarationStatement(stmt, scope);
+
+            case BinaryExpression expr:
+                return EvaluateBinaryExpression(expr, scope);
             default:
                 throw new UnsupportedStatementException(statement.GetType().Name, statement.StartLine, statement.StartColumn);
         }
@@ -52,6 +56,18 @@ internal static class Interpreter
 
     private static NullType EvaluateNullLiteralExpression(NullLiteralExpression expression)
     {
+        return new NullType();
+    }
+
+    private static NullType EvaluateVariableDeclarationStatement(VariableDeclarationStatement statement, Scope scope)
+    {
+        VariableSymbol variable = statement.Type switch
+        {
+            IntegerPrimitive => new IntegerVariable(statement.Value is null ? new NullType() : Evaluate(statement.Value, scope), statement.IsContant),
+            _ => throw new Exception("Tipo ainda não suportado")
+        };
+
+        scope.DeclareVariable(statement.Identifier, variable, statement);
         return new NullType();
     }
 

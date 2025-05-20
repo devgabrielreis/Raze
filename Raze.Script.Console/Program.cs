@@ -61,12 +61,16 @@ internal class Program
         Console.WriteLine(ex.Message);
         Console.WriteLine(source);
         
-        for (int i = 0; i < ex.Column; i++)
+        if (ex.Line is not null && ex.Column is not null)
         {
-            Console.Write(" ");
+            for (int i = 0; i < ex.Column; i++)
+            {
+                Console.Write(" ");
+            }
+
+            Console.WriteLine("^");
         }
 
-        Console.WriteLine("^");
         Console.WriteLine();
     }
 }

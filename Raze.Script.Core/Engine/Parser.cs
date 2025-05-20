@@ -6,6 +6,8 @@ using Raze.Script.Core.Tokens.Delimiters;
 using Raze.Script.Core.Tokens.Grouping;
 using Raze.Script.Core.Tokens.Literals;
 using Raze.Script.Core.Tokens.Operators;
+using Raze.Script.Core.Tokens.Primitives;
+using Raze.Script.Core.Tokens.VariableDeclaration;
 
 namespace Raze.Script.Core.Engine;
 
@@ -91,7 +93,39 @@ internal class Parser
 
     private Statement ParseCurrent()
     {
+        if (Current() is VariableDeclarationToken)
+        {
+            return ParseVariableDeclaration();
+        }
+
         return ParseAdditiveExpression();
+    }
+
+    private VariableDeclarationStatement ParseVariableDeclaration()
+    {
+        bool isConstant = Current() is Const;
+        int startLine = Current().Line;
+        int startColumn = Current().Column;
+        Advance();
+
+        Expect<PrimitiveTypeToken>();
+        PrimitiveTypeToken type = (Current() as PrimitiveTypeToken)!;
+        Advance();
+
+        Expect<Identifier>();
+        string identifier = Current().Lexeme;
+        Advance();
+
+        if (Current() is not AssignmentOperator)
+        {
+            Return();
+            return new VariableDeclarationStatement(identifier, type, null, isConstant, startLine, startColumn);
+        }
+
+        Advance();
+        Expression value = ParseAdditiveExpression();
+
+        return new VariableDeclarationStatement(identifier, type, value, isConstant, startLine, startColumn);
     }
 
     private Expression ParseAdditiveExpression()

@@ -5,12 +5,12 @@ namespace Raze.Script.Core.Symbols.Variables;
 
 public class IntegerVariable : VariableSymbol
 {
-    public IntegerVariable(RuntimeType value)
+    public IntegerVariable(RuntimeType value, bool isConstant)
+        : base(value, isConstant)
     {
-        SetNewValue(value);
     }
 
-    public override void SetNewValue(RuntimeType value)
+    protected override void SetValue(RuntimeType value)
     {
         if (value is NullType)
         {

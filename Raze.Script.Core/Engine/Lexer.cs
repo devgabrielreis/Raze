@@ -23,6 +23,7 @@ internal class Lexer
     private static Dictionary<string, Func<string, int, int, Token>> _keywords = new()
     {
         ["var"]     = (string lexeme, int line, int column) => new Var(lexeme, line, column),
+        ["const"]   = (string lexeme, int line, int column) => new Const(lexeme, line, column),
         ["integer"] = (string lexeme, int line, int column) => new IntegerPrimitive(lexeme, line, column),
         ["NULL"]    = (string lexeme, int line, int column) => new NullLiteral(lexeme, line, column)
     };
