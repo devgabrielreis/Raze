@@ -6,13 +6,13 @@ using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Symbols.Variables;
 using Raze.Script.Core.Tokens.Operators;
 using Raze.Script.Core.Tokens.Primitives;
-using Raze.Script.Core.Types;
+using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Engine;
 
 internal static class Interpreter
 {
-    public static RuntimeType Evaluate(Statement statement, Scope scope)
+    public static RuntimeValue Evaluate(Statement statement, Scope scope)
     {
         switch (statement)
         {
@@ -37,9 +37,9 @@ internal static class Interpreter
         }
     }
 
-    private static RuntimeType EvaluateProgramExpression(ProgramExpression program, Scope scope)
+    private static RuntimeValue EvaluateProgramExpression(ProgramExpression program, Scope scope)
     {
-        RuntimeType lastValue = new NullType();
+        RuntimeValue lastValue = new NullValue();
 
         foreach (var statement in program.Body)
         {
@@ -49,38 +49,38 @@ internal static class Interpreter
         return lastValue;
     }
 
-    private static IntegerType EvaluateIntegerLiteralExpression(IntegerLiteralExpression expression)
+    private static IntegerValue EvaluateIntegerLiteralExpression(IntegerLiteralExpression expression)
     {
-        return new IntegerType(expression.Value);
+        return new IntegerValue(expression.Value);
     }
 
-    private static NullType EvaluateNullLiteralExpression(NullLiteralExpression expression)
+    private static NullValue EvaluateNullLiteralExpression(NullLiteralExpression expression)
     {
-        return new NullType();
+        return new NullValue();
     }
 
-    private static NullType EvaluateVariableDeclarationStatement(VariableDeclarationStatement statement, Scope scope)
+    private static NullValue EvaluateVariableDeclarationStatement(VariableDeclarationStatement statement, Scope scope)
     {
         VariableSymbol variable = statement.Type switch
         {
-            IntegerPrimitive => new IntegerVariable(statement.Value is null ? new NullType() : Evaluate(statement.Value, scope), statement.IsContant),
+            IntegerPrimitive => new IntegerVariable(statement.Value is null ? new NullValue() : Evaluate(statement.Value, scope), statement.IsContant),
             _ => throw new Exception("Tipo ainda não suportado")
         };
 
         scope.DeclareVariable(statement.Identifier, variable, statement);
-        return new NullType();
+        return new NullValue();
     }
 
-    private static RuntimeType EvaluateBinaryExpression(BinaryExpression expression, Scope scope)
+    private static RuntimeValue EvaluateBinaryExpression(BinaryExpression expression, Scope scope)
     {
-        RuntimeType leftHand = Evaluate(expression.Left, scope);
+        RuntimeValue leftHand = Evaluate(expression.Left, scope);
         OperatorToken op = expression.Operator;
-        RuntimeType rightHand = Evaluate(expression.Right, scope);
+        RuntimeValue rightHand = Evaluate(expression.Right, scope);
 
         return leftHand.ExecuteBinaryOperation(op, rightHand, expression);
     }
 
-    private static RuntimeType EvaluateIdentifierExpression(IdentifierExpression expression, Scope scope)
+    private static RuntimeValue EvaluateIdentifierExpression(IdentifierExpression expression, Scope scope)
     {
         var resolvedScope = scope.Resolve(expression.Symbol);
 

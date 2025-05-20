@@ -1,20 +1,20 @@
-﻿using Raze.Script.Core.Types;
+﻿using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Symbols.Variables;
 
 public abstract class VariableSymbol : Symbol
 {
-    public RuntimeType Value { get; protected set; }
+    public RuntimeValue Value { get; protected set; }
 
     public bool IsConstant { get; private set; }
 
-    public VariableSymbol(RuntimeType value, bool isConstant)
+    public VariableSymbol(RuntimeValue value, bool isConstant)
     {
         SetValue(value);
         IsConstant = isConstant;
     }
 
-    public virtual void SetNewValue(RuntimeType newValue)
+    public virtual void SetNewValue(RuntimeValue newValue)
     {
         if (IsConstant)
         {
@@ -24,5 +24,5 @@ public abstract class VariableSymbol : Symbol
         SetValue(newValue);
     }
 
-    protected abstract void SetValue(RuntimeType value);
+    protected abstract void SetValue(RuntimeValue value);
 }

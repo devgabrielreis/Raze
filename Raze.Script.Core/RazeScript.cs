@@ -1,6 +1,6 @@
 ﻿using Raze.Script.Core.Engine;
 using Raze.Script.Core.Scopes;
-using Raze.Script.Core.Types;
+using Raze.Script.Core.Values;
 using System.Reflection;
 
 namespace Raze.Script.Core;
@@ -11,7 +11,7 @@ public static class RazeScript
                                              .GetName()
                                              .Version!;
 
-    public static RuntimeType Evaluate(string source, Scope scope)
+    public static RuntimeValue Evaluate(string source, Scope scope)
     {
         var tokens = new Lexer(source).Tokenize();
 

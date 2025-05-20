@@ -1,23 +1,23 @@
 ﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Types;
+using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Symbols.Variables;
 
 public class IntegerVariable : VariableSymbol
 {
-    public IntegerVariable(RuntimeType value, bool isConstant)
+    public IntegerVariable(RuntimeValue value, bool isConstant)
         : base(value, isConstant)
     {
     }
 
-    protected override void SetValue(RuntimeType value)
+    protected override void SetValue(RuntimeValue value)
     {
-        if (value is NullType)
+        if (value is NullValue)
         {
-            Value = new IntegerType(null);
+            Value = new IntegerValue(null);
             return;
         }
-        else if (value is IntegerType)
+        else if (value is IntegerValue)
         {
             Value = value;
             return;

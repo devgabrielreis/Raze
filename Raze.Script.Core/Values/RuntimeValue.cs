@@ -1,15 +1,15 @@
 ﻿using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Tokens.Operators;
 
-namespace Raze.Script.Core.Types;
+namespace Raze.Script.Core.Values;
 
-public abstract class RuntimeType
+public abstract class RuntimeValue
 {
     public abstract object? Value { get; }
 
     public abstract string TypeName { get; }
 
-    internal abstract RuntimeType ExecuteBinaryOperation(OperatorToken op, RuntimeType other, BinaryExpression source);
+    internal abstract RuntimeValue ExecuteBinaryOperation(OperatorToken op, RuntimeValue other, BinaryExpression source);
 
     public abstract override string ToString();
 }

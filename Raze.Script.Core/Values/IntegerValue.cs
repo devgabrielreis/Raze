@@ -2,9 +2,9 @@
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Tokens.Operators;
 
-namespace Raze.Script.Core.Types;
+namespace Raze.Script.Core.Values;
 
-public class IntegerType : RuntimeType
+public class IntegerValue : RuntimeValue
 {
     public override object? Value => _value;
 
@@ -12,12 +12,12 @@ public class IntegerType : RuntimeType
 
     private readonly int? _value;
 
-    public IntegerType(int? value)
+    public IntegerValue(int? value)
     {
         _value = value;
     }
 
-    internal override RuntimeType ExecuteBinaryOperation(OperatorToken op, RuntimeType other, BinaryExpression source)
+    internal override RuntimeValue ExecuteBinaryOperation(OperatorToken op, RuntimeValue other, BinaryExpression source)
     {
         if (other.TypeName != TypeName)
         {
@@ -38,19 +38,19 @@ public class IntegerType : RuntimeType
         switch (op)
         {
             case AdditionOperator:
-                return new IntegerType((int)Value + (int)other.Value);
+                return new IntegerValue((int)Value + (int)other.Value);
             case SubtractionOperator:
-                return new IntegerType((int)Value - (int)other.Value);
+                return new IntegerValue((int)Value - (int)other.Value);
             case MultiplicationOperator:
-                return new IntegerType((int)Value * (int)other.Value);
+                return new IntegerValue((int)Value * (int)other.Value);
             case DivisionOperator:
                 if ((int)other.Value == 0)
                 {
                     throw new DivisionByZeroException(source.StartLine, source.StartColumn);
                 }
-                return new IntegerType((int)Value / (int)other.Value);
+                return new IntegerValue((int)Value / (int)other.Value);
             case ModuloOperator:
-                return new IntegerType((int)Value % (int)other.Value);
+                return new IntegerValue((int)Value % (int)other.Value);
         }
 
         throw new UnsupportedBinaryOperationException(

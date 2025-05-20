@@ -2,7 +2,7 @@
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Symbols;
 using Raze.Script.Core.Symbols.Variables;
-using Raze.Script.Core.Types;
+using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Scopes;
 
@@ -52,7 +52,7 @@ public abstract class Scope
         _variables[name] = variable;
     }
 
-    public virtual void AssignVariable(string name, RuntimeType value)
+    public virtual void AssignVariable(string name, RuntimeValue value)
     {
         if (Lookup(name) is null)
         {

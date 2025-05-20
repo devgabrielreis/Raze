@@ -2,15 +2,15 @@
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Tokens.Operators;
 
-namespace Raze.Script.Core.Types;
+namespace Raze.Script.Core.Values;
 
-public class NullType : RuntimeType
+public class NullValue : RuntimeValue
 {
     public override object? Value => null;
 
     public override string TypeName => "NULL";
 
-    internal override RuntimeType ExecuteBinaryOperation(OperatorToken op, RuntimeType other, BinaryExpression source)
+    internal override RuntimeValue ExecuteBinaryOperation(OperatorToken op, RuntimeValue other, BinaryExpression source)
     {
         throw new UnsupportedBinaryOperationException(
             TypeName,
