@@ -39,7 +39,7 @@ internal static class Interpreter
 
     private static RuntimeValue EvaluateProgramExpression(ProgramExpression program, Scope scope)
     {
-        RuntimeValue lastValue = new NullValue();
+        RuntimeValue lastValue = new UndefinedValue();
 
         foreach (var statement in program.Body)
         {
