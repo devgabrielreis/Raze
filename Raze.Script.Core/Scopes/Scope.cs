@@ -71,7 +71,7 @@ public abstract class Scope
             throw new UndefinedIdentifierException(name, line, column);
         }
 
-        resolvedScope._variables[name].SetNewValue(value);
+        resolvedScope._variables[name].SetNewValue(value, line, column);
     }
 
     public virtual Symbol? Lookup(string symbol)

@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Values;
+﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Symbols.Variables;
 
@@ -16,9 +17,14 @@ public abstract class VariableSymbol : Symbol
 
     public virtual void SetNewValue(RuntimeValue newValue)
     {
+        SetNewValue(newValue, null, null);
+    }
+
+    internal virtual void SetNewValue(RuntimeValue newValue, int? sourceLine, int? sourceColumn)
+    {
         if (IsConstant)
         {
-            throw new Exception("tentando mudar o valor de uma constante");
+            throw new ConstantAssignmentException(sourceLine, sourceColumn);
         }
 
         SetValue(newValue);
