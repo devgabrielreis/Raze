@@ -62,6 +62,18 @@ internal class Parser
         return _tokens[_currentIndex];
     }
 
+    private Token? Peek(int howMuch = 1)
+    {
+        int target = _currentIndex + howMuch;
+
+        if (target >= _tokens.Count)
+        {
+            return null;
+        }
+
+        return _tokens[target];
+    }
+
     private void Expect<T>() where T : Token
     {
         if (Current() is not T)
@@ -76,9 +88,9 @@ internal class Parser
         }
     }
 
-    private void Advance()
+    private void Advance(int howMuch = 1)
     {
-        _currentIndex++;
+        _currentIndex += howMuch;
     }
 
     private void Return()
@@ -88,7 +100,7 @@ internal class Parser
 
     private bool HasEnded()
     {
-        return Current() is EOF;
+        return _currentIndex >= _tokens.Count || Current() is EOF;
     }
 
     private Statement ParseCurrent()
@@ -98,7 +110,7 @@ internal class Parser
             return ParseVariableDeclaration();
         }
 
-        return ParseAdditiveExpression();
+        return ParseAssignmentStatement();
     }
 
     private VariableDeclarationStatement ParseVariableDeclaration()
@@ -126,6 +138,21 @@ internal class Parser
         Expression value = ParseAdditiveExpression();
 
         return new VariableDeclarationStatement(identifier, type, value, isConstant, startLine, startColumn);
+    }
+
+    private Statement ParseAssignmentStatement()
+    {
+        Expression left = ParseAdditiveExpression();
+
+        if (Peek() is not AssignmentOperator)
+        {
+            return left;
+        }
+
+        Advance(2);
+        Expression value = ParseAdditiveExpression();
+        
+        return new AssignmentStatement(left, value, left.StartLine, left.StartColumn);
     }
 
     private Expression ParseAdditiveExpression()

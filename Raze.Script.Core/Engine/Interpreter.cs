@@ -30,6 +30,9 @@ internal static class Interpreter
             case VariableDeclarationStatement stmt:
                 return EvaluateVariableDeclarationStatement(stmt, scope);
 
+            case AssignmentStatement stmt:
+                return EvaluateAssignmentStatement(stmt, scope);
+
             case BinaryExpression expr:
                 return EvaluateBinaryExpression(expr, scope);
             default:
@@ -68,6 +71,20 @@ internal static class Interpreter
         };
 
         scope.DeclareVariable(statement.Identifier, variable, statement);
+        return new UndefinedValue();
+    }
+
+    private static UndefinedValue EvaluateAssignmentStatement(AssignmentStatement statement, Scope scope)
+    {
+        switch (statement.Target)
+        {
+            case IdentifierExpression expr:
+                scope.AssignVariable(expr.Symbol, Evaluate(statement.Value, scope), statement);
+                break;
+            default:
+                throw new InvalidAssignmentException(statement.StartLine, statement.StartColumn);
+        }
+
         return new UndefinedValue();
     }
 

@@ -52,14 +52,26 @@ public abstract class Scope
         _variables[name] = variable;
     }
 
+    internal virtual void AssignVariable(string name, RuntimeValue value, Statement source)
+    {
+        AssignVariable(name, value, source.StartLine, source.StartLine);
+    }
+
     public virtual void AssignVariable(string name, RuntimeValue value)
     {
-        if (Lookup(name) is null)
+        AssignVariable(name, value, null, null);
+    }
+
+    protected virtual void AssignVariable(string name, RuntimeValue value, int? line, int? column)
+    {
+        var resolvedScope = Resolve(name);
+
+        if (resolvedScope is null)
         {
-            throw new UndefinedIdentifierException(name, 0, 0);
+            throw new UndefinedIdentifierException(name, line, column);
         }
 
-        _variables[name].SetNewValue(value);
+        resolvedScope._variables[name].SetNewValue(value);
     }
 
     public virtual Symbol? Lookup(string symbol)
