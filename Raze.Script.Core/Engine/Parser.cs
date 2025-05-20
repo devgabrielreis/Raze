@@ -2,6 +2,10 @@
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Tokens;
+using Raze.Script.Core.Tokens.Delimiters;
+using Raze.Script.Core.Tokens.Grouping;
+using Raze.Script.Core.Tokens.Literals;
+using Raze.Script.Core.Tokens.Operators;
 
 namespace Raze.Script.Core.Engine;
 
@@ -15,7 +19,7 @@ internal class Parser
 
     public Parser(IList<Token> tokens)
     {
-        if (tokens.Count == 0 || tokens.Last().TokenType != TokenType.EOF)
+        if (tokens.Count == 0 || tokens.Last() is not EOF)
         {
             throw new Exception("Invalid token list");
         }
@@ -56,6 +60,20 @@ internal class Parser
         return _tokens[_currentIndex];
     }
 
+    private void Expect<T>() where T : Token
+    {
+        if (Current() is not T)
+        {
+            throw new UnexpectedTokenException(
+                Current().GetType().Name,
+                typeof(T).Name,
+                Current().Lexeme,
+                Current().Line,
+                Current().Column
+            );
+        }
+    }
+
     private void Advance()
     {
         _currentIndex++;
@@ -68,7 +86,7 @@ internal class Parser
 
     private bool HasEnded()
     {
-        return Current().TokenType == TokenType.EOF;
+        return Current() is EOF;
     }
 
     private Statement ParseCurrent()
@@ -81,9 +99,9 @@ internal class Parser
         Expression? left = ParseMultiplicativeExpression();
         Advance();
 
-        while (Current().TokenType == TokenType.AdditionOperator || Current().TokenType == TokenType.SubtractionOperator)
+        while (Current() is AdditionOperator || Current() is SubtractionOperator)
         {
-            string op = Current().Lexeme;
+            OperatorToken op = (Current() as OperatorToken)!;
             Advance();
 
             Expression right = ParseMultiplicativeExpression();
@@ -103,11 +121,11 @@ internal class Parser
         Expression? left = ParsePrimaryExpression();
         Advance();
 
-        while (Current().TokenType == TokenType.MultiplicationOperator
-            || Current().TokenType == TokenType.DivisionOperator
-            || Current().TokenType == TokenType.ModuloOperator)
+        while (Current() is MultiplicationOperator
+            || Current() is DivisionOperator
+            || Current() is ModuloOperator)
         {
-            string op = Current().Lexeme;
+            OperatorToken op = (Current() as OperatorToken)!;
             Advance();
 
             Expression right = ParsePrimaryExpression();
@@ -124,32 +142,23 @@ internal class Parser
 
     private Expression ParsePrimaryExpression()
     {
-        switch (Current().TokenType)
+        switch (Current())
         {
-            case TokenType.Identifier:
+            case Identifier:
                 return new IdentifierExpression(Current().Lexeme, Current().Line, Current().Column);
-            case TokenType.IntegerLiteral:
+            case IntegerLiteral:
                 return new IntegerLiteralExpression(int.Parse(Current().Lexeme), Current().Line, Current().Column);
-            case TokenType.NullLiteral:
+            case NullLiteral:
                 return new NullLiteralExpression(Current().Line, Current().Column);
-            case TokenType.OpenParenthesis:
+            case OpenParenthesis:
                 Advance();
                 Expression expr = ParseAdditiveExpression();
                 Advance();
-                if (Current().TokenType != TokenType.CloseParenthesis)
-                {
-                    throw new UnexpectedTokenException(
-                        Current().TokenType.ToString(),
-                        TokenType.CloseParenthesis.ToString(),
-                        Current().Lexeme,
-                        Current().Line,
-                        Current().Column
-                    );
-                }
+                Expect<CloseParenthesis>();
                 return expr;
             default:
                 throw new UnexpectedTokenException(
-                    Current().TokenType.ToString(), Current().Lexeme, Current().Line, Current().Column
+                    Current().GetType().Name, Current().Lexeme, Current().Line, Current().Column
                 );
 
         }

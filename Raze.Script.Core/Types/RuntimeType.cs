@@ -1,4 +1,5 @@
 ﻿using Raze.Script.Core.Statements.Expressions;
+using Raze.Script.Core.Tokens.Operators;
 
 namespace Raze.Script.Core.Types;
 
@@ -8,7 +9,7 @@ public abstract class RuntimeType
 
     public abstract string TypeName { get; }
 
-    internal abstract RuntimeType ExecuteBinaryOperation(string op, RuntimeType other, BinaryExpression source);
+    internal abstract RuntimeType ExecuteBinaryOperation(OperatorToken op, RuntimeType other, BinaryExpression source);
 
     public abstract override string ToString();
 }

@@ -1,5 +1,6 @@
 ﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Statements.Expressions;
+using Raze.Script.Core.Tokens.Operators;
 
 namespace Raze.Script.Core.Types;
 
@@ -16,14 +17,14 @@ public class IntegerType : RuntimeType
         _value = value;
     }
 
-    internal override RuntimeType ExecuteBinaryOperation(string op, RuntimeType other, BinaryExpression source)
+    internal override RuntimeType ExecuteBinaryOperation(OperatorToken op, RuntimeType other, BinaryExpression source)
     {
         if (other.TypeName != TypeName)
         {
             throw new UnsupportedBinaryOperationException(
                 TypeName,
                 other.TypeName,
-                op,
+                op.Lexeme,
                 source.StartLine,
                 source.StartColumn
             );
@@ -36,26 +37,26 @@ public class IntegerType : RuntimeType
 
         switch (op)
         {
-            case "+":
+            case AdditionOperator:
                 return new IntegerType((int)Value + (int)other.Value);
-            case "-":
+            case SubtractionOperator:
                 return new IntegerType((int)Value - (int)other.Value);
-            case "*":
+            case MultiplicationOperator:
                 return new IntegerType((int)Value * (int)other.Value);
-            case "/":
+            case DivisionOperator:
                 if ((int)other.Value == 0)
                 {
                     throw new DivisionByZeroException(source.StartLine, source.StartColumn);
                 }
                 return new IntegerType((int)Value / (int)other.Value);
-            case "%":
+            case ModuloOperator:
                 return new IntegerType((int)Value % (int)other.Value);
         }
 
         throw new UnsupportedBinaryOperationException(
             TypeName,
             other.TypeName,
-            op,
+            op.Lexeme,
             source.StartLine,
             source.StartColumn
         );

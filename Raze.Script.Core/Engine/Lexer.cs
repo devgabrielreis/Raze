@@ -1,5 +1,11 @@
 ﻿using Raze.Script.Core.Exceptions.LexerExceptions;
 using Raze.Script.Core.Tokens;
+using Raze.Script.Core.Tokens.Delimiters;
+using Raze.Script.Core.Tokens.Grouping;
+using Raze.Script.Core.Tokens.Literals;
+using Raze.Script.Core.Tokens.Operators;
+using Raze.Script.Core.Tokens.Primitives;
+using Raze.Script.Core.Tokens.VariableDeclaration;
 using Raze.Shared.Utils;
 
 namespace Raze.Script.Core.Engine;
@@ -14,11 +20,24 @@ internal class Lexer
     private int _currentColumn;
     private List<Token> _tokens;
 
-    private static Dictionary<string, TokenType> _keywords = new()
+    private static Dictionary<string, Func<string, int, int, Token>> _keywords = new()
     {
-        { "var", TokenType.KeywordVar},
-        { "integer", TokenType.KeywordInteger },
-        { "NULL", TokenType.NullLiteral }
+        ["var"]     = (string lexeme, int line, int column) => new Var(lexeme, line, column),
+        ["integer"] = (string lexeme, int line, int column) => new IntegerPrimitive(lexeme, line, column),
+        ["NULL"]    = (string lexeme, int line, int column) => new NullLiteral(lexeme, line, column)
+    };
+
+    private static Dictionary<char, Func<string, int, int, Token>> _singleCharTokens = new()
+    {
+        [';'] = (string lexeme, int line, int column) => new SemiColon(lexeme, line, column),
+        ['('] = (string lexeme, int line, int column) => new OpenParenthesis(lexeme, line, column),
+        [')'] = (string lexeme, int line, int column) => new CloseParenthesis(lexeme, line, column),
+        ['='] = (string lexeme, int line, int column) => new AssignmentOperator(lexeme, line, column),
+        ['+'] = (string lexeme, int line, int column) => new AdditionOperator(lexeme, line, column),
+        ['-'] = (string lexeme, int line, int column) => new SubtractionOperator(lexeme, line, column),
+        ['*'] = (string lexeme, int line, int column) => new MultiplicationOperator(lexeme, line, column),
+        ['/'] = (string lexeme, int line, int column) => new DivisionOperator(lexeme, line, column),
+        ['%'] = (string lexeme, int line, int column) => new ModuloOperator(lexeme, line, column)
     };
 
     public Lexer(string sourceCode)
@@ -52,7 +71,7 @@ internal class Lexer
             ProcessCurrentToken();
         }
 
-        _tokens.Add(new Token(TokenType.EOF, "", _currentLine, _currentColumn));
+        _tokens.Add(new EOF(_currentLine, _currentColumn));
 
         return _tokens;
     }
@@ -84,60 +103,37 @@ internal class Lexer
 
     private void ProcessCurrentToken()
     {
-        switch (Current())
+        if (_singleCharTokens.TryGetValue(Current(), out var tokenFunc))
         {
-            case ';':
-                ProcessSingleCharacter(TokenType.SemiColon);
-                break;
-            case '(':
-                ProcessSingleCharacter(TokenType.OpenParenthesis);
-                break;
-            case ')':
-                ProcessSingleCharacter(TokenType.CloseParenthesis);
-                break;
-            case '=':
-                ProcessSingleCharacter(TokenType.AssignmentOperator);
-                break;
-            case '+':
-                ProcessSingleCharacter(TokenType.AdditionOperator);
-                break;
-            case '-':
-                ProcessSingleCharacter(TokenType.SubtractionOperator);
-                break;
-            case '*':
-                ProcessSingleCharacter(TokenType.MultiplicationOperator);
-                break;
-            case '/':
-                ProcessSingleCharacter(TokenType.DivisionOperator);
-                break;
-            case '%':
-                ProcessSingleCharacter(TokenType.ModuloOperator);
-                break;
-            default:
-                if (CharUtils.IsAsciiLetter(Current()))
-                {
-                    ProcessIdentifier();
-                }
-                else if (CharUtils.IsNumber(Current()))
-                {
-                    ProcessNumber();
-                }
-                else if (CharUtils.IsWhiteSpace(Current()))
-                {
-                    Advance();
-                }
-                else
-                {
-                    throw new UnexpectedCharacterException(Current(), _currentLine, _currentColumn);
-                }
-                break;
+            _tokens.Add(tokenFunc(Current().ToString(), _currentLine, _currentColumn));
+            Advance();
+            return;
         }
+
+        if (CharUtils.IsWhiteSpace(Current()))
+        {
+            Advance();
+            return;
+        }
+
+        ProcessMultiCharacterToken();
     }
 
-    private void ProcessSingleCharacter(TokenType tokenType)
+    private void ProcessMultiCharacterToken()
     {
-        _tokens.Add(new Token(tokenType, Current().ToString(), _currentLine, _currentColumn));
-        Advance();
+        if (CharUtils.IsAsciiLetter(Current()))
+        {
+            ProcessIdentifier();
+            return;
+        }
+
+        if (CharUtils.IsNumber(Current()))
+        {
+            ProcessNumber();
+            return;
+        }
+
+        throw new UnexpectedCharacterException(Current(), _currentLine, _currentColumn);
     }
 
     private void ProcessIdentifier()
@@ -151,18 +147,14 @@ internal class Lexer
             Advance();
         }
 
-        TokenType tokenType;
-
-        if (_keywords.TryGetValue(identifier, out TokenType token))
+        if (_keywords.TryGetValue(identifier, out var tokenFunc))
         {
-            tokenType = token;
+            _tokens.Add(tokenFunc(identifier, _currentLine, startColumn));
         }
         else
         {
-            tokenType = TokenType.Identifier;
+            _tokens.Add(new Identifier(identifier, _currentLine, startColumn));
         }
-
-        _tokens.Add(new Token(tokenType, identifier, _currentLine, startColumn));
     }
 
     private void ProcessNumber()
@@ -176,6 +168,6 @@ internal class Lexer
             Advance();
         }
 
-        _tokens.Add(new Token(TokenType.IntegerLiteral, number, _currentLine, startColumn));
+        _tokens.Add(new IntegerLiteral(number, _currentLine, startColumn));
     }
 }

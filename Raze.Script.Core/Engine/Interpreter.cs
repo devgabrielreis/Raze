@@ -4,6 +4,7 @@ using Raze.Script.Core.Scopes;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Symbols.Variables;
+using Raze.Script.Core.Tokens.Operators;
 using Raze.Script.Core.Types;
 
 namespace Raze.Script.Core.Engine;
@@ -57,7 +58,7 @@ internal static class Interpreter
     private static RuntimeType EvaluateBinaryExpression(BinaryExpression expression, Scope scope)
     {
         RuntimeType leftHand = Evaluate(expression.Left, scope);
-        string op = expression.Operator;
+        OperatorToken op = expression.Operator;
         RuntimeType rightHand = Evaluate(expression.Right, scope);
 
         return leftHand.ExecuteBinaryOperation(op, rightHand, expression);
