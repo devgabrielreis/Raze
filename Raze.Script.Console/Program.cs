@@ -2,6 +2,7 @@
 using Raze.Script.Core;
 using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Scopes;
+using Raze.Script.Core.Values;
 
 internal class Program
 {
@@ -40,7 +41,12 @@ internal class Program
 
             try
             {
-                Console.WriteLine(RazeScript.Evaluate(command, scope));
+                var result = RazeScript.Evaluate(command, scope);
+
+                if (result is not UndefinedValue)
+                {
+                    Console.WriteLine(result);
+                }
             }
             catch (Exception ex)
             {

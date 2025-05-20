@@ -59,7 +59,7 @@ internal static class Interpreter
         return new NullValue();
     }
 
-    private static NullValue EvaluateVariableDeclarationStatement(VariableDeclarationStatement statement, Scope scope)
+    private static UndefinedValue EvaluateVariableDeclarationStatement(VariableDeclarationStatement statement, Scope scope)
     {
         VariableSymbol variable = statement.Type switch
         {
@@ -68,7 +68,7 @@ internal static class Interpreter
         };
 
         scope.DeclareVariable(statement.Identifier, variable, statement);
-        return new NullValue();
+        return new UndefinedValue();
     }
 
     private static RuntimeValue EvaluateBinaryExpression(BinaryExpression expression, Scope scope)
