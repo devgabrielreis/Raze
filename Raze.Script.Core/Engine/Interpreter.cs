@@ -3,6 +3,7 @@ using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Scopes;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
+using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 using Raze.Script.Core.Symbols.Variables;
 using Raze.Script.Core.Tokens.Operators;
 using Raze.Script.Core.Tokens.Primitives;
@@ -20,9 +21,11 @@ internal static class Interpreter
                 return EvaluateProgramExpression(program, scope);
 
             case IntegerLiteralExpression expr:
-                return EvaluateIntegerLiteralExpression(expr);
-            case NullLiteralExpression expr:
-                return EvaluateNullLiteralExpression(expr);
+                return new IntegerValue((int)expr.Value);
+            case FloatLiteralExpression expr:
+                return new FloatValue((float)expr.Value);
+            case NullLiteralExpression:
+                return new NullValue();
 
             case IdentifierExpression expr:
                 return EvaluateIdentifierExpression(expr, scope);
@@ -50,16 +53,6 @@ internal static class Interpreter
         }
 
         return lastValue;
-    }
-
-    private static IntegerValue EvaluateIntegerLiteralExpression(IntegerLiteralExpression expression)
-    {
-        return new IntegerValue(expression.Value);
-    }
-
-    private static NullValue EvaluateNullLiteralExpression(NullLiteralExpression expression)
-    {
-        return new NullValue();
     }
 
     private static UndefinedValue EvaluateVariableDeclarationStatement(VariableDeclarationStatement statement, Scope scope)

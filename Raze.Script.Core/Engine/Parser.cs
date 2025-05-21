@@ -1,6 +1,7 @@
 ﻿using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
+using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 using Raze.Script.Core.Tokens;
 using Raze.Script.Core.Tokens.Delimiters;
 using Raze.Script.Core.Tokens.Grouping;
@@ -8,6 +9,7 @@ using Raze.Script.Core.Tokens.Literals;
 using Raze.Script.Core.Tokens.Operators;
 using Raze.Script.Core.Tokens.Primitives;
 using Raze.Script.Core.Tokens.VariableDeclaration;
+using System.Globalization;
 
 namespace Raze.Script.Core.Engine;
 
@@ -209,6 +211,8 @@ internal class Parser
                 return new IdentifierExpression(Current().Lexeme, Current().Line, Current().Column);
             case IntegerLiteral:
                 return new IntegerLiteralExpression(int.Parse(Current().Lexeme), Current().Line, Current().Column);
+            case FloatLiteral:
+                return new FloatLiteralExpression(float.Parse(Current().Lexeme, CultureInfo.InvariantCulture), Current().Line, Current().Column);
             case NullLiteral:
                 return new NullLiteralExpression(Current().Line, Current().Column);
             case OpenParenthesis:
@@ -221,7 +225,6 @@ internal class Parser
                 throw new UnexpectedTokenException(
                     Current().GetType().Name, Current().Lexeme, Current().Line, Current().Column
                 );
-
         }
     }
 }

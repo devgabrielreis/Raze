@@ -1,6 +1,6 @@
 ﻿namespace Raze.Script.Core.Statements.Expressions;
 
-internal class IdentifierExpression : PrimaryExpression
+internal class IdentifierExpression : Expression
 {
     public string Symbol { get; private set; }
 

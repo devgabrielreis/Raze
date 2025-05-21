@@ -1,31 +1,32 @@
 ﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Tokens.Operators;
+using System.Globalization;
 
 namespace Raze.Script.Core.Values;
 
-public class IntegerValue : RuntimeValue
+public class FloatValue : RuntimeValue
 {
     public override object? Value => _value;
 
-    public override string TypeName => "Integer";
+    public override string TypeName => "Float";
 
-    private readonly int? _value;
+    private readonly float? _value;
 
-    public IntegerValue(int? value)
+    public FloatValue(float? value)
     {
         _value = value;
     }
 
     internal override RuntimeValue ExecuteBinaryOperation(OperatorToken op, RuntimeValue other, BinaryExpression source)
     {
-        if (other is IntegerValue intValue)
-        {
-            return ExecuteBinaryOperationWithInteger(op, intValue, source);
-        }
-        else if (other is FloatValue floatValue)
+        if (other is FloatValue floatValue)
         {
             return ExecuteBinaryOperationWithFloat(op, floatValue, source);
+        }
+        else if (other is IntegerValue integerValue)
+        {
+            return ExecuteBinaryOperationWithInteger(op, integerValue, source);
         }
 
         throw new UnsupportedBinaryOperationException(
@@ -44,41 +45,14 @@ public class IntegerValue : RuntimeValue
             return "NULL";
         }
 
-        return _value.ToString()!;
-    }
+        string floatStr = ((float)_value).ToString(CultureInfo.InvariantCulture);
 
-    private IntegerValue ExecuteBinaryOperationWithInteger(OperatorToken op, IntegerValue other, BinaryExpression source)
-    {
-        if (Value is null || other.Value is null)
+        if (!floatStr.Contains('.'))
         {
-            throw new NullValueException(source.StartLine, source.StartColumn);
+            floatStr += ".0";
         }
 
-        switch (op)
-        {
-            case AdditionOperator:
-                return new IntegerValue((int)Value + (int)other.Value);
-            case SubtractionOperator:
-                return new IntegerValue((int)Value - (int)other.Value);
-            case MultiplicationOperator:
-                return new IntegerValue((int)Value * (int)other.Value);
-            case DivisionOperator:
-                if ((int)other.Value == 0)
-                {
-                    throw new DivisionByZeroException(source.StartLine, source.StartColumn);
-                }
-                return new IntegerValue((int)Value / (int)other.Value);
-            case ModuloOperator:
-                return new IntegerValue((int)Value % (int)other.Value);
-        }
-
-        throw new UnsupportedBinaryOperationException(
-            TypeName,
-            other.TypeName,
-            op.Lexeme,
-            source.StartLine,
-            source.StartColumn
-        );
+        return floatStr;
     }
 
     private FloatValue ExecuteBinaryOperationWithFloat(OperatorToken op, FloatValue other, BinaryExpression source)
@@ -91,19 +65,53 @@ public class IntegerValue : RuntimeValue
         switch (op)
         {
             case AdditionOperator:
-                return new FloatValue((float)(int)Value + (float)other.Value);
+                return new FloatValue((float)Value + (float)other.Value);
             case SubtractionOperator:
-                return new FloatValue((float)(int)Value - (float)other.Value);
+                return new FloatValue((float)Value - (float)other.Value);
             case MultiplicationOperator:
-                return new FloatValue((float)(int)Value * (float)other.Value);
+                return new FloatValue((float)Value * (float)other.Value);
             case DivisionOperator:
                 if ((float)other.Value == 0)
                 {
                     throw new DivisionByZeroException(source.StartLine, source.StartColumn);
                 }
-                return new FloatValue((float)(int)Value / (float)other.Value);
+                return new FloatValue((float)Value / (float)other.Value);
             case ModuloOperator:
-                return new FloatValue((float)(int)Value % (float)other.Value);
+                return new FloatValue((float)Value % (float)other.Value);
+        }
+
+        throw new UnsupportedBinaryOperationException(
+            TypeName,
+            other.TypeName,
+            op.Lexeme,
+            source.StartLine,
+            source.StartColumn
+        );
+    }
+
+    private FloatValue ExecuteBinaryOperationWithInteger(OperatorToken op, IntegerValue other, BinaryExpression source)
+    {
+        if (Value is null || other.Value is null)
+        {
+            throw new NullValueException(source.StartLine, source.StartColumn);
+        }
+
+        switch (op)
+        {
+            case AdditionOperator:
+                return new FloatValue((float)Value + (float)(int)other.Value);
+            case SubtractionOperator:
+                return new FloatValue((float)Value - (float)(int)other.Value);
+            case MultiplicationOperator:
+                return new FloatValue((float)Value * (float)(int)other.Value);
+            case DivisionOperator:
+                if ((int)other.Value == 0)
+                {
+                    throw new DivisionByZeroException(source.StartLine, source.StartColumn);
+                }
+                return new FloatValue((float)Value / (float)(int)other.Value);
+            case ModuloOperator:
+                return new FloatValue((float)Value % (float)(int)other.Value);
         }
 
         throw new UnsupportedBinaryOperationException(

@@ -163,12 +163,36 @@ internal class Lexer
         string number = "";
         var startColumn = _currentColumn;
 
-        while (!HasEnded() && CharUtils.IsNumber(Current()))
+        bool hasDot = false;
+
+        while (!HasEnded() && (CharUtils.IsNumber(Current()) || Current() == '.'))
         {
+            if (Current() == '.')
+            {
+                if (hasDot)
+                {
+                    throw new UnexpectedCharacterException(Current(), _currentLine, _currentColumn);
+                }
+
+                hasDot = true;
+            }
+
             number += Current().ToString();
             Advance();
         }
 
-        _tokens.Add(new IntegerLiteral(number, _currentLine, startColumn));
+        if (number.Last() == '.')
+        {
+            throw new UnexpectedCharacterException('.', _currentLine, _currentColumn - 1);
+        }
+
+        if (hasDot)
+        {
+            _tokens.Add(new FloatLiteral(number, _currentLine, startColumn));
+        }
+        else
+        {
+            _tokens.Add(new IntegerLiteral(number, _currentLine, startColumn));
+        }
     }
 }
