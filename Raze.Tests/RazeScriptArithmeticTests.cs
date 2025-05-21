@@ -44,4 +44,29 @@ public class RazeScriptArithmeticTests
             var result = RazeScript.Evaluate(expression);
         });
     }
+
+    [Theory]
+    [InlineData("10 + 1.5")]
+    [InlineData("0.5 - 10")]
+    [InlineData("10 * 0.1")]
+    [InlineData("100.5 / 10")]
+    [InlineData("10 % 3.0")]
+    public void Evaluate_OperationsBetweenIntegerAndFloat_ReturnsFloat(string expression)
+    {
+        Assert.IsType<FloatValue>(RazeScript.Evaluate(expression));
+    }
+
+    [Theory]
+    [InlineData("100 / 0")]
+    [InlineData("100 / 0.0")]
+    [InlineData("100.0 / 0")]
+    [InlineData("100.0 / 0.0")]
+    [InlineData("100 / ((100 * 2 - 199) - 1)")]
+    public void Evaluate_DivisionByZero_ThrowsDivisionByZeroException(string expression)
+    {
+        Assert.Throws<DivisionByZeroException>(() =>
+        {
+            RazeScript.Evaluate(expression);
+        });
+    }
 }

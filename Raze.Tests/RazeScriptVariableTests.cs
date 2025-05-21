@@ -8,6 +8,17 @@ namespace Raze.Tests;
 public class RazeScriptVariableTests
 {
     [Theory]
+    [InlineData("var integer test = 10.0")]
+    [InlineData("var integer test = 10 + 1.0")]
+    public void Evaluate_WrongVariableTypeAssignment_ThrowsVariableTypeException(string expression)
+    {
+        Assert.Throws<VariableTypeException>(() =>
+        {
+            var result = RazeScript.Evaluate(expression);
+        });
+    }
+
+    [Theory]
     [InlineData("var integer test = 10", "test", 10)]
     [InlineData("const integer test = 10", "test", 10)]
     [InlineData("var integer test = 10 + 10", "test", 20)]
