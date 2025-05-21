@@ -11,7 +11,7 @@ public static class RazeScript
                                              .GetName()
                                              .Version!;
 
-    public static RuntimeValue Evaluate(string source, Scope? scope)
+    public static RuntimeValue Evaluate(string source, Scope? scope = null)
     {
         if (scope is null)
         {

@@ -1,6 +1,5 @@
 ﻿using Raze.Script.Core;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Scopes;
 using Raze.Script.Core.Values;
 
 namespace Raze.Tests;
@@ -15,8 +14,7 @@ public class RazeScriptArithmeticTests
     [InlineData("10 % 3", 1)]
     public void Evaluate_Expressions_ReturnsExpectedValue(string expression, int expectedValue)
     {
-        var scope = new InterpreterScope();
-        var result = RazeScript.Evaluate(expression, scope);
+        var result = RazeScript.Evaluate(expression);
 
         Assert.IsType<IntegerValue>(result);
 
@@ -29,8 +27,7 @@ public class RazeScriptArithmeticTests
     [InlineData("(10 + 3) * 6", 78)]
     public void Evaluate_Expressions_RespectsPrecedence(string expression, int expectedValue)
     {
-        var scope = new InterpreterScope();
-        var result = RazeScript.Evaluate(expression, scope);
+        var result = RazeScript.Evaluate(expression);
 
         Assert.IsType<IntegerValue>(result);
 
@@ -42,11 +39,9 @@ public class RazeScriptArithmeticTests
     [InlineData("NULL + 10")]
     public void Evaluate_InvalidBinaryOperations_ThrowUnsupportedBinaryOperationException(string expression)
     {
-        var scope = new InterpreterScope();
-
         Assert.Throws<UnsupportedBinaryOperationException>(() =>
         {
-            var result = RazeScript.Evaluate(expression, scope);
+            var result = RazeScript.Evaluate(expression);
         });
     }
 }
