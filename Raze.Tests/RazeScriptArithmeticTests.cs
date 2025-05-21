@@ -8,7 +8,7 @@ namespace Raze.Tests;
 public class RazeScriptArithmeticTests
 {
     [Theory]
-    [InlineData("10 + 10", 1)]
+    [InlineData("10 + 10", 20)]
     [InlineData("10 - 11", -1)]
     [InlineData("10 * 10", 100)]
     [InlineData("10 / 10", 1)]
