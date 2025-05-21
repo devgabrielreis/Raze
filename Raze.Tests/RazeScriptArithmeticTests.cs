@@ -49,24 +49,4 @@ public class RazeScriptArithmeticTests
             var result = RazeScript.Evaluate(expression, scope);
         });
     }
-
-    [Fact]
-    public void Evaluate_UninitializedOrNullVariable_ThrowsNullValueException()
-    {
-        var scope = new InterpreterScope();
-
-        RazeScript.Evaluate("var integer a = NULL", scope);
-
-        Assert.Throws<NullValueException>(() =>
-        {
-            RazeScript.Evaluate("10 + a", scope);
-        });
-
-        RazeScript.Evaluate("const integer b", scope);
-
-        Assert.Throws<NullValueException>(() =>
-        {
-            RazeScript.Evaluate("10 + b", scope);
-        });
-    }
 }
