@@ -11,7 +11,15 @@ public abstract class VariableSymbol : Symbol
 
     public VariableSymbol(RuntimeValue value, bool isConstant)
     {
-        SetValue(value);
+        IsConstant = false;
+        SetNewValue(value, null, null);
+        IsConstant = isConstant;
+    }
+
+    internal VariableSymbol(RuntimeValue value, bool isConstant, int? sourceLine, int? sourceColumn)
+    {
+        IsConstant = false;
+        SetNewValue(value, sourceLine, sourceColumn);
         IsConstant = isConstant;
     }
 
@@ -27,8 +35,8 @@ public abstract class VariableSymbol : Symbol
             throw new ConstantAssignmentException(sourceLine, sourceColumn);
         }
 
-        SetValue(newValue);
+        SetValue(newValue, sourceLine, sourceColumn);
     }
 
-    protected abstract void SetValue(RuntimeValue value);
+    protected abstract void SetValue(RuntimeValue value, int? sourceLine, int? sourceColumn);
 }

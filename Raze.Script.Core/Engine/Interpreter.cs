@@ -59,7 +59,12 @@ internal static class Interpreter
     {
         VariableSymbol variable = statement.Type switch
         {
-            IntegerPrimitive => new IntegerVariable(statement.Value is null ? new NullValue() : Evaluate(statement.Value, scope), statement.IsContant),
+            IntegerPrimitive => new IntegerVariable(
+                statement.Value is null ? new NullValue() : Evaluate(statement.Value, scope),
+                statement.IsContant,
+                statement.StartLine,
+                statement.StartColumn
+            ),
             _ => throw new Exception("Tipo ainda não suportado")
         };
 

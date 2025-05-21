@@ -10,7 +10,12 @@ public class IntegerVariable : VariableSymbol
     {
     }
 
-    protected override void SetValue(RuntimeValue value)
+    internal IntegerVariable(RuntimeValue value, bool isConstant, int? sourceLine, int? sourceColumn)
+        : base(value, isConstant, sourceLine, sourceColumn)
+    {
+    }
+
+    protected override void SetValue(RuntimeValue value, int? sourceLine, int? sourceColumn)
     {
         if (value is NullValue)
         {
@@ -23,6 +28,6 @@ public class IntegerVariable : VariableSymbol
             return;
         }
 
-        throw new VariableTypeException(value.TypeName, nameof(IntegerVariable), 0, 0);
+        throw new VariableTypeException(value.TypeName, nameof(IntegerVariable), sourceLine, sourceColumn);
     }
 }
