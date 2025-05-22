@@ -25,6 +25,7 @@ internal class Lexer
         ["var"]     = (string lexeme, int line, int column) => new Var(lexeme, line, column),
         ["const"]   = (string lexeme, int line, int column) => new Const(lexeme, line, column),
         ["integer"] = (string lexeme, int line, int column) => new IntegerPrimitive(lexeme, line, column),
+        ["float"]   = (string lexeme, int line, int column) => new FloatPrimitive(lexeme, line, column),
         ["NULL"]    = (string lexeme, int line, int column) => new NullLiteral(lexeme, line, column)
     };
 

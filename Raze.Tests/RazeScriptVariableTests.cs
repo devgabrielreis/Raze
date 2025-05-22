@@ -30,6 +30,19 @@ public class RazeScriptVariableTests
         TestVariableDeclaration<IntegerValue, int?>(expression, varname, expected);
     }
 
+    [Theory]
+    [InlineData("var float test = 10", "test", 10.0F)]
+    [InlineData("const float test = 10", "test", 10.0f)]
+    [InlineData("var float test = 10 + 10", "test", 20.0f)]
+    [InlineData("const float test = 10 * 10", "test", 100.0f)]
+    [InlineData("const float test = 13.0", "test", 13.0f)]
+    [InlineData("var float test", "test", null)]
+    [InlineData("const float test", "test", null)]
+    public void Evaluate_FloatDeclaration_ReturnsExpectedValue(string expression, string varname, float? expected)
+    {
+        TestVariableDeclaration<FloatValue, float?>(expression, varname, expected);
+    }
+
     [Fact]
     public void Evaluate_UninitializedOrNullVariable_ThrowsNullValueException()
     {

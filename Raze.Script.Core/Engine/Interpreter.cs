@@ -65,6 +65,12 @@ internal static class Interpreter
                 statement.StartLine,
                 statement.StartColumn
             ),
+            FloatPrimitive => new FloatVariable(
+                statement.Value is null ? new NullValue() : Evaluate(statement.Value, scope),
+                statement.IsContant,
+                statement.StartLine,
+                statement.StartColumn
+            ),
             _ => throw new Exception("Tipo ainda não suportado")
         };
 
