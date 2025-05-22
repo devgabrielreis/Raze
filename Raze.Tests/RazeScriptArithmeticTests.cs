@@ -37,6 +37,8 @@ public class RazeScriptArithmeticTests
     [Theory]
     [InlineData("10 + NULL")]
     [InlineData("NULL + 10")]
+    [InlineData("true + 1.5")]
+    [InlineData("false + 7")]
     public void Evaluate_InvalidBinaryOperations_ThrowUnsupportedBinaryOperationException(string expression)
     {
         Assert.Throws<UnsupportedBinaryOperationException>(() =>

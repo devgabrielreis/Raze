@@ -24,6 +24,8 @@ internal static class Interpreter
                 return new IntegerValue((int)expr.Value);
             case DecimalLiteralExpression expr:
                 return new DecimalValue((decimal)expr.Value);
+            case BooleanLiteralExpression expr:
+                return new BooleanValue((bool)expr.Value);
             case NullLiteralExpression:
                 return new NullValue();
 
