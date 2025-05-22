@@ -2,6 +2,7 @@
 using Raze.Script.Core.Scopes;
 using Raze.Script.Core;
 using Raze.Script.Core.Values;
+using System.Globalization;
 
 namespace Raze.Tests;
 
@@ -31,16 +32,17 @@ public class RazeScriptVariableTests
     }
 
     [Theory]
-    [InlineData("var float test = 10", "test", 10.0F)]
-    [InlineData("const float test = 10", "test", 10.0f)]
-    [InlineData("var float test = 10 + 10", "test", 20.0f)]
-    [InlineData("const float test = 10 * 10", "test", 100.0f)]
-    [InlineData("const float test = 13.0", "test", 13.0f)]
-    [InlineData("var float test", "test", null)]
-    [InlineData("const float test", "test", null)]
-    public void Evaluate_FloatDeclaration_ReturnsExpectedValue(string expression, string varname, float? expected)
+    [InlineData("var decimal test = 10", "test", "10.0")]
+    [InlineData("const decimal test = 10", "test", "10.0")]
+    [InlineData("var decimal test = 10 + 10", "test", "20.0")]
+    [InlineData("const decimal test = 10 * 10", "test", "100.0")]
+    [InlineData("const decimal test = 13.0", "test", "13.0")]
+    [InlineData("var decimal test", "test", null)]
+    [InlineData("const decimal test", "test", null)]
+    public void Evaluate_DecimalDeclaration_ReturnsExpectedValue(string expression, string varname, string? expectedDecimalStr)
     {
-        TestVariableDeclaration<FloatValue, float?>(expression, varname, expected);
+        decimal? expected = expectedDecimalStr is null ? null : decimal.Parse(expectedDecimalStr, CultureInfo.InvariantCulture);
+        TestVariableDeclaration<DecimalValue, decimal?>(expression, varname, expected);
     }
 
     [Fact]

@@ -23,9 +23,9 @@ public class IntegerValue : RuntimeValue
         {
             return ExecuteBinaryOperationWithInteger(op, intValue, source);
         }
-        else if (other is FloatValue floatValue)
+        else if (other is DecimalValue decimalValue)
         {
-            return ExecuteBinaryOperationWithFloat(op, floatValue, source);
+            return ExecuteBinaryOperationWithDecimal(op, decimalValue, source);
         }
 
         throw new UnsupportedBinaryOperationException(
@@ -81,7 +81,7 @@ public class IntegerValue : RuntimeValue
         );
     }
 
-    private FloatValue ExecuteBinaryOperationWithFloat(OperatorToken op, FloatValue other, BinaryExpression source)
+    private DecimalValue ExecuteBinaryOperationWithDecimal(OperatorToken op, DecimalValue other, BinaryExpression source)
     {
         if (Value is null || other.Value is null)
         {
@@ -91,19 +91,19 @@ public class IntegerValue : RuntimeValue
         switch (op)
         {
             case AdditionOperator:
-                return new FloatValue((float)(int)Value + (float)other.Value);
+                return new DecimalValue((decimal)(int)Value + (decimal)other.Value);
             case SubtractionOperator:
-                return new FloatValue((float)(int)Value - (float)other.Value);
+                return new DecimalValue((decimal)(int)Value - (decimal)other.Value);
             case MultiplicationOperator:
-                return new FloatValue((float)(int)Value * (float)other.Value);
+                return new DecimalValue((decimal)(int)Value * (decimal)other.Value);
             case DivisionOperator:
-                if ((float)other.Value == 0)
+                if ((decimal)other.Value == 0)
                 {
                     throw new DivisionByZeroException(source.StartLine, source.StartColumn);
                 }
-                return new FloatValue((float)(int)Value / (float)other.Value);
+                return new DecimalValue((decimal)(int)Value / (decimal)other.Value);
             case ModuloOperator:
-                return new FloatValue((float)(int)Value % (float)other.Value);
+                return new DecimalValue((decimal)(int)Value % (decimal)other.Value);
         }
 
         throw new UnsupportedBinaryOperationException(

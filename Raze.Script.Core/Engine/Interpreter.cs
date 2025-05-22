@@ -22,8 +22,8 @@ internal static class Interpreter
 
             case IntegerLiteralExpression expr:
                 return new IntegerValue((int)expr.Value);
-            case FloatLiteralExpression expr:
-                return new FloatValue((float)expr.Value);
+            case DecimalLiteralExpression expr:
+                return new DecimalValue((decimal)expr.Value);
             case NullLiteralExpression:
                 return new NullValue();
 
@@ -65,7 +65,7 @@ internal static class Interpreter
                 statement.StartLine,
                 statement.StartColumn
             ),
-            FloatPrimitive => new FloatVariable(
+            DecimalPrimitive => new DecimalVariable(
                 statement.Value is null ? new NullValue() : Evaluate(statement.Value, scope),
                 statement.IsContant,
                 statement.StartLine,

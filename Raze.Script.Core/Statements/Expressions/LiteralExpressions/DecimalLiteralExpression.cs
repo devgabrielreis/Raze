@@ -1,12 +1,12 @@
 ﻿namespace Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 
-internal class FloatLiteralExpression : LiteralExpression
+internal class DecimalLiteralExpression : LiteralExpression
 {
     public override object Value => _value;
 
-    private readonly float _value;
+    private readonly decimal _value;
 
-    public FloatLiteralExpression(float value, int startLine, int startColumn)
+    public DecimalLiteralExpression(decimal value, int startLine, int startColumn)
         : base(startLine, startColumn)
     {
         _value = value;

@@ -25,7 +25,7 @@ internal class Lexer
         ["var"]     = (string lexeme, int line, int column) => new Var(lexeme, line, column),
         ["const"]   = (string lexeme, int line, int column) => new Const(lexeme, line, column),
         ["integer"] = (string lexeme, int line, int column) => new IntegerPrimitive(lexeme, line, column),
-        ["float"]   = (string lexeme, int line, int column) => new FloatPrimitive(lexeme, line, column),
+        ["decimal"]   = (string lexeme, int line, int column) => new DecimalPrimitive(lexeme, line, column),
         ["NULL"]    = (string lexeme, int line, int column) => new NullLiteral(lexeme, line, column)
     };
 
@@ -189,7 +189,7 @@ internal class Lexer
 
         if (hasDot)
         {
-            _tokens.Add(new FloatLiteral(number, _currentLine, startColumn));
+            _tokens.Add(new DecimalLiteral(number, _currentLine, startColumn));
         }
         else
         {

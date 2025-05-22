@@ -5,24 +5,24 @@ using System.Globalization;
 
 namespace Raze.Script.Core.Values;
 
-public class FloatValue : RuntimeValue
+public class DecimalValue : RuntimeValue
 {
     public override object? Value => _value;
 
-    public override string TypeName => "Float";
+    public override string TypeName => "Decimal";
 
-    private readonly float? _value;
+    private readonly decimal? _value;
 
-    public FloatValue(float? value)
+    public DecimalValue(decimal? value)
     {
         _value = value;
     }
 
     internal override RuntimeValue ExecuteBinaryOperation(OperatorToken op, RuntimeValue other, BinaryExpression source)
     {
-        if (other is FloatValue floatValue)
+        if (other is DecimalValue decimalValue)
         {
-            return ExecuteBinaryOperationWithFloat(op, floatValue, source);
+            return ExecuteBinaryOperationWithDecimal(op, decimalValue, source);
         }
         else if (other is IntegerValue integerValue)
         {
@@ -45,17 +45,17 @@ public class FloatValue : RuntimeValue
             return "NULL";
         }
 
-        string floatStr = ((float)_value).ToString(CultureInfo.InvariantCulture);
+        string decimalStr = ((decimal)_value).ToString(CultureInfo.InvariantCulture);
 
-        if (!floatStr.Contains('.'))
+        if (!decimalStr.Contains('.'))
         {
-            floatStr += ".0";
+            decimalStr += ".0";
         }
 
-        return floatStr;
+        return decimalStr;
     }
 
-    private FloatValue ExecuteBinaryOperationWithFloat(OperatorToken op, FloatValue other, BinaryExpression source)
+    private DecimalValue ExecuteBinaryOperationWithDecimal(OperatorToken op, DecimalValue other, BinaryExpression source)
     {
         if (Value is null || other.Value is null)
         {
@@ -65,19 +65,19 @@ public class FloatValue : RuntimeValue
         switch (op)
         {
             case AdditionOperator:
-                return new FloatValue((float)Value + (float)other.Value);
+                return new DecimalValue((decimal)Value + (decimal)other.Value);
             case SubtractionOperator:
-                return new FloatValue((float)Value - (float)other.Value);
+                return new DecimalValue((decimal)Value - (decimal)other.Value);
             case MultiplicationOperator:
-                return new FloatValue((float)Value * (float)other.Value);
+                return new DecimalValue((decimal)Value * (decimal)other.Value);
             case DivisionOperator:
-                if ((float)other.Value == 0)
+                if ((decimal)other.Value == 0)
                 {
                     throw new DivisionByZeroException(source.StartLine, source.StartColumn);
                 }
-                return new FloatValue((float)Value / (float)other.Value);
+                return new DecimalValue((decimal)Value / (decimal)other.Value);
             case ModuloOperator:
-                return new FloatValue((float)Value % (float)other.Value);
+                return new DecimalValue((decimal)Value % (decimal)other.Value);
         }
 
         throw new UnsupportedBinaryOperationException(
@@ -89,7 +89,7 @@ public class FloatValue : RuntimeValue
         );
     }
 
-    private FloatValue ExecuteBinaryOperationWithInteger(OperatorToken op, IntegerValue other, BinaryExpression source)
+    private DecimalValue ExecuteBinaryOperationWithInteger(OperatorToken op, IntegerValue other, BinaryExpression source)
     {
         if (Value is null || other.Value is null)
         {
@@ -99,19 +99,19 @@ public class FloatValue : RuntimeValue
         switch (op)
         {
             case AdditionOperator:
-                return new FloatValue((float)Value + (float)(int)other.Value);
+                return new DecimalValue((decimal)Value + (decimal)(int)other.Value);
             case SubtractionOperator:
-                return new FloatValue((float)Value - (float)(int)other.Value);
+                return new DecimalValue((decimal)Value - (decimal)(int)other.Value);
             case MultiplicationOperator:
-                return new FloatValue((float)Value * (float)(int)other.Value);
+                return new DecimalValue((decimal)Value * (decimal)(int)other.Value);
             case DivisionOperator:
                 if ((int)other.Value == 0)
                 {
                     throw new DivisionByZeroException(source.StartLine, source.StartColumn);
                 }
-                return new FloatValue((float)Value / (float)(int)other.Value);
+                return new DecimalValue((decimal)Value / (decimal)(int)other.Value);
             case ModuloOperator:
-                return new FloatValue((float)Value % (float)(int)other.Value);
+                return new DecimalValue((decimal)Value % (decimal)(int)other.Value);
         }
 
         throw new UnsupportedBinaryOperationException(

@@ -211,8 +211,8 @@ internal class Parser
                 return new IdentifierExpression(Current().Lexeme, Current().Line, Current().Column);
             case IntegerLiteral:
                 return new IntegerLiteralExpression(int.Parse(Current().Lexeme), Current().Line, Current().Column);
-            case FloatLiteral:
-                return new FloatLiteralExpression(float.Parse(Current().Lexeme, CultureInfo.InvariantCulture), Current().Line, Current().Column);
+            case DecimalLiteral:
+                return new DecimalLiteralExpression(decimal.Parse(Current().Lexeme, CultureInfo.InvariantCulture), Current().Line, Current().Column);
             case NullLiteral:
                 return new NullLiteralExpression(Current().Line, Current().Column);
             case OpenParenthesis:

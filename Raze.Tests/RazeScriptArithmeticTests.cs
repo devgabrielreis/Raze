@@ -51,9 +51,9 @@ public class RazeScriptArithmeticTests
     [InlineData("10 * 0.1")]
     [InlineData("100.5 / 10")]
     [InlineData("10 % 3.0")]
-    public void Evaluate_OperationsBetweenIntegerAndFloat_ReturnsFloat(string expression)
+    public void Evaluate_OperationsBetweenIntegerAndDecimal_ReturnsDecimal(string expression)
     {
-        Assert.IsType<FloatValue>(RazeScript.Evaluate(expression));
+        Assert.IsType<DecimalValue>(RazeScript.Evaluate(expression));
     }
 
     [Theory]
