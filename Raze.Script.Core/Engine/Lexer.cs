@@ -26,6 +26,7 @@ internal class Lexer
         ["const"]   = (string lexeme, int line, int column) => new Const(lexeme, line, column),
         ["integer"] = (string lexeme, int line, int column) => new IntegerPrimitive(lexeme, line, column),
         ["decimal"] = (string lexeme, int line, int column) => new DecimalPrimitive(lexeme, line, column),
+        ["boolean"] = (string lexeme, int line, int column) => new BooleanPrimitive(lexeme, line, column),
         ["true"]    = (string lexeme, int line, int column) => new BooleanLiteral(lexeme, line, column),
         ["false"]   = (string lexeme, int line, int column) => new BooleanLiteral(lexeme, line, column),
         ["NULL"]    = (string lexeme, int line, int column) => new NullLiteral(lexeme, line, column)

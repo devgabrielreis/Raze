@@ -11,6 +11,10 @@ public class RazeScriptVariableTests
     [Theory]
     [InlineData("var integer test = 10.0")]
     [InlineData("var integer test = 10 + 1.0")]
+    [InlineData("var integer test = true")]
+    [InlineData("var decimal test = false")]
+    [InlineData("var boolean test = 10")]
+    [InlineData("var boolean test = 1.6")]
     public void Evaluate_WrongVariableTypeAssignment_ThrowsVariableTypeException(string expression)
     {
         Assert.Throws<VariableTypeException>(() =>
@@ -43,6 +47,15 @@ public class RazeScriptVariableTests
     {
         decimal? expected = expectedDecimalStr is null ? null : decimal.Parse(expectedDecimalStr, CultureInfo.InvariantCulture);
         TestVariableDeclaration<DecimalValue, decimal?>(expression, varname, expected);
+    }
+
+    [Theory]
+    [InlineData("var boolean test = true", "test", true)]
+    [InlineData("const boolean test = false", "test", false)]
+    [InlineData("var boolean test", "test", null)]
+    public void Evaluate_BooleanDeclaration_ReturnsExpectedValue(string expression, string varname, bool? expected)
+    {
+        TestVariableDeclaration<BooleanValue, bool?>(expression, varname, expected);
     }
 
     [Fact]
