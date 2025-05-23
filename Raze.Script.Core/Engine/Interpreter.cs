@@ -81,6 +81,12 @@ internal static class Interpreter
                 statement.StartLine,
                 statement.StartColumn
             ),
+            StringPrimitive => new StringVariable(
+                statement.Value is null ? new NullValue() : Evaluate(statement.Value, scope),
+                statement.IsContant,
+                statement.StartLine,
+                statement.StartColumn
+            ),
             _ => throw new Exception("Tipo ainda não suportado")
         };
 
