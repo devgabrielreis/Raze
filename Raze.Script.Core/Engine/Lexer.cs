@@ -15,10 +15,10 @@ internal class Lexer
     public bool HasProcessed { get; private set; }
 
     private readonly string _sourceCode;
-    private int _currentIndex;
-    private int _currentLine;
-    private int _currentColumn;
-    private List<Token> _tokens;
+    private int _currentIndex = 0;
+    private int _currentLine = 0;
+    private int _currentColumn = 0;
+    private List<Token> _tokens = [];
 
     private static readonly Dictionary<string, Func<string, int, int, Token>> _keywords = new()
     {
@@ -49,8 +49,6 @@ internal class Lexer
     public Lexer(string sourceCode)
     {
         _sourceCode = sourceCode;
-
-        Reset();
     }
 
     public void Reset()
@@ -58,7 +56,7 @@ internal class Lexer
         _currentIndex = 0;
         _currentLine = 0;
         _currentColumn = 0;
-        _tokens = [];
+        _tokens.Clear();
 
         HasProcessed = false;
     }

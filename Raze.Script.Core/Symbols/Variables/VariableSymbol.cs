@@ -5,7 +5,7 @@ namespace Raze.Script.Core.Symbols.Variables;
 
 public abstract class VariableSymbol : Symbol
 {
-    public RuntimeValue Value { get; protected set; }
+    public RuntimeValue Value { get; protected set; } = new NullValue();
 
     public bool IsConstant { get; private set; }
 

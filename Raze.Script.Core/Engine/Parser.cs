@@ -15,11 +15,11 @@ namespace Raze.Script.Core.Engine;
 
 internal class Parser
 {
-    public bool HasProcessed;
+    public bool HasProcessed { get; private set; } = false;
 
-    private IList<Token> _tokens;
-    private int _currentIndex;
-    private ProgramExpression _program;
+    private readonly IList<Token> _tokens;
+    private int _currentIndex = 0;
+    private ProgramExpression _program = new();
 
     public Parser(IList<Token> tokens)
     {
@@ -29,8 +29,6 @@ internal class Parser
         }
 
         _tokens = tokens;
-
-        Reset();
     }
 
     public void Reset()
@@ -47,6 +45,8 @@ internal class Parser
         {
             return _program;
         }
+
+        HasProcessed = true;
 
         _program = new();
 
