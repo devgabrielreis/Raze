@@ -1,6 +1,4 @@
-﻿using Raze.Script.Core.Tokens;
-
-namespace Raze.Script.Core.Exceptions.ParseExceptions;
+﻿namespace Raze.Script.Core.Exceptions.ParseExceptions;
 
 public class UnexpectedTokenException : ParseException
 {

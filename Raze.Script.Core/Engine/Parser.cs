@@ -215,6 +215,8 @@ internal class Parser
                 return new DecimalLiteralExpression(decimal.Parse(Current().Lexeme, CultureInfo.InvariantCulture), Current().Line, Current().Column);
             case BooleanLiteral:
                 return new BooleanLiteralExpression(bool.Parse(Current().Lexeme), Current().Line, Current().Column);
+            case StringLiteral:
+                return new StringLiteralExpression(Current().Lexeme, Current().Line, Current().Column);
             case NullLiteral:
                 return new NullLiteralExpression(Current().Line, Current().Column);
             case OpenParenthesis:

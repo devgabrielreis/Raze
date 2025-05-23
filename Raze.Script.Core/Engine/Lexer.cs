@@ -91,6 +91,18 @@ internal class Lexer
         return _sourceCode[_currentIndex];
     }
 
+    private char? Peek(int howMuch = 1)
+    {
+        int target = _currentIndex + howMuch;
+
+        if (target >= _sourceCode.Length)
+        {
+            return null;
+        }
+
+        return _sourceCode[target];
+    }
+
     private void Advance()
     {
         if (Current() == '\n')
@@ -135,6 +147,12 @@ internal class Lexer
         if (CharUtils.IsNumber(Current()))
         {
             ProcessNumber();
+            return;
+        }
+
+        if (Current() == '"')
+        {
+            ProcessString();
             return;
         }
 
@@ -198,5 +216,33 @@ internal class Lexer
         {
             _tokens.Add(new IntegerLiteral(number, _currentLine, startColumn));
         }
+    }
+
+    private void ProcessString()
+    {
+        string str = "";
+        var startColumn = _currentColumn;
+        Advance();
+
+        while (Current() != '"')
+        {
+            if (Current() == '\n')
+            {
+                throw new InvalidStringException("\"" + str, _currentLine, startColumn);
+            }
+
+            str += Current();
+
+            if (Peek() is null)
+            {
+                throw new InvalidStringException("\"" + str, _currentLine, startColumn);
+            }
+
+            Advance();
+        }
+
+        Advance();
+
+        _tokens.Add(new StringLiteral(str, _currentLine, startColumn));
     }
 }
