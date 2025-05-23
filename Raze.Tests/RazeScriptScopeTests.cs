@@ -25,4 +25,17 @@ public class RazeScriptScopeTests
             RazeScript.Evaluate("const integer x = 2", scope2);
         });
     }
+
+    [Fact]
+    public void Evaluate_ConstantAssignment_ThrowsConstantAssignmentException()
+    {
+        var scope = new InterpreterScope();
+
+        RazeScript.Evaluate("const integer test = 10", scope);
+
+        Assert.Throws<ConstantAssignmentException>(() =>
+        {
+            RazeScript.Evaluate("test = 11", scope);
+        });
+    }
 }
