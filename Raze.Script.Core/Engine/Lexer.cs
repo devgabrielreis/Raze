@@ -20,7 +20,7 @@ internal class Lexer
     private int _currentColumn;
     private List<Token> _tokens;
 
-    private static Dictionary<string, Func<string, int, int, Token>> _keywords = new()
+    private static readonly Dictionary<string, Func<string, int, int, Token>> _keywords = new()
     {
         ["var"]     = (string lexeme, int line, int column) => new Var(lexeme, line, column),
         ["const"]   = (string lexeme, int line, int column) => new Const(lexeme, line, column),
@@ -32,7 +32,7 @@ internal class Lexer
         ["NULL"]    = (string lexeme, int line, int column) => new NullLiteral(lexeme, line, column)
     };
 
-    private static Dictionary<char, Func<string, int, int, Token>> _singleCharTokens = new()
+    private static readonly Dictionary<char, Func<string, int, int, Token>> _singleCharTokens = new()
     {
         [';'] = (string lexeme, int line, int column) => new SemiColon(lexeme, line, column),
         ['('] = (string lexeme, int line, int column) => new OpenParenthesis(lexeme, line, column),
@@ -224,18 +224,30 @@ internal class Lexer
         var startColumn = _currentColumn;
         Advance();
 
+        if (HasEnded())
+        {
+            throw new InvalidStringException("\"" + StringUtils.UnescapeString(str), _currentLine, startColumn);
+        }
+
         while (Current() != '"')
         {
-            if (Current() == '\n')
+            if (Current() == '\n' || Peek() is null)
             {
-                throw new InvalidStringException("\"" + str, _currentLine, startColumn);
+                throw new InvalidStringException("\"" + StringUtils.UnescapeString(str), _currentLine, startColumn);
             }
 
-            str += Current();
-
-            if (Peek() is null)
+            if (Current() == '\\')
             {
-                throw new InvalidStringException("\"" + str, _currentLine, startColumn);
+                str += GetCurrentEscapedChar();
+
+                if (Peek() is null)
+                {
+                    throw new InvalidStringException("\"" + StringUtils.UnescapeString(str), _currentLine, startColumn);
+                }
+            }
+            else
+            {
+                str += Current();
             }
 
             Advance();
@@ -244,5 +256,26 @@ internal class Lexer
         Advance();
 
         _tokens.Add(new StringLiteral(str, _currentLine, startColumn));
+    }
+
+    private char GetCurrentEscapedChar()
+    {
+        Advance();
+
+        switch (Current())
+        {
+            case '"':
+                return '"';
+            case 'n':
+                return '\n';
+            case 't':
+                return '\t';
+            case 'r':
+                return '\r';
+            case '\\':
+                return '\\';
+            default:
+                throw new UnrecognizedEscapeSequenceException("\\" + Current(), _currentLine, _currentColumn - 1);
+        }
     }
 }
