@@ -37,7 +37,7 @@ public class StringValue : RuntimeValue
     {
         if (_value is null)
         {
-            return "NULL";
+            return "null";
         }
 
         return '"' + _value + '"';

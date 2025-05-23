@@ -8,7 +8,7 @@ public class NullValue : RuntimeValue
 {
     public override object? Value => null;
 
-    public override string TypeName => "NULL";
+    public override string TypeName => "Null";
 
     internal override RuntimeValue ExecuteBinaryOperation(OperatorToken op, RuntimeValue other, BinaryExpression source)
     {
@@ -23,6 +23,6 @@ public class NullValue : RuntimeValue
 
     public override string ToString()
     {
-        return "NULL";
+        return "null";
     }
 }

@@ -9,7 +9,7 @@ public class RazeScriptStringTests
 {
     [Theory]
     [InlineData("var string test = \"teste\"", "test", "teste")]
-    [InlineData("var string test = NULL", "test", null)]
+    [InlineData("var string test = null", "test", null)]
     [InlineData("const string test", "test", null)]
     public void Evaluate_StringVariableDeclaration_ReturnsExpectedValue(string expression, string varname, string? expected)
     {
@@ -61,11 +61,11 @@ public class RazeScriptStringTests
     [InlineData("\"a\" / true")]
     [InlineData("\"a\" * true")]
     [InlineData("\"a\" % true")]
-    [InlineData("\"a\" + NULL")]
-    [InlineData("\"a\" - NULL")]
-    [InlineData("\"a\" / NULL")]
-    [InlineData("\"a\" * NULL")]
-    [InlineData("\"a\" % NULL")]
+    [InlineData("\"a\" + null")]
+    [InlineData("\"a\" - null")]
+    [InlineData("\"a\" / null")]
+    [InlineData("\"a\" * null")]
+    [InlineData("\"a\" % null")]
     [InlineData("\"a\" - \"a\"")]
     [InlineData("\"a\" / \"a\"")]
     [InlineData("\"a\" * \"a\"")]

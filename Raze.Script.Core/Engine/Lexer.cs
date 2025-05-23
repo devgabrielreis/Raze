@@ -30,7 +30,7 @@ internal class Lexer
         ["string"]  = (string lexeme, int line, int column) => new StringPrimitive(lexeme, line, column),
         ["true"]    = (string lexeme, int line, int column) => new BooleanLiteral(lexeme, line, column),
         ["false"]   = (string lexeme, int line, int column) => new BooleanLiteral(lexeme, line, column),
-        ["NULL"]    = (string lexeme, int line, int column) => new NullLiteral(lexeme, line, column)
+        ["null"]    = (string lexeme, int line, int column) => new NullLiteral(lexeme, line, column)
     };
 
     private static readonly Dictionary<char, Func<string, int, int, Token>> _singleCharTokens = new()

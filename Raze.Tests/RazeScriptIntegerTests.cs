@@ -10,7 +10,7 @@ public class RazeScriptIntegerTests
 {
     [Theory]
     [InlineData("const integer test = 5", "test", 5)]
-    [InlineData("var integer test = NULL", "test", null)]
+    [InlineData("var integer test = null", "test", null)]
     [InlineData("var integer test", "test", null)]
     public void Evaluate_IntegerVariableDeclaration_ReturnsExpectedValue(string expression, string varname, int? expected)
     {
@@ -74,11 +74,11 @@ public class RazeScriptIntegerTests
     [InlineData("10 / true")]
     [InlineData("10 * true")]
     [InlineData("10 % true")]
-    [InlineData("10 + NULL")]
-    [InlineData("10 - NULL")]
-    [InlineData("10 / NULL")]
-    [InlineData("10 * NULL")]
-    [InlineData("10 % NULL")]
+    [InlineData("10 + null")]
+    [InlineData("10 - null")]
+    [InlineData("10 / null")]
+    [InlineData("10 * null")]
+    [InlineData("10 % null")]
     [InlineData("10 + \"a\"")]
     [InlineData("10 - \"a\"")]
     [InlineData("10 / \"a\"")]

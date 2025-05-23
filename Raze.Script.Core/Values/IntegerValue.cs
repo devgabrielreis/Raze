@@ -41,7 +41,7 @@ public class IntegerValue : RuntimeValue
     {
         if (_value is null)
         {
-            return "NULL";
+            return "null";
         }
 
         return _value.ToString()!;
