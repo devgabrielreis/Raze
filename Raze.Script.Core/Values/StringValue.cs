@@ -8,6 +8,8 @@ public class StringValue : RuntimeValue
 {
     public override object? Value => _value;
 
+    public string? StrValue => _value;
+
     public override string TypeName => "String";
 
     private readonly string? _value;
@@ -45,7 +47,7 @@ public class StringValue : RuntimeValue
 
     private StringValue ExecuteBinaryOperationWithString(OperatorToken op, StringValue other, BinaryExpression source)
     {
-        if (Value is null || other.Value is null)
+        if (StrValue is null || other.StrValue is null)
         {
             throw new NullValueException(source.StartLine, source.StartColumn);
         }
@@ -53,7 +55,7 @@ public class StringValue : RuntimeValue
         switch (op)
         {
             case AdditionOperator:
-                return new StringValue((string)Value + (string)other.Value);
+                return new StringValue(StrValue + other.StrValue);
         }
 
         throw new UnsupportedBinaryOperationException(

@@ -29,7 +29,7 @@ internal class DecimalVariable : VariableSymbol
         }
         else if (value is IntegerValue intValue)
         {
-            Value = new DecimalValue((decimal)(int)intValue.Value!);
+            Value = new DecimalValue((decimal)intValue.IntValue!);
             return;
         }
 

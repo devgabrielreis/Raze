@@ -23,7 +23,7 @@ public class RazeScriptDecimalTests
 
         Assert.IsType<DecimalValue>(result);
 
-        Assert.Equal(expected, (decimal?)((result as DecimalValue)!.Value)!);
+        Assert.Equal(expected, (result as DecimalValue)!.DecValue);
     }
 
     [Theory]
@@ -55,7 +55,7 @@ public class RazeScriptDecimalTests
         var result = RazeScript.Evaluate(expression, scope);
 
         Assert.IsType<DecimalValue>(result);
-        Assert.Equal(expected, (decimal)((result as DecimalValue)!.Value)!);
+        Assert.Equal(expected, (result as DecimalValue)!.DecValue);
     }
 
     [Theory]

@@ -20,7 +20,7 @@ public class RazeScriptStringTests
 
         Assert.IsType<StringValue>(result);
 
-        Assert.Equal(expected, (string?)((result as StringValue)!.Value)!);
+        Assert.Equal(expected, (result as StringValue)!.StrValue);
     }
 
     [Theory]
@@ -42,7 +42,7 @@ public class RazeScriptStringTests
         var result = RazeScript.Evaluate("\"Hello\" + \" \" + \"World!\"", scope);
 
         Assert.IsType<StringValue>(result);
-        Assert.Equal("Hello World!", (string)((result as StringValue)!.Value)!);
+        Assert.Equal("Hello World!", (result as StringValue)!.StrValue);
     }
 
     [Theory]
@@ -89,7 +89,7 @@ public class RazeScriptStringTests
         var result = RazeScript.Evaluate(character);
 
         Assert.IsType<StringValue>(result);
-        Assert.Equal(expected.ToString(), (string)result.Value!);
+        Assert.Equal(expected.ToString(), (result as StringValue)!.StrValue);
     }
 
     [Theory]

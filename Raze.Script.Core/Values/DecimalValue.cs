@@ -9,6 +9,8 @@ public class DecimalValue : RuntimeValue
 {
     public override object? Value => _value;
 
+    public decimal? DecValue => _value;
+
     public override string TypeName => "Decimal";
 
     private readonly decimal? _value;
@@ -57,7 +59,7 @@ public class DecimalValue : RuntimeValue
 
     private DecimalValue ExecuteBinaryOperationWithDecimal(OperatorToken op, DecimalValue other, BinaryExpression source)
     {
-        if (Value is null || other.Value is null)
+        if (DecValue is null || other.DecValue is null)
         {
             throw new NullValueException(source.StartLine, source.StartColumn);
         }
@@ -65,19 +67,19 @@ public class DecimalValue : RuntimeValue
         switch (op)
         {
             case AdditionOperator:
-                return new DecimalValue((decimal)Value + (decimal)other.Value);
+                return new DecimalValue(DecValue + other.DecValue);
             case SubtractionOperator:
-                return new DecimalValue((decimal)Value - (decimal)other.Value);
+                return new DecimalValue(DecValue - other.DecValue);
             case MultiplicationOperator:
-                return new DecimalValue((decimal)Value * (decimal)other.Value);
+                return new DecimalValue(DecValue * other.DecValue);
             case DivisionOperator:
-                if ((decimal)other.Value == 0)
+                if (other.DecValue == 0)
                 {
                     throw new DivisionByZeroException(source.StartLine, source.StartColumn);
                 }
-                return new DecimalValue((decimal)Value / (decimal)other.Value);
+                return new DecimalValue(DecValue / other.DecValue);
             case ModuloOperator:
-                return new DecimalValue((decimal)Value % (decimal)other.Value);
+                return new DecimalValue(DecValue % other.DecValue);
         }
 
         throw new UnsupportedBinaryOperationException(
@@ -91,7 +93,7 @@ public class DecimalValue : RuntimeValue
 
     private DecimalValue ExecuteBinaryOperationWithInteger(OperatorToken op, IntegerValue other, BinaryExpression source)
     {
-        if (Value is null || other.Value is null)
+        if (DecValue is null || other.IntValue is null)
         {
             throw new NullValueException(source.StartLine, source.StartColumn);
         }
@@ -99,19 +101,19 @@ public class DecimalValue : RuntimeValue
         switch (op)
         {
             case AdditionOperator:
-                return new DecimalValue((decimal)Value + (decimal)(int)other.Value);
+                return new DecimalValue(DecValue + (decimal)other.IntValue);
             case SubtractionOperator:
-                return new DecimalValue((decimal)Value - (decimal)(int)other.Value);
+                return new DecimalValue(DecValue - (decimal)other.IntValue);
             case MultiplicationOperator:
-                return new DecimalValue((decimal)Value * (decimal)(int)other.Value);
+                return new DecimalValue(DecValue * (decimal)other.IntValue);
             case DivisionOperator:
-                if ((int)other.Value == 0)
+                if (other.IntValue == 0)
                 {
                     throw new DivisionByZeroException(source.StartLine, source.StartColumn);
                 }
-                return new DecimalValue((decimal)Value / (decimal)(int)other.Value);
+                return new DecimalValue(DecValue / (decimal)other.IntValue);
             case ModuloOperator:
-                return new DecimalValue((decimal)Value % (decimal)(int)other.Value);
+                return new DecimalValue(DecValue % (decimal)other.IntValue);
         }
 
         throw new UnsupportedBinaryOperationException(

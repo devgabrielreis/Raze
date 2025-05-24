@@ -21,7 +21,7 @@ public class RazeScriptBooleanTests
 
         Assert.IsType<BooleanValue>(result);
 
-        Assert.Equal(expected, (bool?)((result as BooleanValue)!.Value)!);
+        Assert.Equal(expected, (result as BooleanValue)!.BoolValue);
     }
 
     [Theory]

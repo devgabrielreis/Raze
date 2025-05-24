@@ -21,7 +21,7 @@ public class RazeScriptIntegerTests
 
         Assert.IsType<IntegerValue>(result);
 
-        Assert.Equal(expected, (int?)((result as IntegerValue)!.Value)!);
+        Assert.Equal(expected, (result as IntegerValue)!.IntValue);
     }
 
     [Theory]
@@ -48,7 +48,7 @@ public class RazeScriptIntegerTests
         var result = RazeScript.Evaluate(expression, scope);
 
         Assert.IsType<IntegerValue>(result);
-        Assert.Equal(expected, (int)((result as IntegerValue)!.Value)!);
+        Assert.Equal(expected, (result as IntegerValue)!.IntValue);
     }
 
     [Theory]
@@ -65,7 +65,7 @@ public class RazeScriptIntegerTests
         var result = RazeScript.Evaluate(expression, scope);
 
         Assert.IsType<DecimalValue>(result);
-        Assert.Equal(expected, (decimal)((result as DecimalValue)!.Value)!);
+        Assert.Equal(expected, (result as DecimalValue)!.DecValue);
     }
 
     [Theory]

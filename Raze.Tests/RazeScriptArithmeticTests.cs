@@ -16,7 +16,7 @@ public class RazeScriptArithmeticTests
 
         Assert.IsType<IntegerValue>(result);
 
-        Assert.Equal(expectedValue, result.Value);
+        Assert.Equal(expectedValue, (result as IntegerValue)!.IntValue);
     }
 
     [Theory]

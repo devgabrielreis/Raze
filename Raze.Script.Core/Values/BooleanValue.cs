@@ -8,6 +8,8 @@ public class BooleanValue : RuntimeValue
 {
     public override object? Value => _value;
 
+    public bool? BoolValue => _value;
+
     public override string TypeName => "Boolean";
 
     private readonly bool? _value;
