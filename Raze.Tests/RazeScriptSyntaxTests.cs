@@ -10,6 +10,7 @@ public class RazeScriptSyntaxTests
     [InlineData("@")]
     [InlineData(".0")]
     [InlineData("0.")]
+    [InlineData("0.0.")]
     public void Evaluate_Expression_ThrowsUnexpectedCharacterException(string expression)
     {
         Assert.Throws<UnexpectedCharacterException>(() =>
@@ -26,6 +27,30 @@ public class RazeScriptSyntaxTests
     public void Evaluate_Expression_ThrowsUnexpectedTokenException(string expression)
     {
         Assert.Throws<UnexpectedTokenException>(() =>
+        {
+            RazeScript.Evaluate(expression);
+        });
+    }
+
+    [Theory]
+    [InlineData("\"\"\"")]
+    [InlineData("\"teste")]
+    [InlineData("\"")]
+    [InlineData("teste\"")]
+    public void Evaluate_InvalidString_ThrowsInvalidStringException(string expreesion)
+    {
+        Assert.Throws<InvalidStringException>(() =>
+        {
+            RazeScript.Evaluate(expreesion);
+        });
+    }
+
+    [Theory]
+    [InlineData("\"hello\\zword\"")]
+    [InlineData("\"\\'\"")]
+    public void Evaluate_InvalidEscapeSequence_ThrowsUnrecognizedEscapeSequenceException(string expression)
+    {
+        Assert.Throws<UnrecognizedEscapeSequenceException>(() =>
         {
             RazeScript.Evaluate(expression);
         });
