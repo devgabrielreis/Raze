@@ -31,7 +31,7 @@ public class RazeScriptNullTests
     [InlineData("null / \"a\"")]
     [InlineData("null * \"a\"")]
     [InlineData("null % \"a\"")]
-    public void Evaluate_NULLBinaryOperations_ThrowUnsupportedBinaryOperationException(string expression)
+    public void Evaluate_NullBinaryOperations_ThrowUnsupportedBinaryOperationException(string expression)
     {
         Assert.Throws<UnsupportedBinaryOperationException>(() =>
         {

@@ -107,6 +107,11 @@ public class RazeScriptIntegerTests
         {
             RazeScript.Evaluate($"1 {op} nullVar", scope);
         });
+
+        Assert.Throws<NullValueException>(() =>
+        {
+            RazeScript.Evaluate($"nullVar {op} 1", scope);
+        });
     }
 
     [Theory]
@@ -123,6 +128,11 @@ public class RazeScriptIntegerTests
         Assert.Throws<NullValueException>(() =>
         {
             RazeScript.Evaluate($"1 {op} nullVar", scope);
+        });
+
+        Assert.Throws<NullValueException>(() =>
+        {
+            RazeScript.Evaluate($"nullVar {op} 1", scope);
         });
     }
 }

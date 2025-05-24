@@ -97,6 +97,11 @@ public class RazeScriptDecimalTests
         {
             RazeScript.Evaluate($"1.0 {op} nullVar", scope);
         });
+
+        Assert.Throws<NullValueException>(() =>
+        {
+            RazeScript.Evaluate($"nullVar {op} 1.0", scope);
+        });
     }
 
     [Theory]
@@ -113,6 +118,11 @@ public class RazeScriptDecimalTests
         Assert.Throws<NullValueException>(() =>
         {
             RazeScript.Evaluate($"1.0 {op} nullVar", scope);
+        });
+
+        Assert.Throws<NullValueException>(() =>
+        {
+            RazeScript.Evaluate($"nullVar {op} 1.0", scope);
         });
     }
 }

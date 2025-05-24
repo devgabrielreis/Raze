@@ -103,5 +103,10 @@ public class RazeScriptStringTests
         {
             RazeScript.Evaluate($"\"a\" {op} nullVar", scope);
         });
+
+        Assert.Throws<NullValueException>(() =>
+        {
+            RazeScript.Evaluate($"nullVar {op} \"a\"", scope);
+        });
     }
 }
