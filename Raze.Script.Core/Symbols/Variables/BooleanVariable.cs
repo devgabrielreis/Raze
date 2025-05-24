@@ -5,6 +5,10 @@ namespace Raze.Script.Core.Symbols.Variables;
 
 public class BooleanVariable : VariableSymbol
 {
+    public override BooleanValue Value => _value;
+
+    private BooleanValue _value = new(null);
+
     public BooleanVariable(RuntimeValue value, bool isConstant)
         : base(value, isConstant)
     {
@@ -19,12 +23,12 @@ public class BooleanVariable : VariableSymbol
     {
         if (value is NullValue)
         {
-            Value = new BooleanValue(null);
+            _value = new BooleanValue(null);
             return;
         }
-        else if (value is BooleanValue)
+        else if (value is BooleanValue boolValue)
         {
-            Value = value;
+            _value = boolValue;
             return;
         }
 

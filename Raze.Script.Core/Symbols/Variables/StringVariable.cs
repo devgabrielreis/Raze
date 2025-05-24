@@ -5,6 +5,10 @@ namespace Raze.Script.Core.Symbols.Variables;
 
 public class StringVariable : VariableSymbol
 {
+    public override StringValue Value => _value;
+
+    private StringValue _value = new(null);
+
     public StringVariable(RuntimeValue value, bool isConstant)
         : base(value, isConstant)
     {
@@ -19,12 +23,12 @@ public class StringVariable : VariableSymbol
     {
         if (value is NullValue)
         {
-            Value = new StringValue(null);
+            _value = new StringValue(null);
             return;
         }
-        else if (value is StringValue)
+        else if (value is StringValue strValue)
         {
-            Value = value;
+            _value = strValue;
             return;
         }
 
