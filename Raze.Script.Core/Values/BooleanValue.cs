@@ -21,6 +21,33 @@ public class BooleanValue : RuntimeValue
 
     internal override RuntimeValue ExecuteBinaryOperation(OperatorToken op, RuntimeValue other, BinaryExpression source)
     {
+        if (other is BooleanValue boolValue)
+        {
+            return ExecuteBinaryOperationWithBoolean(op, boolValue, source);
+        }
+
+        throw new UnsupportedBinaryOperationException(
+            TypeName,
+            other.TypeName,
+            op.Lexeme,
+            source.StartLine,
+            source.StartColumn
+        );
+    }
+
+    private BooleanValue ExecuteBinaryOperationWithBoolean(OperatorToken op, BooleanValue other, BinaryExpression source)
+    {
+        if (BoolValue is null || other.BoolValue is null)
+        {
+            throw new NullValueException(source.StartLine, source.StartColumn);
+        }
+
+        switch (op)
+        {
+            case EqualOperator:
+                return new BooleanValue(BoolValue == other.BoolValue);
+        }
+
         throw new UnsupportedBinaryOperationException(
             TypeName,
             other.TypeName,
