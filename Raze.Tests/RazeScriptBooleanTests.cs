@@ -67,6 +67,7 @@ public class RazeScriptBooleanTests
     [InlineData("true / null")]
     [InlineData("false * null")]
     [InlineData("true % null")]
+    [InlineData("true == null")]
     [InlineData("false + \"a\"")]
     [InlineData("true - \"a\"")]
     [InlineData("false / \"a\"")]
