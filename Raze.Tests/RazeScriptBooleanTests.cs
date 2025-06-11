@@ -42,7 +42,7 @@ public class RazeScriptBooleanTests
     [InlineData("true == false", false)]
     [InlineData("false == true", false)]
     [InlineData("false == false", true)]
-    public void Evaluate_BooleanArithmeticExpression_ReturnsExpectedValue(string expression, bool expected)
+    public void Evaluate_BooleanComparisonExpression_ReturnsExpectedValue(string expression, bool expected)
     {
         var scope = new InterpreterScope();
         var result = RazeScript.Evaluate(expression, scope);
