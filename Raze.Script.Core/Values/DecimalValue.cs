@@ -57,7 +57,7 @@ public class DecimalValue : RuntimeValue
         return decimalStr;
     }
 
-    private DecimalValue ExecuteBinaryOperationWithDecimal(OperatorToken op, DecimalValue other, BinaryExpression source)
+    private RuntimeValue ExecuteBinaryOperationWithDecimal(OperatorToken op, DecimalValue other, BinaryExpression source)
     {
         if (DecValue is null || other.DecValue is null)
         {
@@ -80,6 +80,9 @@ public class DecimalValue : RuntimeValue
                 return new DecimalValue(DecValue / other.DecValue);
             case ModuloOperator:
                 return new DecimalValue(DecValue % other.DecValue);
+            case EqualOperator:
+                return new BooleanValue(DecValue == other.DecValue);
+
         }
 
         throw new UnsupportedBinaryOperationException(
@@ -91,7 +94,7 @@ public class DecimalValue : RuntimeValue
         );
     }
 
-    private DecimalValue ExecuteBinaryOperationWithInteger(OperatorToken op, IntegerValue other, BinaryExpression source)
+    private RuntimeValue ExecuteBinaryOperationWithInteger(OperatorToken op, IntegerValue other, BinaryExpression source)
     {
         if (DecValue is null || other.IntValue is null)
         {
@@ -114,6 +117,8 @@ public class DecimalValue : RuntimeValue
                 return new DecimalValue(DecValue / (decimal)other.IntValue);
             case ModuloOperator:
                 return new DecimalValue(DecValue % (decimal)other.IntValue);
+            case EqualOperator:
+                return new BooleanValue(DecValue == (decimal)other.IntValue);
         }
 
         throw new UnsupportedBinaryOperationException(
