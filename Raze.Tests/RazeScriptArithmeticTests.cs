@@ -20,6 +20,19 @@ public class RazeScriptArithmeticTests
     }
 
     [Theory]
+    [InlineData("18 == 3 * 6", true)]
+    [InlineData("18 * 3 == 54", true)]
+    [InlineData("(true == false) == true", false)]
+    public void Evaluate_ComparisonExpressions_RespectsPrecedence(string expression, bool expectedValue)
+    {
+        var result = RazeScript.Evaluate(expression);
+
+        Assert.IsType<BooleanValue>(result);
+
+        Assert.Equal(expectedValue, (result as BooleanValue)!.BoolValue);
+    }
+
+    [Theory]
     [InlineData("100 / 0")]
     [InlineData("100 / 0.0")]
     [InlineData("100.0 / 0")]
