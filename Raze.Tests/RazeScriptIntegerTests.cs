@@ -52,6 +52,20 @@ public class RazeScriptIntegerTests
     }
 
     [Theory]
+    [InlineData("10 == 10", true)]
+    [InlineData("10 == 10.0", true)]
+    [InlineData("10 == 11", false)]
+    [InlineData("10 == 10.1", false)]
+    public void Evaluate_IntegerComparisonExpression_ReturnsExpectedValue(string expression, bool expected)
+    {
+        var scope = new InterpreterScope();
+        var result = RazeScript.Evaluate(expression, scope);
+
+        Assert.IsType<BooleanValue>(result);
+        Assert.Equal(expected, (result as BooleanValue)!.BoolValue);
+    }
+
+    [Theory]
     [InlineData("10 + 10.0", "20.0")]
     [InlineData("10 - 15.0", "-5.0")]
     [InlineData("6 / 2.0", "3.0")]
@@ -74,16 +88,19 @@ public class RazeScriptIntegerTests
     [InlineData("10 / true")]
     [InlineData("10 * true")]
     [InlineData("10 % true")]
+    [InlineData("10 == true")]
     [InlineData("10 + null")]
     [InlineData("10 - null")]
     [InlineData("10 / null")]
     [InlineData("10 * null")]
     [InlineData("10 % null")]
+    [InlineData("10 == null")]
     [InlineData("10 + \"a\"")]
     [InlineData("10 - \"a\"")]
     [InlineData("10 / \"a\"")]
     [InlineData("10 * \"a\"")]
     [InlineData("10 % \"a\"")]
+    [InlineData("10 == \"a\"")]
     public void Evaluate_InvalidIntegerBinaryOperations_ThrowUnsupportedBinaryOperationException(string expression)
     {
         Assert.Throws<UnsupportedBinaryOperationException>(() =>
@@ -98,6 +115,7 @@ public class RazeScriptIntegerTests
     [InlineData("*")]
     [InlineData("/")]
     [InlineData("%")]
+    [InlineData("==")]
     public void Evaluate_IntegerOperationWithNullIntegerVariable_ThrowsNullValueException(string op)
     {
         var scope = new InterpreterScope();
@@ -120,6 +138,7 @@ public class RazeScriptIntegerTests
     [InlineData("*")]
     [InlineData("/")]
     [InlineData("%")]
+    [InlineData("==")]
     public void Evaluate_IntegerOperationWithNullDecimalVariable_ThrowsNullValueException(string op)
     {
         var scope = new InterpreterScope();
