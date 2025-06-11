@@ -137,14 +137,14 @@ internal class Parser
         }
 
         Advance();
-        Expression value = ParseAdditiveExpression();
+        Expression value = ParseEqualityExpression();
 
         return new VariableDeclarationStatement(identifier, type, value, isConstant, startLine, startColumn);
     }
 
     private Statement ParseAssignmentStatement()
     {
-        Expression left = ParseAdditiveExpression();
+        Expression left = ParseEqualityExpression();
 
         if (Peek() is not AssignmentOperator)
         {
@@ -152,9 +152,31 @@ internal class Parser
         }
 
         Advance(2);
-        Expression value = ParseAdditiveExpression();
+        Expression value = ParseEqualityExpression();
         
         return new AssignmentStatement(left, value, left.StartLine, left.StartColumn);
+    }
+
+    private Expression ParseEqualityExpression()
+    {
+        Expression? left = ParseAdditiveExpression();
+        Advance();
+
+        while (Current() is EqualOperator)
+        {
+            OperatorToken op = (Current() as OperatorToken)!;
+            Advance();
+
+            Expression right = ParseAdditiveExpression();
+            Advance();
+
+            left = new BinaryExpression(left!, op, right, left!.StartLine, left.StartColumn);
+        }
+
+        // coloca o indice de volta no lugar
+        Return();
+
+        return left;
     }
 
     private Expression ParseAdditiveExpression()
@@ -221,7 +243,7 @@ internal class Parser
                 return new NullLiteralExpression(Current().Line, Current().Column);
             case OpenParenthesis:
                 Advance();
-                Expression expr = ParseAdditiveExpression();
+                Expression expr = ParseEqualityExpression();
                 Advance();
                 Expect<CloseParenthesis>();
                 return expr;

@@ -33,6 +33,11 @@ internal class Lexer
         ["null"]    = (string lexeme, int line, int column) => new NullLiteral(lexeme, line, column)
     };
 
+    private static readonly Dictionary<string, Func<string, int, int, Token>> _doubleCharTokens = new()
+    {
+        ["=="] = (string lexeme, int line, int column) => new EqualOperator(lexeme, line, column)
+    };
+
     private static readonly Dictionary<char, Func<string, int, int, Token>> _singleCharTokens = new()
     {
         [';'] = (string lexeme, int line, int column) => new SemiColon(lexeme, line, column),
@@ -102,23 +107,38 @@ internal class Lexer
         return _sourceCode[target];
     }
 
-    private void Advance()
+    private void Advance(int howMuch = 1)
     {
-        if (Current() == '\n')
+        for (int i = 0; i < howMuch; i++)
         {
-            _currentLine++;
-            _currentColumn = 0;
-        }
-        else
-        {
-            _currentColumn++;
-        }
+            if (Current() == '\n')
+            {
+                _currentLine++;
+                _currentColumn = 0;
+            }
+            else
+            {
+                _currentColumn++;
+            }
 
-        _currentIndex++;
+            _currentIndex++;
+        }
     }
 
     private void ProcessCurrentToken()
     {
+        if (Peek() is char next)
+        {
+            string doubleToken = $"{Current()}{next}";
+
+            if (_doubleCharTokens.TryGetValue(doubleToken, out var doubleTokenFunc))
+            {
+                _tokens.Add(doubleTokenFunc(doubleToken, _currentLine, _currentColumn));
+                Advance(2);
+                return;
+            }
+        }
+
         if (_singleCharTokens.TryGetValue(Current(), out var tokenFunc))
         {
             _tokens.Add(tokenFunc(Current().ToString(), _currentLine, _currentColumn));
