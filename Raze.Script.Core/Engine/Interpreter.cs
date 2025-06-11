@@ -65,25 +65,25 @@ internal static class Interpreter
         {
             IntegerPrimitive => new IntegerVariable(
                 statement.Value is null ? new NullValue() : Evaluate(statement.Value, scope),
-                statement.IsContant,
+                statement.IsConstant,
                 statement.StartLine,
                 statement.StartColumn
             ),
             DecimalPrimitive => new DecimalVariable(
                 statement.Value is null ? new NullValue() : Evaluate(statement.Value, scope),
-                statement.IsContant,
+                statement.IsConstant,
                 statement.StartLine,
                 statement.StartColumn
             ),
             BooleanPrimitive => new BooleanVariable(
                 statement.Value is null ? new NullValue() : Evaluate(statement.Value, scope),
-                statement.IsContant,
+                statement.IsConstant,
                 statement.StartLine,
                 statement.StartColumn
             ),
             StringPrimitive => new StringVariable(
                 statement.Value is null ? new NullValue() : Evaluate(statement.Value, scope),
-                statement.IsContant,
+                statement.IsConstant,
                 statement.StartLine,
                 statement.StartColumn
             ),
