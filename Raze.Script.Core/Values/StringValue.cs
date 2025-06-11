@@ -45,7 +45,7 @@ public class StringValue : RuntimeValue
         return '"' + _value + '"';
     }
 
-    private StringValue ExecuteBinaryOperationWithString(OperatorToken op, StringValue other, BinaryExpression source)
+    private RuntimeValue ExecuteBinaryOperationWithString(OperatorToken op, StringValue other, BinaryExpression source)
     {
         if (StrValue is null || other.StrValue is null)
         {
@@ -56,6 +56,8 @@ public class StringValue : RuntimeValue
         {
             case AdditionOperator:
                 return new StringValue(StrValue + other.StrValue);
+            case EqualOperator:
+                return new BooleanValue(StrValue == other.StrValue);
         }
 
         throw new UnsupportedBinaryOperationException(
