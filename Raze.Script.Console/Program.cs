@@ -43,7 +43,7 @@ internal class Program
             {
                 var result = RazeScript.Evaluate(command, scope);
 
-                if (result is not UndefinedValue)
+                if (result is not VoidValue)
                 {
                     Console.WriteLine(result);
                 }

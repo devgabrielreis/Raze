@@ -49,7 +49,7 @@ internal static class Interpreter
 
     private static RuntimeValue EvaluateProgramExpression(ProgramExpression program, Scope scope)
     {
-        RuntimeValue lastValue = new UndefinedValue();
+        RuntimeValue lastValue = new VoidValue();
 
         foreach (var statement in program.Body)
         {
@@ -59,7 +59,7 @@ internal static class Interpreter
         return lastValue;
     }
 
-    private static UndefinedValue EvaluateVariableDeclarationStatement(VariableDeclarationStatement statement, Scope scope)
+    private static VoidValue EvaluateVariableDeclarationStatement(VariableDeclarationStatement statement, Scope scope)
     {
         VariableSymbol variable = statement.Type switch
         {
@@ -91,10 +91,10 @@ internal static class Interpreter
         };
 
         scope.DeclareVariable(statement.Identifier, variable, statement);
-        return new UndefinedValue();
+        return new VoidValue();
     }
 
-    private static UndefinedValue EvaluateAssignmentStatement(AssignmentStatement statement, Scope scope)
+    private static VoidValue EvaluateAssignmentStatement(AssignmentStatement statement, Scope scope)
     {
         switch (statement.Target)
         {
@@ -105,7 +105,7 @@ internal static class Interpreter
                 throw new InvalidAssignmentException(statement.StartLine, statement.StartColumn);
         }
 
-        return new UndefinedValue();
+        return new VoidValue();
     }
 
     private static RuntimeValue EvaluateBinaryExpression(BinaryExpression expression, Scope scope)

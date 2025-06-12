@@ -4,7 +4,7 @@ using Raze.Script.Core.Tokens.Operators;
 
 namespace Raze.Script.Core.Values;
 
-public class UndefinedValue : RuntimeValue
+public class VoidValue : RuntimeValue
 {
     public override object? Value => new object();
 
