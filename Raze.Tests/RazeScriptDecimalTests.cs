@@ -63,6 +63,10 @@ public class RazeScriptDecimalTests
     [InlineData("10.0 == 10", true)]
     [InlineData("10.0 == 10.1", false)]
     [InlineData("10.0 == 11", false)]
+    [InlineData("10.0 != 10.0", false)]
+    [InlineData("10.0 != 10", false)]
+    [InlineData("10.0 != 10.1", true)]
+    [InlineData("10.0 != 11", true)]
     public void Evaluate_DecimalComparisonExpression_ReturnsExpectedValue(string expression, bool expected)
     {
         var scope = new InterpreterScope();
@@ -79,18 +83,21 @@ public class RazeScriptDecimalTests
     [InlineData("10.0 * true")]
     [InlineData("10.0 % true")]
     [InlineData("10.0 == true")]
+    [InlineData("10.0 != true")]
     [InlineData("10.0 + null")]
     [InlineData("10.0 - null")]
     [InlineData("10.0 / null")]
     [InlineData("10.0 * null")]
     [InlineData("10.0 % null")]
     [InlineData("10.0 == null")]
+    [InlineData("10.0 != null")]
     [InlineData("10.0 + \"a\"")]
     [InlineData("10.0 - \"a\"")]
     [InlineData("10.0 / \"a\"")]
     [InlineData("10.0 * \"a\"")]
     [InlineData("10.0 % \"a\"")]
     [InlineData("10.0 == \"a\"")]
+    [InlineData("10.0 != \"a\"")]
     public void Evaluate_InvalidDecimalBinaryOperations_ThrowUnsupportedBinaryOperationException(string expression)
     {
         Assert.Throws<UnsupportedBinaryOperationException>(() =>
@@ -106,6 +113,7 @@ public class RazeScriptDecimalTests
     [InlineData("/")]
     [InlineData("%")]
     [InlineData("==")]
+    [InlineData("!=")]
     public void Evaluate_DecimalOperationWithNullDecimalVariable_ThrowsNullValueException(string op)
     {
         var scope = new InterpreterScope();
@@ -129,6 +137,7 @@ public class RazeScriptDecimalTests
     [InlineData("/")]
     [InlineData("%")]
     [InlineData("==")]
+    [InlineData("!=")]
     public void Evaluate_DecimalOperationWithNullIntegerVariable_ThrowsNullValueException(string op)
     {
         var scope = new InterpreterScope();
