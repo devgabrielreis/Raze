@@ -21,13 +21,13 @@ internal static class Interpreter
                 return EvaluateProgramExpression(program, scope);
 
             case IntegerLiteralExpression expr:
-                return new IntegerValue((Int128)expr.Value);
+                return new IntegerValue(expr.IntValue);
             case DecimalLiteralExpression expr:
-                return new DecimalValue((decimal)expr.Value);
+                return new DecimalValue(expr.DecValue);
             case BooleanLiteralExpression expr:
-                return new BooleanValue((bool)expr.Value);
+                return new BooleanValue(expr.BoolValue);
             case StringLiteralExpression expr:
-                return new StringValue((string)expr.Value);
+                return new StringValue(expr.StrValue);
             case NullLiteralExpression:
                 return new NullValue();
 
