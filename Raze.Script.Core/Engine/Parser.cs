@@ -162,7 +162,7 @@ internal class Parser
         Expression? left = ParseAdditiveExpression();
         Advance();
 
-        while (Current() is EqualOperator)
+        while (Current() is EqualOperator || Current() is NotEqualOperator)
         {
             OperatorToken op = (Current() as OperatorToken)!;
             Advance();

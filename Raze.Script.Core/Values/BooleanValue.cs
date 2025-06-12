@@ -46,6 +46,8 @@ public class BooleanValue : RuntimeValue
         {
             case EqualOperator:
                 return new BooleanValue(BoolValue == other.BoolValue);
+            case NotEqualOperator:
+                return new BooleanValue(BoolValue != other.BoolValue);
         }
 
         throw new UnsupportedBinaryOperationException(

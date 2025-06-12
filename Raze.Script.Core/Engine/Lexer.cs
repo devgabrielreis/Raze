@@ -35,7 +35,8 @@ internal class Lexer
 
     private static readonly Dictionary<string, Func<string, int, int, Token>> _doubleCharTokens = new()
     {
-        ["=="] = (string lexeme, int line, int column) => new EqualOperator(lexeme, line, column)
+        ["=="] = (string lexeme, int line, int column) => new EqualOperator(lexeme, line, column),
+        ["!="] = (string lexeme, int line, int column) => new NotEqualOperator(lexeme, line, column)
     };
 
     private static readonly Dictionary<char, Func<string, int, int, Token>> _singleCharTokens = new()
