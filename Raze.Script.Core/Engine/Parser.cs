@@ -232,7 +232,7 @@ internal class Parser
             case Identifier:
                 return new IdentifierExpression(Current().Lexeme, Current().Line, Current().Column);
             case IntegerLiteral:
-                return new IntegerLiteralExpression(int.Parse(Current().Lexeme), Current().Line, Current().Column);
+                return new IntegerLiteralExpression(Int128.Parse(Current().Lexeme), Current().Line, Current().Column);
             case DecimalLiteral:
                 return new DecimalLiteralExpression(decimal.Parse(Current().Lexeme, CultureInfo.InvariantCulture), Current().Line, Current().Column);
             case BooleanLiteral:

@@ -21,7 +21,7 @@ internal static class Interpreter
                 return EvaluateProgramExpression(program, scope);
 
             case IntegerLiteralExpression expr:
-                return new IntegerValue((int)expr.Value);
+                return new IntegerValue((Int128)expr.Value);
             case DecimalLiteralExpression expr:
                 return new DecimalValue((decimal)expr.Value);
             case BooleanLiteralExpression expr:

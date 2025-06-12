@@ -8,13 +8,13 @@ public class IntegerValue : RuntimeValue
 {
     public override object? Value => _value;
 
-    public int? IntValue => _value;
+    public Int128? IntValue => _value;
 
     public override string TypeName => "Integer";
 
-    private readonly int? _value;
+    private readonly Int128? _value;
 
-    public IntegerValue(int? value)
+    public IntegerValue(Int128? value)
     {
         _value = value;
     }
