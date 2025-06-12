@@ -58,6 +58,8 @@ public class StringValue : RuntimeValue
                 return new StringValue(StrValue + other.StrValue);
             case EqualOperator:
                 return new BooleanValue(StrValue == other.StrValue);
+            case NotEqualOperator:
+                return new BooleanValue(StrValue != other.StrValue);
         }
 
         throw new UnsupportedBinaryOperationException(

@@ -50,6 +50,10 @@ public class RazeScriptStringTests
     [InlineData("\"aaa\" == \"bbb\"", false)]
     [InlineData("\"aaa\" == \"AAA\"", false)]
     [InlineData("\"\" == \"\"", true)]
+    [InlineData("\"aaa\" != \"aaa\"", false)]
+    [InlineData("\"aaa\" != \"bbb\"", true)]
+    [InlineData("\"aaa\" != \"AAA\"", true)]
+    [InlineData("\"\" != \"\"", false)]
     public void Evaluate_StringComparisonExpression_ReturnsExpectedValue(string expression, bool expected)
     {
         var scope = new InterpreterScope();
@@ -66,24 +70,28 @@ public class RazeScriptStringTests
     [InlineData("\"a\" * 10")]
     [InlineData("\"a\" % 10")]
     [InlineData("\"a\" == 10")]
+    [InlineData("\"a\" != 10")]
     [InlineData("\"a\" + 10.0")]
     [InlineData("\"a\" - 10.0")]
     [InlineData("\"a\" / 10.0")]
     [InlineData("\"a\" * 10.0")]
     [InlineData("\"a\" % 10.0")]
     [InlineData("\"a\" == 10.0")]
+    [InlineData("\"a\" != 10.0")]
     [InlineData("\"a\" + true")]
     [InlineData("\"a\" - true")]
     [InlineData("\"a\" / true")]
     [InlineData("\"a\" * true")]
     [InlineData("\"a\" % true")]
     [InlineData("\"a\" == true")]
+    [InlineData("\"a\" != true")]
     [InlineData("\"a\" + null")]
     [InlineData("\"a\" - null")]
     [InlineData("\"a\" / null")]
     [InlineData("\"a\" * null")]
     [InlineData("\"a\" % null")]
     [InlineData("\"a\" == null")]
+    [InlineData("\"a\" != null")]
     [InlineData("\"a\" - \"a\"")]
     [InlineData("\"a\" / \"a\"")]
     [InlineData("\"a\" * \"a\"")]
@@ -113,6 +121,7 @@ public class RazeScriptStringTests
     [Theory]
     [InlineData("+")]
     [InlineData("==")]
+    [InlineData("!=")]
     public void Evaluate_StringOperationWithNullStringVariable_ThrowsNullValueException(string op)
     {
         var scope = new InterpreterScope();
