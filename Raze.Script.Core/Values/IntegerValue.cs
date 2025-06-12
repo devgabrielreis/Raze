@@ -74,6 +74,8 @@ public class IntegerValue : RuntimeValue
                 return new IntegerValue(IntValue % other.IntValue);
             case EqualOperator:
                 return new BooleanValue(IntValue == other.IntValue);
+            case NotEqualOperator:
+                return new BooleanValue(IntValue != other.IntValue);
         }
 
         throw new UnsupportedBinaryOperationException(
@@ -110,6 +112,8 @@ public class IntegerValue : RuntimeValue
                 return new DecimalValue((decimal)IntValue % other.DecValue);
             case EqualOperator:
                 return new BooleanValue((decimal)IntValue == other.DecValue);
+            case NotEqualOperator:
+                return new BooleanValue((decimal)IntValue != other.DecValue);
         }
 
         throw new UnsupportedBinaryOperationException(
