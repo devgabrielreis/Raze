@@ -159,10 +159,32 @@ internal class Parser
 
     private Expression ParseEqualityExpression()
     {
-        Expression? left = ParseAdditiveExpression();
+        Expression? left = ParseRelationalExpression();
         Advance();
 
         while (Current() is EqualOperator || Current() is NotEqualOperator)
+        {
+            OperatorToken op = (Current() as OperatorToken)!;
+            Advance();
+
+            Expression right = ParseRelationalExpression();
+            Advance();
+
+            left = new BinaryExpression(left!, op, right, left!.StartLine, left.StartColumn);
+        }
+
+        // coloca o indice de volta no lugar
+        Return();
+
+        return left;
+    }
+
+    private Expression ParseRelationalExpression()
+    {
+        Expression? left = ParseAdditiveExpression();
+        Advance();
+
+        while (Current() is GreaterThanOperator)
         {
             OperatorToken op = (Current() as OperatorToken)!;
             Advance();
