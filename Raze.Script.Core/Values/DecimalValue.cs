@@ -1,6 +1,10 @@
 ﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Tokens.Operators;
+using Raze.Script.Core.Tokens.Operators.AdditiveOperators;
+using Raze.Script.Core.Tokens.Operators.EqualityOperators;
+using Raze.Script.Core.Tokens.Operators.MultiplicativeOperators;
+using Raze.Script.Core.Tokens.Operators.RelationalOperators;
 using System.Globalization;
 
 namespace Raze.Script.Core.Values;

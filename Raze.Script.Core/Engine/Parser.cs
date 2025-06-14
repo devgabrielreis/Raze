@@ -7,6 +7,10 @@ using Raze.Script.Core.Tokens.Delimiters;
 using Raze.Script.Core.Tokens.Grouping;
 using Raze.Script.Core.Tokens.Literals;
 using Raze.Script.Core.Tokens.Operators;
+using Raze.Script.Core.Tokens.Operators.AdditiveOperators;
+using Raze.Script.Core.Tokens.Operators.EqualityOperators;
+using Raze.Script.Core.Tokens.Operators.MultiplicativeOperators;
+using Raze.Script.Core.Tokens.Operators.RelationalOperators;
 using Raze.Script.Core.Tokens.Primitives;
 using Raze.Script.Core.Tokens.VariableDeclaration;
 using System.Globalization;
@@ -159,94 +163,22 @@ internal class Parser
 
     private Expression ParseEqualityExpression()
     {
-        Expression? left = ParseRelationalExpression();
-        Advance();
-
-        while (Current() is EqualOperator || Current() is NotEqualOperator)
-        {
-            OperatorToken op = (Current() as OperatorToken)!;
-            Advance();
-
-            Expression right = ParseRelationalExpression();
-            Advance();
-
-            left = new BinaryExpression(left!, op, right, left!.StartLine, left.StartColumn);
-        }
-
-        // coloca o indice de volta no lugar
-        Return();
-
-        return left;
+        return ParseBinaryExpression<EqualityOperator>(ParseRelationalExpression);
     }
 
     private Expression ParseRelationalExpression()
     {
-        Expression? left = ParseAdditiveExpression();
-        Advance();
-
-        while (Current() is GreaterThanOperator
-            || Current() is LessThanOperator
-            || Current() is GreaterOrEqualThanOperator)
-        {
-            OperatorToken op = (Current() as OperatorToken)!;
-            Advance();
-
-            Expression right = ParseAdditiveExpression();
-            Advance();
-
-            left = new BinaryExpression(left!, op, right, left!.StartLine, left.StartColumn);
-        }
-
-        // coloca o indice de volta no lugar
-        Return();
-
-        return left;
+        return ParseBinaryExpression<RelationalOperator>(ParseAdditiveExpression);
     }
 
     private Expression ParseAdditiveExpression()
     {
-        Expression? left = ParseMultiplicativeExpression();
-        Advance();
-
-        while (Current() is AdditionOperator || Current() is SubtractionOperator)
-        {
-            OperatorToken op = (Current() as OperatorToken)!;
-            Advance();
-
-            Expression right = ParseMultiplicativeExpression();
-            Advance();
-
-            left = new BinaryExpression(left!, op, right, left!.StartLine, left.StartColumn);
-        }
-
-        // coloca o indice de volta no lugar
-        Return();
-
-        return left;
+        return ParseBinaryExpression<AdditiveOperator>(ParseMultiplicativeExpression);
     }
 
     private Expression ParseMultiplicativeExpression()
     {
-        Expression? left = ParsePrimaryExpression();
-        Advance();
-
-        while (Current() is MultiplicationOperator
-            || Current() is DivisionOperator
-            || Current() is ModuloOperator)
-        {
-            OperatorToken op = (Current() as OperatorToken)!;
-            Advance();
-
-            Expression right = ParsePrimaryExpression();
-            Advance();
-
-            left = new BinaryExpression(left!, op, right, left!.StartLine, left.StartColumn);
-        }
-
-        // coloca o indice de volta no lugar
-        Return();
-
-        return left;
+        return ParseBinaryExpression<MultiplicativeOperator>(ParsePrimaryExpression);
     }
 
     private Expression ParsePrimaryExpression()
@@ -276,5 +208,27 @@ internal class Parser
                     Current().GetType().Name, Current().Lexeme, Current().Line, Current().Column
                 );
         }
+    }
+
+    private Expression ParseBinaryExpression<TOperator>(Func<Expression> next) where TOperator : OperatorToken
+    {
+        Expression? left = next();
+        Advance();
+
+        while (Current() is TOperator)
+        {
+            OperatorToken op = (Current() as OperatorToken)!;
+            Advance();
+
+            Expression right = next();
+            Advance();
+
+            left = new BinaryExpression(left!, op, right, left!.StartLine, left.StartColumn);
+        }
+
+        // coloca o indice de volta no lugar
+        Return();
+
+        return left;
     }
 }
