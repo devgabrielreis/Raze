@@ -24,6 +24,7 @@ public class RazeScriptArithmeticTests
     [InlineData("18 * 3 == 54", true)]
     [InlineData("(true == false) == true", false)]
     [InlineData("10 > 9 == 9 > 10", false)]
+    [InlineData("10 > 9 == 9 < 10", true)]
     public void Evaluate_ComparisonExpressions_RespectsPrecedence(string expression, bool expectedValue)
     {
         var result = RazeScript.Evaluate(expression);
