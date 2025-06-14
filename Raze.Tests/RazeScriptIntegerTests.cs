@@ -72,6 +72,12 @@ public class RazeScriptIntegerTests
     [InlineData("10 < 9.9", false)]
     [InlineData("10 < 10.0", false)]
     [InlineData("10 < 10.1", true)]
+    [InlineData("10 >= 9", true)]
+    [InlineData("10 >= 10", true)]
+    [InlineData("10 >= 11", false)]
+    [InlineData("10 >= 9.9", true)]
+    [InlineData("10 >= 10.0", true)]
+    [InlineData("10 >= 10.1", false)]
     public void Evaluate_IntegerComparisonExpression_ReturnsExpectedValue(string expression, bool expected)
     {
         var scope = new InterpreterScope();
@@ -108,6 +114,7 @@ public class RazeScriptIntegerTests
     [InlineData("10 != true")]
     [InlineData("10 > true")]
     [InlineData("10 < true")]
+    [InlineData("10 >= true")]
     [InlineData("10 + null")]
     [InlineData("10 - null")]
     [InlineData("10 / null")]
@@ -117,6 +124,7 @@ public class RazeScriptIntegerTests
     [InlineData("10 != null")]
     [InlineData("10 > null")]
     [InlineData("10 < null")]
+    [InlineData("10 >= null")]
     [InlineData("10 + \"a\"")]
     [InlineData("10 - \"a\"")]
     [InlineData("10 / \"a\"")]
@@ -126,6 +134,7 @@ public class RazeScriptIntegerTests
     [InlineData("10 != \"a\"")]
     [InlineData("10 > \"a\"")]
     [InlineData("10 < \"a\"")]
+    [InlineData("10 >= \"a\"")]
     public void Evaluate_InvalidIntegerBinaryOperations_ThrowUnsupportedBinaryOperationException(string expression)
     {
         Assert.Throws<UnsupportedBinaryOperationException>(() =>
@@ -144,6 +153,7 @@ public class RazeScriptIntegerTests
     [InlineData("!=")]
     [InlineData(">")]
     [InlineData("<")]
+    [InlineData(">=")]
     public void Evaluate_IntegerOperationWithNullIntegerVariable_ThrowsNullValueException(string op)
     {
         var scope = new InterpreterScope();
@@ -170,6 +180,7 @@ public class RazeScriptIntegerTests
     [InlineData("!=")]
     [InlineData(">")]
     [InlineData("<")]
+    [InlineData(">=")]
     public void Evaluate_IntegerOperationWithNullDecimalVariable_ThrowsNullValueException(string op)
     {
         var scope = new InterpreterScope();

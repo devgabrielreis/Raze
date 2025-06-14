@@ -184,7 +184,9 @@ internal class Parser
         Expression? left = ParseAdditiveExpression();
         Advance();
 
-        while (Current() is GreaterThanOperator || Current() is LessThanOperator)
+        while (Current() is GreaterThanOperator
+            || Current() is LessThanOperator
+            || Current() is GreaterOrEqualThanOperator)
         {
             OperatorToken op = (Current() as OperatorToken)!;
             Advance();

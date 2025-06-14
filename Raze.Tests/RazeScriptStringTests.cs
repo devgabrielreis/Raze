@@ -73,6 +73,7 @@ public class RazeScriptStringTests
     [InlineData("\"a\" != 10")]
     [InlineData("\"a\" > 10")]
     [InlineData("\"a\" < 10")]
+    [InlineData("\"a\" >= 10")]
     [InlineData("\"a\" + 10.0")]
     [InlineData("\"a\" - 10.0")]
     [InlineData("\"a\" / 10.0")]
@@ -82,6 +83,7 @@ public class RazeScriptStringTests
     [InlineData("\"a\" != 10.0")]
     [InlineData("\"a\" > 10.0")]
     [InlineData("\"a\" < 10.0")]
+    [InlineData("\"a\" >= 10.0")]
     [InlineData("\"a\" + true")]
     [InlineData("\"a\" - true")]
     [InlineData("\"a\" / true")]
@@ -91,6 +93,7 @@ public class RazeScriptStringTests
     [InlineData("\"a\" != true")]
     [InlineData("\"a\" > true")]
     [InlineData("\"a\" < true")]
+    [InlineData("\"a\" >= true")]
     [InlineData("\"a\" + null")]
     [InlineData("\"a\" - null")]
     [InlineData("\"a\" / null")]
@@ -100,12 +103,14 @@ public class RazeScriptStringTests
     [InlineData("\"a\" != null")]
     [InlineData("\"a\" > null")]
     [InlineData("\"a\" < null")]
+    [InlineData("\"a\" >= null")]
     [InlineData("\"a\" - \"a\"")]
     [InlineData("\"a\" / \"a\"")]
     [InlineData("\"a\" * \"a\"")]
     [InlineData("\"a\" % \"a\"")]
     [InlineData("\"a\" > \"a\"")]
     [InlineData("\"a\" < \"a\"")]
+    [InlineData("\"a\" >= \"a\"")]
     public void Evaluate_InvalidStringBinaryOperations_ThrowUnsupportedBinaryOperationException(string expression)
     {
         Assert.Throws<UnsupportedBinaryOperationException>(() =>
