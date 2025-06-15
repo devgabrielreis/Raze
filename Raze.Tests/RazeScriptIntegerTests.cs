@@ -111,6 +111,8 @@ public class RazeScriptIntegerTests
     }
 
     [Theory]
+    [InlineData("10 && 10.0")]
+    [InlineData("10 && 10")]
     [InlineData("10 + true")]
     [InlineData("10 - true")]
     [InlineData("10 / true")]
@@ -122,6 +124,7 @@ public class RazeScriptIntegerTests
     [InlineData("10 < true")]
     [InlineData("10 >= true")]
     [InlineData("10 <= true")]
+    [InlineData("10 && true")]
     [InlineData("10 + null")]
     [InlineData("10 - null")]
     [InlineData("10 / null")]
@@ -133,6 +136,7 @@ public class RazeScriptIntegerTests
     [InlineData("10 < null")]
     [InlineData("10 >= null")]
     [InlineData("10 <= null")]
+    [InlineData("10 && null")]
     [InlineData("10 + \"a\"")]
     [InlineData("10 - \"a\"")]
     [InlineData("10 / \"a\"")]
@@ -144,6 +148,7 @@ public class RazeScriptIntegerTests
     [InlineData("10 < \"a\"")]
     [InlineData("10 >= \"a\"")]
     [InlineData("10 <= \"a\"")]
+    [InlineData("10 && \"a\"")]
     public void Evaluate_InvalidIntegerBinaryOperations_ThrowUnsupportedBinaryOperationException(string expression)
     {
         Assert.Throws<UnsupportedBinaryOperationException>(() =>

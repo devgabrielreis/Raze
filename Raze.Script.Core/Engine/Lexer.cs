@@ -42,7 +42,8 @@ internal class Lexer
         ["=="] = (string lexeme, int line, int column) => new EqualOperator(lexeme, line, column),
         ["!="] = (string lexeme, int line, int column) => new NotEqualOperator(lexeme, line, column),
         [">="] = (string lexeme, int line, int column) => new GreaterOrEqualThanOperator(lexeme, line, column),
-        ["<="] = (string lexeme, int line, int column) => new LessOrEqualThanOperator(lexeme, line, column)
+        ["<="] = (string lexeme, int line, int column) => new LessOrEqualThanOperator(lexeme, line, column),
+        ["&&"] = (string lexeme, int line, int column) => new AndOperator(lexeme, line, column)
     };
 
     private static readonly Dictionary<char, Func<string, int, int, Token>> _singleCharTokens = new()

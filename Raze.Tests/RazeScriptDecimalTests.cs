@@ -101,6 +101,8 @@ public class RazeScriptDecimalTests
     }
 
     [Theory]
+    [InlineData("10.0 && 10.0")]
+    [InlineData("10.0 && 10")]
     [InlineData("10.0 + true")]
     [InlineData("10.0 - true")]
     [InlineData("10.0 / true")]
@@ -112,6 +114,7 @@ public class RazeScriptDecimalTests
     [InlineData("10.0 < true")]
     [InlineData("10.0 >= true")]
     [InlineData("10.0 <= true")]
+    [InlineData("10.0 && true")]
     [InlineData("10.0 + null")]
     [InlineData("10.0 - null")]
     [InlineData("10.0 / null")]
@@ -123,6 +126,7 @@ public class RazeScriptDecimalTests
     [InlineData("10.0 < null")]
     [InlineData("10.0 >= null")]
     [InlineData("10.0 <= null")]
+    [InlineData("10.0 && null")]
     [InlineData("10.0 + \"a\"")]
     [InlineData("10.0 - \"a\"")]
     [InlineData("10.0 / \"a\"")]
@@ -134,6 +138,7 @@ public class RazeScriptDecimalTests
     [InlineData("10.0 < \"a\"")]
     [InlineData("10.0 >= \"a\"")]
     [InlineData("10.0 <= \"a\"")]
+    [InlineData("10.0 && \"a\"")]
     public void Evaluate_InvalidDecimalBinaryOperations_ThrowUnsupportedBinaryOperationException(string expression)
     {
         Assert.Throws<UnsupportedBinaryOperationException>(() =>
