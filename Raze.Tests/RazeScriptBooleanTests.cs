@@ -49,6 +49,10 @@ public class RazeScriptBooleanTests
     [InlineData("true && false", false)]
     [InlineData("false && true", false)]
     [InlineData("false && false", false)]
+    [InlineData("true || true", true)]
+    [InlineData("true || false", true)]
+    [InlineData("false || true", true)]
+    [InlineData("false || false", false)]
     public void Evaluate_BooleanComparisonExpression_ReturnsExpectedValue(string expression, bool expected)
     {
         var scope = new InterpreterScope();
@@ -71,6 +75,7 @@ public class RazeScriptBooleanTests
     [InlineData("true >= 10")]
     [InlineData("true <= 10")]
     [InlineData("true && 10")]
+    [InlineData("true || 10")]
     [InlineData("false + 10.0")]
     [InlineData("true - 10.0")]
     [InlineData("false / 10.0")]
@@ -83,6 +88,7 @@ public class RazeScriptBooleanTests
     [InlineData("false >= 10.0")]
     [InlineData("false <= 10.0")]
     [InlineData("false && 10.0")]
+    [InlineData("false || 10.0")]
     [InlineData("true + null")]
     [InlineData("false - null")]
     [InlineData("true / null")]
@@ -95,6 +101,7 @@ public class RazeScriptBooleanTests
     [InlineData("true >= null")]
     [InlineData("true <= null")]
     [InlineData("true && null")]
+    [InlineData("true || null")]
     [InlineData("false + \"a\"")]
     [InlineData("true - \"a\"")]
     [InlineData("false / \"a\"")]
@@ -107,6 +114,7 @@ public class RazeScriptBooleanTests
     [InlineData("false >= \"a\"")]
     [InlineData("false <= \"a\"")]
     [InlineData("false && \"a\"")]
+    [InlineData("false || \"a\"")]
     [InlineData("true + true")]
     [InlineData("false - false")]
     [InlineData("true / true")]
@@ -128,6 +136,7 @@ public class RazeScriptBooleanTests
     [InlineData("==")]
     [InlineData("!=")]
     [InlineData("&&")]
+    [InlineData("||")]
     public void Evaluate_BooleanOperationWithNullBooleanVariable_ThrowsNullValueException(string op)
     {
         var scope = new InterpreterScope();

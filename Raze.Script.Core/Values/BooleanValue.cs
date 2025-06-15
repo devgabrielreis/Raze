@@ -51,6 +51,8 @@ public class BooleanValue : RuntimeValue
                 return new BooleanValue(BoolValue != other.BoolValue);
             case AndOperator:
                 return new BooleanValue(BoolValue.Value && other.BoolValue.Value);
+            case OrOperator:
+                return new BooleanValue(BoolValue.Value || other.BoolValue.Value);
         }
 
         throw new UnsupportedBinaryOperationException(

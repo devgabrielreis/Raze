@@ -141,14 +141,14 @@ internal class Parser
         }
 
         Advance();
-        Expression value = ParseAndExpression();
+        Expression value = ParseOrExpression();
 
         return new VariableDeclarationStatement(identifier, type, value, isConstant, startLine, startColumn);
     }
 
     private Statement ParseAssignmentStatement()
     {
-        Expression left = ParseAndExpression();
+        Expression left = ParseOrExpression();
 
         if (Peek() is not AssignmentOperator)
         {
@@ -156,9 +156,14 @@ internal class Parser
         }
 
         Advance(2);
-        Expression value = ParseAndExpression();
+        Expression value = ParseOrExpression();
         
         return new AssignmentStatement(left, value, left.StartLine, left.StartColumn);
+    }
+
+    private Expression ParseOrExpression()
+    {
+        return ParseBinaryExpression<OrOperator>(ParseAndExpression);
     }
 
     private Expression ParseAndExpression()
@@ -204,7 +209,7 @@ internal class Parser
                 return new NullLiteralExpression(Current().Line, Current().Column);
             case OpenParenthesis:
                 Advance();
-                Expression expr = ParseAndExpression();
+                Expression expr = ParseOrExpression();
                 Advance();
                 Expect<CloseParenthesis>();
                 return expr;
