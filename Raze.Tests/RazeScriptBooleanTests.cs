@@ -66,6 +66,7 @@ public class RazeScriptBooleanTests
     [InlineData("true > 10")]
     [InlineData("true < 10")]
     [InlineData("true >= 10")]
+    [InlineData("true <= 10")]
     [InlineData("false + 10.0")]
     [InlineData("true - 10.0")]
     [InlineData("false / 10.0")]
@@ -76,6 +77,7 @@ public class RazeScriptBooleanTests
     [InlineData("false > 10.0")]
     [InlineData("false < 10.0")]
     [InlineData("false >= 10.0")]
+    [InlineData("false <= 10.0")]
     [InlineData("true + null")]
     [InlineData("false - null")]
     [InlineData("true / null")]
@@ -86,6 +88,7 @@ public class RazeScriptBooleanTests
     [InlineData("true > null")]
     [InlineData("true < null")]
     [InlineData("true >= null")]
+    [InlineData("true <= null")]
     [InlineData("false + \"a\"")]
     [InlineData("true - \"a\"")]
     [InlineData("false / \"a\"")]
@@ -96,6 +99,7 @@ public class RazeScriptBooleanTests
     [InlineData("false > \"a\"")]
     [InlineData("false < \"a\"")]
     [InlineData("false >= \"a\"")]
+    [InlineData("false <= \"a\"")]
     [InlineData("true + true")]
     [InlineData("false - false")]
     [InlineData("true / true")]
@@ -104,6 +108,7 @@ public class RazeScriptBooleanTests
     [InlineData("true > true")]
     [InlineData("true < true")]
     [InlineData("true >= true")]
+    [InlineData("true <= true")]
     public void Evaluate_InvalidBooleanBinaryOperations_ThrowUnsupportedBinaryOperationException(string expression)
     {
         Assert.Throws<UnsupportedBinaryOperationException>(() =>

@@ -16,6 +16,7 @@ public class RazeScriptNullTests
     [InlineData("null > 10")]
     [InlineData("null < 10")]
     [InlineData("null >= 10")]
+    [InlineData("null <= 10")]
     [InlineData("null + 10.0")]
     [InlineData("null - 10.0")]
     [InlineData("null / 10.0")]
@@ -26,6 +27,7 @@ public class RazeScriptNullTests
     [InlineData("null > 10.0")]
     [InlineData("null < 10.0")]
     [InlineData("null >= 10.0")]
+    [InlineData("null <= 10.0")]
     [InlineData("null + true")]
     [InlineData("null - true")]
     [InlineData("null / true")]
@@ -36,6 +38,7 @@ public class RazeScriptNullTests
     [InlineData("null > true")]
     [InlineData("null < true")]
     [InlineData("null >= true")]
+    [InlineData("null <= true")]
     [InlineData("null + null")]
     [InlineData("null - null")]
     [InlineData("null / null")]
@@ -46,6 +49,7 @@ public class RazeScriptNullTests
     [InlineData("null > null")]
     [InlineData("null < null")]
     [InlineData("null >= null")]
+    [InlineData("null <= null")]
     [InlineData("null + \"a\"")]
     [InlineData("null - \"a\"")]
     [InlineData("null / \"a\"")]
@@ -56,6 +60,7 @@ public class RazeScriptNullTests
     [InlineData("null > \"a\"")]
     [InlineData("null < \"a\"")]
     [InlineData("null >= \"a\"")]
+    [InlineData("null <= \"a\"")]
     public void Evaluate_NullBinaryOperations_ThrowUnsupportedBinaryOperationException(string expression)
     {
         Assert.Throws<UnsupportedBinaryOperationException>(() =>

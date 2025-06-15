@@ -86,6 +86,8 @@ public class IntegerValue : RuntimeValue
                 return new BooleanValue(IntValue < other.IntValue);
             case GreaterOrEqualThanOperator:
                 return new BooleanValue(IntValue >= other.IntValue);
+            case LessOrEqualThanOperator:
+                return new BooleanValue(IntValue <= other.IntValue);
         }
 
         throw new UnsupportedBinaryOperationException(
@@ -130,6 +132,8 @@ public class IntegerValue : RuntimeValue
                 return new BooleanValue((decimal)IntValue < other.DecValue);
             case GreaterOrEqualThanOperator:
                 return new BooleanValue((decimal)IntValue >= other.DecValue);
+            case LessOrEqualThanOperator:
+                return new BooleanValue((decimal)IntValue <= other.DecValue);
         }
 
         throw new UnsupportedBinaryOperationException(
