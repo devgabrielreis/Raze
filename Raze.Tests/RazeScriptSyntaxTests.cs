@@ -1,6 +1,7 @@
 ﻿using Raze.Script.Core;
 using Raze.Script.Core.Exceptions.LexerExceptions;
 using Raze.Script.Core.Exceptions.ParseExceptions;
+using Raze.Script.Core.Values;
 
 namespace Raze.Tests;
 
@@ -54,5 +55,51 @@ public class RazeScriptSyntaxTests
         {
             RazeScript.Evaluate(expression);
         });
+    }
+
+    [Fact]
+    public void Evaluate_Statements_MustBeSeparatedBySemiColon()
+    {
+        var script = @"
+            var integer test = 10
+            test = test + 1
+        ";
+
+        Assert.Throws<UnexpectedTokenException>(() =>
+        {
+            RazeScript.Evaluate(script);
+        });
+    }
+
+    [Fact]
+    public void Evaluate_LastStatement_DoesntNeedSemiColon()
+    {
+        var script = @"
+            var integer test = 10;
+            test = test + 1;
+            test
+        ";
+
+        var result = RazeScript.Evaluate(script);
+
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(11, (result as IntegerValue)!.IntValue);
+    }
+
+    [Fact]
+    public void Evaluate_EmptyStatement_HasNoEffect()
+    {
+        var script = @"
+            var integer test = 10;
+            ;;;;;;;;
+            test = test + 1;
+            ;;;;;;;;
+            test
+        ";
+
+        var result = RazeScript.Evaluate(script);
+
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(11, (result as IntegerValue)!.IntValue);
     }
 }
