@@ -56,8 +56,19 @@ internal class Parser
 
         while (!HasEnded())
         {
+            if (Current() is SemiColon)
+            {
+                Advance();
+                continue;
+            }
+
             _program.Body.Add(ParseCurrent());
             Advance();
+
+            if (_program.Body.Last().RequireSemicolon)
+            {
+                Expect<SemiColon, EOF>();
+            }
         }
 
         return _program;
@@ -87,6 +98,20 @@ internal class Parser
             throw new UnexpectedTokenException(
                 Current().GetType().Name,
                 typeof(T).Name,
+                Current().Lexeme,
+                Current().Line,
+                Current().Column
+            );
+        }
+    }
+
+    private void Expect<T1, T2>() where T1 : Token where T2 : Token
+    {
+        if (Current() is not T1 && Current() is not T2)
+        {
+            throw new UnexpectedTokenException(
+                Current().GetType().Name,
+                $"{typeof(T1).Name} or {typeof(T2).Name}",
                 Current().Lexeme,
                 Current().Line,
                 Current().Column
