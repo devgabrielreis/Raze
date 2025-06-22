@@ -136,12 +136,41 @@ internal class Parser
 
     private Statement ParseCurrent()
     {
-        if (Current() is VariableDeclarationToken)
+        return Current() switch
         {
-            return ParseVariableDeclaration();
+            VariableDeclarationToken => ParseVariableDeclaration(),
+            OpenBraces               => ParseCodeBlock(),
+            _                        => ParseAssignmentStatement()
+        };
+    }
+
+    private CodeBlockStatement ParseCodeBlock()
+    {
+        Expect<OpenBraces>();
+        var codeBlock = new CodeBlockStatement(Current().Line, Current().Column);
+        Advance();
+
+        while (!HasEnded() && !(Current() is CloseBraces))
+        {
+            if (Current() is SemiColon)
+            {
+                Advance();
+                continue;
+            }
+
+            codeBlock.Body.Add(ParseCurrent());
+
+            Advance();
+
+            if (codeBlock.Body.Last().RequireSemicolon)
+            {
+                Expect<SemiColon>();
+            }
         }
 
-        return ParseAssignmentStatement();
+        Expect<CloseBraces>();
+
+        return codeBlock;
     }
 
     private VariableDeclarationStatement ParseVariableDeclaration()

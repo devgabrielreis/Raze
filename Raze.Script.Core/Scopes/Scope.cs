@@ -88,9 +88,9 @@ public abstract class Scope
             return this;
         }
 
-        if (_parent is not null && _parent.Lookup(symbol) is not null)
+        if (_parent is not null && _parent.Resolve(symbol) is Scope result)
         {
-            return _parent;
+            return result;
         }
 
         return null;

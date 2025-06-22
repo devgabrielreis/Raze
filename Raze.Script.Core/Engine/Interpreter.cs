@@ -34,6 +34,9 @@ internal static class Interpreter
             case IdentifierExpression expr:
                 return EvaluateIdentifierExpression(expr, scope);
 
+            case CodeBlockStatement stmt:
+                return EvaluateCodeBlock(stmt, scope);
+
             case VariableDeclarationStatement stmt:
                 return EvaluateVariableDeclarationStatement(stmt, scope);
 
@@ -135,5 +138,17 @@ internal static class Interpreter
         }
 
         throw new Exception("nao implementado ainda");
+    }
+
+    private static VoidValue EvaluateCodeBlock(CodeBlockStatement codeBlock, Scope scope)
+    {
+        var codeBlockScope = new LocalScope(scope);
+
+        foreach (var stmt in codeBlock.Body)
+        {
+            Evaluate(stmt, codeBlockScope);
+        }
+
+        return new VoidValue();
     }
 }

@@ -52,6 +52,8 @@ internal class Lexer
         [';'] = (string lexeme, int line, int column) => new SemiColon(lexeme, line, column),
         ['('] = (string lexeme, int line, int column) => new OpenParenthesis(lexeme, line, column),
         [')'] = (string lexeme, int line, int column) => new CloseParenthesis(lexeme, line, column),
+        ['{'] = (string lexeme, int line, int column) => new OpenBraces(lexeme, line, column),
+        ['}'] = (string lexeme, int line, int column) => new CloseBraces(lexeme, line, column),
         ['='] = (string lexeme, int line, int column) => new AssignmentOperator(lexeme, line, column),
         ['+'] = (string lexeme, int line, int column) => new AdditionOperator(lexeme, line, column),
         ['-'] = (string lexeme, int line, int column) => new SubtractionOperator(lexeme, line, column),
