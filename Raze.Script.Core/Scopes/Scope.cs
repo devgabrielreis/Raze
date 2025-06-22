@@ -54,7 +54,7 @@ public abstract class Scope
 
     internal virtual void AssignVariable(string name, RuntimeValue value, Statement source)
     {
-        AssignVariable(name, value, source.StartLine, source.StartLine);
+        AssignVariable(name, value, source.StartLine, source.StartColumn);
     }
 
     public virtual void AssignVariable(string name, RuntimeValue value)
