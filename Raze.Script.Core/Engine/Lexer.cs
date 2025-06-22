@@ -1,5 +1,6 @@
 ﻿using Raze.Script.Core.Exceptions.LexerExceptions;
 using Raze.Script.Core.Tokens;
+using Raze.Script.Core.Tokens.ControlStructures;
 using Raze.Script.Core.Tokens.Delimiters;
 using Raze.Script.Core.Tokens.Grouping;
 using Raze.Script.Core.Tokens.Literals;
@@ -34,7 +35,9 @@ internal class Lexer
         ["string"]  = (string lexeme, int line, int column) => new StringPrimitive(lexeme, line, column),
         ["true"]    = (string lexeme, int line, int column) => new BooleanLiteral(lexeme, line, column),
         ["false"]   = (string lexeme, int line, int column) => new BooleanLiteral(lexeme, line, column),
-        ["null"]    = (string lexeme, int line, int column) => new NullLiteral(lexeme, line, column)
+        ["null"]    = (string lexeme, int line, int column) => new NullLiteral(lexeme, line, column),
+        ["if"]      = (string lexeme, int line, int column) => new If(lexeme, line, column),
+        ["else"]    = (string lexeme, int line, int column) => new Else(lexeme, line, column),
     };
 
     private static readonly Dictionary<string, Func<string, int, int, Token>> _doubleCharTokens = new()

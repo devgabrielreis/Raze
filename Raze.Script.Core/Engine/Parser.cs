@@ -3,6 +3,7 @@ using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 using Raze.Script.Core.Tokens;
+using Raze.Script.Core.Tokens.ControlStructures;
 using Raze.Script.Core.Tokens.Delimiters;
 using Raze.Script.Core.Tokens.Grouping;
 using Raze.Script.Core.Tokens.Literals;
@@ -140,6 +141,7 @@ internal class Parser
         {
             VariableDeclarationToken => ParseVariableDeclaration(),
             OpenBraces               => ParseCodeBlock(),
+            If                       => ParseIfElse(),
             _                        => ParseAssignmentStatement()
         };
     }
@@ -171,6 +173,44 @@ internal class Parser
         Expect<CloseBraces>();
 
         return codeBlock;
+    }
+
+    private IfElseStatement ParseIfElse()
+    {
+        Expect<If>();
+        int startLine = Current().Line;
+        int startColumn = Current().Column;
+        Advance();
+
+        Expect<OpenParenthesis>();
+        Advance();
+
+        Expression condition = ParseOrExpression();
+        Advance();
+
+        Expect<CloseParenthesis>();
+        Advance();
+
+        Expect<OpenBraces>();
+        CodeBlockStatement then = ParseCodeBlock();
+
+        Statement? elseStmt = null;
+
+        if (Peek() is Else)
+        {
+            Advance(2);
+
+            elseStmt = Current() switch
+            {
+                OpenBraces => ParseCodeBlock(),
+                If         => ParseIfElse(),
+                _ => throw new UnexpectedTokenException(
+                    Current().GetType().Name, Current().Lexeme, Current().Line, Current().Column
+                )
+            };
+        }
+
+        return new IfElseStatement(condition, then, elseStmt, startLine, startColumn);
     }
 
     private VariableDeclarationStatement ParseVariableDeclaration()

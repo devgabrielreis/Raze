@@ -45,6 +45,9 @@ internal static class Interpreter
 
             case BinaryExpression expr:
                 return EvaluateBinaryExpression(expr, scope);
+
+            case IfElseStatement stmt:
+                return EvaluateIfElseStatement(stmt, scope);
             default:
                 throw new UnsupportedStatementException(statement.GetType().Name, statement.StartLine, statement.StartColumn);
         }
@@ -147,6 +150,40 @@ internal static class Interpreter
         foreach (var stmt in codeBlock.Body)
         {
             Evaluate(stmt, codeBlockScope);
+        }
+
+        return new VoidValue();
+    }
+
+    private static VoidValue EvaluateIfElseStatement(IfElseStatement ifElse, Scope scope)
+    {
+        var conditionResult = Evaluate(ifElse.Condition, scope);
+
+        if (conditionResult is not BooleanValue)
+        {
+            throw new UnexpectedTypeException(
+                conditionResult.GetType().Name,
+                nameof(BooleanValue),
+                ifElse.Condition.StartLine,
+                ifElse.Condition.StartColumn
+            );
+        }
+
+        if ((conditionResult as BooleanValue)!.BoolValue == null)
+        {
+            throw new NullValueException(
+                ifElse.Condition.StartLine,
+                ifElse.Condition.StartColumn
+            );
+        }
+
+        if ((conditionResult as BooleanValue)!.BoolValue!.Value)
+        {
+            Evaluate(ifElse.Then, scope);
+        }
+        else if (ifElse.Else is not null)
+        {
+            Evaluate(ifElse.Else, scope);
         }
 
         return new VoidValue();
