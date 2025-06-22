@@ -102,4 +102,19 @@ public class RazeScriptSyntaxTests
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(11, (result as IntegerValue)!.IntValue);
     }
+
+    [Fact]
+    public void Evaluate_StatementInsideCodeBlockWithoutSemiColon_ThrowsUnexpectedTokenException()
+    {
+        var script = @"
+            {
+                var integer test = 10
+            }
+        ";
+
+        Assert.Throws<UnexpectedTokenException>(() =>
+        {
+            RazeScript.Evaluate(script);
+        });
+    }
 }

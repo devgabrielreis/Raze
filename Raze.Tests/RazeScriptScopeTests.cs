@@ -1,6 +1,7 @@
 ﻿using Raze.Script.Core;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Scopes;
+using Raze.Script.Core.Values;
 
 namespace Raze.Tests;
 
@@ -36,6 +37,44 @@ public class RazeScriptScopeTests
         Assert.Throws<ConstantAssignmentException>(() =>
         {
             RazeScript.Evaluate("test = 11", scope);
+        });
+    }
+
+    [Fact]
+    public void Evaluate_CodeBlock_CanAcessOutsideScope()
+    {
+        var script = @"
+            var integer a = 10;
+            {
+                a = a + 1;
+                {
+                    a = a + 2;
+                    {
+                        a = a + 3;
+                    }
+                }
+            }
+            a;
+        ";
+
+        var result = RazeScript.Evaluate(script);
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(16, (result as IntegerValue)!.IntValue);
+    }
+
+    [Fact]
+    public void Evaluate_VariableDeclaredInsideCodeBlock_ShouldntExistOutsideOfIt()
+    {
+        var script = @"
+            {
+                var integer test = 10;
+            }
+            test
+        ";
+
+        Assert.Throws<UndefinedIdentifierException>(() =>
+        {
+            RazeScript.Evaluate(script);
         });
     }
 }
