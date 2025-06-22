@@ -31,8 +31,7 @@ internal class Program
 
         while (true)
         {
-            Console.Write("> ");
-            string command = Console.ReadLine()!;
+            string command = GetCommandFromUser();
 
             if (command == "exit()")
             {
@@ -48,33 +47,73 @@ internal class Program
                     Console.WriteLine(result);
                 }
             }
-            catch (Exception ex)
+            catch (RazeException razeEx)
             {
-                if (ex is RazeException razeEx)
-                {
-                    PrettyPrintRazeException(razeEx, command);
-                }
-                else
-                {
-                    throw;
-                }
+                PrettyPrintRazeException(razeEx, command);
             }
         }
+    }
+
+    private static string GetCommandFromUser()
+    {
+        Console.Write("> ");
+        string command = Console.ReadLine()!;
+
+        int level;
+        while ((level = GetIndentationLevel(command)) > 0)
+        {
+            command += '\n';
+
+            Console.Write("..");
+            for (int i = 0; i < level; i++)
+            {
+                Console.Write("    ");
+                command += "    ";
+            }
+
+            command += Console.ReadLine()!;
+        }
+
+        return command;
+    }
+
+    public static int GetIndentationLevel(string command)
+    {
+        int level = 0;
+
+        foreach (var ch in command)
+        {
+            if (ch == '{')
+            {
+                level++;
+            }
+            else if (ch == '}')
+            {
+                level--;
+            }
+        }
+
+        return level;
     }
 
     private static void PrettyPrintRazeException(RazeException ex, string source)
     {
         Console.WriteLine(ex.Message);
-        Console.WriteLine(source);
         
         if (ex.Line is not null && ex.Column is not null)
         {
+            Console.WriteLine(source.Split('\n')[ex.Line.Value]);
+
             for (int i = 0; i < ex.Column; i++)
             {
                 Console.Write(" ");
             }
 
             Console.WriteLine("^");
+        }
+        else
+        {
+            Console.WriteLine(source);
         }
 
         Console.WriteLine();
