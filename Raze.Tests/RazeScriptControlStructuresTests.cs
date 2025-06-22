@@ -114,4 +114,22 @@ public class RazeScriptControlStructuresTests
             RazeScript.Evaluate(script);
         });
     }
+
+    [Fact]
+    public void Evaluate_NullBooleanIfCondition_ThrowsNullValueException()
+    {
+        var script = @"
+            var integer test = 0;
+            var boolean nullBoolean;
+            if (nullBoolean) {
+                test = 10;
+            }
+            test
+        ";
+
+        Assert.Throws<NullValueException>(() =>
+        {
+            RazeScript.Evaluate(script);
+        });
+    }
 }
