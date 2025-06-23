@@ -10,7 +10,7 @@ public class RazeScriptIntegerTests
 {
     [Theory]
     [InlineData("const integer test = 5", "test", 5)]
-    [InlineData("var integer test? = null", "test", null)]
+    [InlineData("var integer? test = null", "test", null)]
     public void Evaluate_IntegerVariableDeclaration_ReturnsExpectedValue(string expression, string varname, int? expected)
     {
         var scope = new InterpreterScope();
