@@ -96,4 +96,13 @@ public class RazeScriptScopeTests
             RazeScript.Evaluate("nullableVariable", scope);
         });
     }
+
+    [Fact]
+    public void Evaluate_AssigningNullToNonNullableVariable_ThrowsVariableTypeException()
+    {
+        Assert.Throws<VariableTypeException>(() =>
+        {
+            RazeScript.Evaluate("var integer variable = null");
+        });
+    }
 }
