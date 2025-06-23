@@ -10,8 +10,7 @@ public class RazeScriptBooleanTests
     [Theory]
     [InlineData("var boolean test = true", "test", true)]
     [InlineData("const boolean test = false", "test", false)]
-    [InlineData("var boolean test = null", "test", null)]
-    [InlineData("var boolean test", "test", null)]
+    [InlineData("var boolean? test = null", "test", null)]
     public void Evaluate_BooleanVariableDeclaration_ReturnsExpectedValue(string expression, string varname, bool? expected)
     {
         var scope = new InterpreterScope();
@@ -28,6 +27,7 @@ public class RazeScriptBooleanTests
     [InlineData("var boolean test = 10")]
     [InlineData("var boolean test = 10.0")]
     [InlineData("const boolean test = \"a\"")]
+    [InlineData("const boolean test = null")]
     public void Evaluate_WrongBooleanVariableTypeAssignment_ThrowsVariableTypeException(string expression)
     {
         Assert.Throws<VariableTypeException>(() =>
@@ -140,7 +140,7 @@ public class RazeScriptBooleanTests
     public void Evaluate_BooleanOperationWithNullBooleanVariable_ThrowsNullValueException(string op)
     {
         var scope = new InterpreterScope();
-        RazeScript.Evaluate("var boolean nullVar", scope);
+        RazeScript.Evaluate("var boolean? nullVar = null", scope);
 
         Assert.Throws<NullValueException>(() =>
         {

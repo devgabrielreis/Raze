@@ -77,4 +77,23 @@ public class RazeScriptScopeTests
             RazeScript.Evaluate(script);
         });
     }
+
+    [Fact]
+    public void Evaluate_UninitializedVariable_ThrowsUninitializedVariableException()
+    {
+        var scope = new InterpreterScope();
+
+        RazeScript.Evaluate("var integer variable", scope);
+        RazeScript.Evaluate("var integer? nullableVariable", scope);
+
+        Assert.Throws<UninitializedVariableException>(() =>
+        {
+            RazeScript.Evaluate("variable", scope);
+        });
+
+        Assert.Throws<UninitializedVariableException>(() =>
+        {
+            RazeScript.Evaluate("nullableVariable", scope);
+        });
+    }
 }

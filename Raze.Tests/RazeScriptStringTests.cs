@@ -9,8 +9,7 @@ public class RazeScriptStringTests
 {
     [Theory]
     [InlineData("var string test = \"teste\"", "test", "teste")]
-    [InlineData("var string test = null", "test", null)]
-    [InlineData("const string test", "test", null)]
+    [InlineData("var string test? = null", "test", null)]
     public void Evaluate_StringVariableDeclaration_ReturnsExpectedValue(string expression, string varname, string? expected)
     {
         var scope = new InterpreterScope();
@@ -27,6 +26,7 @@ public class RazeScriptStringTests
     [InlineData("var string test = true")]
     [InlineData("const string test = 10")]
     [InlineData("var string test = 10.0")]
+    [InlineData("var string? test = null")]
     public void Evaluate_WrongStringVariableTypeAssignment_ThrowsVariableTypeException(string expression)
     {
         Assert.Throws<VariableTypeException>(() =>
@@ -155,7 +155,7 @@ public class RazeScriptStringTests
     public void Evaluate_StringOperationWithNullStringVariable_ThrowsNullValueException(string op)
     {
         var scope = new InterpreterScope();
-        RazeScript.Evaluate("var string nullVar", scope);
+        RazeScript.Evaluate("var string? nullVar = null", scope);
 
         Assert.Throws<NullValueException>(() =>
         {

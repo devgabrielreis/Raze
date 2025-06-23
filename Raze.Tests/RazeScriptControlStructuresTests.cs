@@ -120,7 +120,7 @@ public class RazeScriptControlStructuresTests
     {
         var script = @"
             var integer test = 0;
-            var boolean nullBoolean;
+            var boolean? nullBoolean = null;
             if (nullBoolean) {
                 test = 10;
             }

@@ -10,8 +10,7 @@ public class RazeScriptIntegerTests
 {
     [Theory]
     [InlineData("const integer test = 5", "test", 5)]
-    [InlineData("var integer test = null", "test", null)]
-    [InlineData("var integer test", "test", null)]
+    [InlineData("var integer test? = null", "test", null)]
     public void Evaluate_IntegerVariableDeclaration_ReturnsExpectedValue(string expression, string varname, int? expected)
     {
         var scope = new InterpreterScope();
@@ -28,6 +27,7 @@ public class RazeScriptIntegerTests
     [InlineData("var integer test = true")]
     [InlineData("var integer test = 10.0")]
     [InlineData("const integer test = \"a\"")]
+    [InlineData("const integer test = null")]
     public void Evaluate_WrongIntegerVariableTypeAssignment_ThrowsVariableTypeException(string expression)
     {
         Assert.Throws<VariableTypeException>(() =>
@@ -177,7 +177,7 @@ public class RazeScriptIntegerTests
     public void Evaluate_IntegerOperationWithNullIntegerVariable_ThrowsNullValueException(string op)
     {
         var scope = new InterpreterScope();
-        RazeScript.Evaluate("var integer nullVar", scope);
+        RazeScript.Evaluate("var integer? nullVar = null", scope);
 
         Assert.Throws<NullValueException>(() =>
         {
@@ -205,7 +205,7 @@ public class RazeScriptIntegerTests
     public void Evaluate_IntegerOperationWithNullDecimalVariable_ThrowsNullValueException(string op)
     {
         var scope = new InterpreterScope();
-        RazeScript.Evaluate("var decimal nullVar", scope);
+        RazeScript.Evaluate("var decimal? nullVar = null", scope);
 
         Assert.Throws<NullValueException>(() =>
         {
