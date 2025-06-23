@@ -5,21 +5,37 @@ namespace Raze.Script.Core.Symbols.Variables;
 
 public abstract class VariableSymbol : Symbol
 {
-    public abstract RuntimeValue Value { get; }
+    public abstract RuntimeValue? Value { get; }
 
     public bool IsConstant { get; private set; }
 
-    public VariableSymbol(RuntimeValue value, bool isConstant)
+    public bool IsNullable { get; private set; }
+
+    public bool IsInitialized { get; private set; }
+
+    public abstract string VariableTypeName { get; }
+
+    public VariableSymbol(RuntimeValue? value, bool isConstant, bool isNullable)
     {
-        IsConstant = false;
-        SetNewValue(value, null, null);
-        IsConstant = isConstant;
+        Initialize(value, isConstant, isNullable, null, null);
     }
 
-    internal VariableSymbol(RuntimeValue value, bool isConstant, int? sourceLine, int? sourceColumn)
+    internal VariableSymbol(RuntimeValue? value, bool isConstant, bool isNullable, int? sourceLine, int? sourceColumn)
     {
+        Initialize(value, isConstant, isNullable, sourceLine, sourceColumn);
+    }
+
+    private void Initialize(RuntimeValue? value, bool isConstant, bool isNullable, int? sourceLine, int? sourceColumn)
+    {
+        IsNullable = isNullable;
+        IsInitialized = false;
         IsConstant = false;
-        SetNewValue(value, sourceLine, sourceColumn);
+
+        if (value != null)
+        {
+            SetNewValue(value, sourceLine, sourceColumn);
+        }
+
         IsConstant = isConstant;
     }
 
@@ -34,6 +50,13 @@ public abstract class VariableSymbol : Symbol
         {
             throw new ConstantAssignmentException(sourceLine, sourceColumn);
         }
+
+        if (!IsNullable && (newValue is NullValue || newValue.Value is null))
+        {
+            throw new VariableTypeException("NULL", VariableTypeName, sourceLine, sourceColumn);
+        }
+
+        IsInitialized = true;
 
         SetValue(newValue, sourceLine, sourceColumn);
     }

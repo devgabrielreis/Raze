@@ -5,17 +5,19 @@ namespace Raze.Script.Core.Symbols.Variables;
 
 public class BooleanVariable : VariableSymbol
 {
-    public override BooleanValue Value => _value;
+    public override BooleanValue? Value => _value;
 
     private BooleanValue _value = new(null);
 
-    public BooleanVariable(RuntimeValue value, bool isConstant)
-        : base(value, isConstant)
+    public override string VariableTypeName => IsNullable ? "NullableBooleanVariable" : "BooleanVariable";
+
+    public BooleanVariable(RuntimeValue? value, bool isConstant, bool isNullable)
+        : base(value, isConstant, isNullable)
     {
     }
 
-    internal BooleanVariable(RuntimeValue value, bool isConstant, int? sourceLine, int? sourceColumn)
-        : base(value, isConstant, sourceLine, sourceColumn)
+    internal BooleanVariable(RuntimeValue? value, bool isConstant, bool isNullable, int? sourceLine, int? sourceColumn)
+        : base(value, isConstant, isNullable, sourceLine, sourceColumn)
     {
     }
 
@@ -32,6 +34,6 @@ public class BooleanVariable : VariableSymbol
             return;
         }
 
-        throw new VariableTypeException(value.TypeName, nameof(BooleanVariable), sourceLine, sourceColumn);
+        throw new VariableTypeException(value.TypeName, VariableTypeName, sourceLine, sourceColumn);
     }
 }

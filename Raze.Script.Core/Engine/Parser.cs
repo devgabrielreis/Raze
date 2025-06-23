@@ -224,6 +224,13 @@ internal class Parser
         PrimitiveTypeToken type = (Current() as PrimitiveTypeToken)!;
         Advance();
 
+        var isNullable = false;
+        if (Current() is QuestionMarkOperator)
+        {
+            isNullable = true;
+            Advance();
+        }
+
         Expect<Identifier>();
         string identifier = Current().Lexeme;
         Advance();
@@ -231,13 +238,13 @@ internal class Parser
         if (Current() is not AssignmentOperator)
         {
             Return();
-            return new VariableDeclarationStatement(identifier, type, null, isConstant, startLine, startColumn);
+            return new VariableDeclarationStatement(identifier, type, null, isConstant, isNullable, startLine, startColumn);
         }
 
         Advance();
         Expression value = ParseOrExpression();
 
-        return new VariableDeclarationStatement(identifier, type, value, isConstant, startLine, startColumn);
+        return new VariableDeclarationStatement(identifier, type, value, isConstant, isNullable, startLine, startColumn);
     }
 
     private Statement ParseAssignmentStatement()

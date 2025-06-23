@@ -70,26 +70,30 @@ internal static class Interpreter
         VariableSymbol variable = statement.Type switch
         {
             IntegerPrimitive => new IntegerVariable(
-                statement.Value is null ? new NullValue() : Evaluate(statement.Value, scope),
+                statement.Value is null ? null : Evaluate(statement.Value, scope),
                 statement.IsConstant,
+                statement.IsNullable,
                 statement.StartLine,
                 statement.StartColumn
             ),
             DecimalPrimitive => new DecimalVariable(
-                statement.Value is null ? new NullValue() : Evaluate(statement.Value, scope),
+                statement.Value is null ? null : Evaluate(statement.Value, scope),
                 statement.IsConstant,
+                statement.IsNullable,
                 statement.StartLine,
                 statement.StartColumn
             ),
             BooleanPrimitive => new BooleanVariable(
-                statement.Value is null ? new NullValue() : Evaluate(statement.Value, scope),
+                statement.Value is null ? null : Evaluate(statement.Value, scope),
                 statement.IsConstant,
+                statement.IsNullable,
                 statement.StartLine,
                 statement.StartColumn
             ),
             StringPrimitive => new StringVariable(
-                statement.Value is null ? new NullValue() : Evaluate(statement.Value, scope),
+                statement.Value is null ? null : Evaluate(statement.Value, scope),
                 statement.IsConstant,
+                statement.IsNullable,
                 statement.StartLine,
                 statement.StartColumn
             ),
@@ -137,6 +141,11 @@ internal static class Interpreter
 
         if (result is VariableSymbol variable)
         {
+            if (!variable.IsInitialized || variable.Value is null)
+            {
+                throw new UninitializedVariableException(expression.StartLine, expression.StartColumn);
+            }
+
             return variable.Value;
         }
 

@@ -5,17 +5,19 @@ namespace Raze.Script.Core.Symbols.Variables;
 
 public class IntegerVariable : VariableSymbol
 {
-    public override IntegerValue Value => _value;
+    public override IntegerValue? Value => _value;
 
     private IntegerValue _value = new(null);
 
-    public IntegerVariable(RuntimeValue value, bool isConstant)
-        : base(value, isConstant)
+    public override string VariableTypeName => IsNullable ? "NullableIntegerVariable" : "IntegerVariable";
+
+    public IntegerVariable(RuntimeValue? value, bool isConstant, bool isNullable)
+        : base(value, isConstant, isNullable)
     {
     }
 
-    internal IntegerVariable(RuntimeValue value, bool isConstant, int? sourceLine, int? sourceColumn)
-        : base(value, isConstant, sourceLine, sourceColumn)
+    internal IntegerVariable(RuntimeValue? value, bool isConstant, bool isNullable, int? sourceLine, int? sourceColumn)
+        : base(value, isConstant, isNullable, sourceLine, sourceColumn)
     {
     }
 
@@ -32,6 +34,6 @@ public class IntegerVariable : VariableSymbol
             return;
         }
 
-        throw new VariableTypeException(value.TypeName, nameof(IntegerVariable), sourceLine, sourceColumn);
+        throw new VariableTypeException(value.TypeName, VariableTypeName, sourceLine, sourceColumn);
     }
 }

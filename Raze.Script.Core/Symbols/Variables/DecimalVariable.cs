@@ -5,17 +5,19 @@ namespace Raze.Script.Core.Symbols.Variables;
 
 internal class DecimalVariable : VariableSymbol
 {
-    public override DecimalValue Value => _value;
+    public override DecimalValue? Value => _value;
 
     private DecimalValue _value = new(null);
 
-    public DecimalVariable(RuntimeValue value, bool isConstant)
-        : base(value, isConstant)
+    public override string VariableTypeName => IsNullable ? "NullableDecimalVariable" : "DecimalVariable";
+
+    public DecimalVariable(RuntimeValue? value, bool isConstant, bool isNullable)
+        : base(value, isConstant, isNullable)
     {
     }
 
-    internal DecimalVariable(RuntimeValue value, bool isConstant, int? sourceLine, int? sourceColumn)
-        : base(value, isConstant, sourceLine, sourceColumn)
+    internal DecimalVariable(RuntimeValue? value, bool isConstant, bool isNullable, int? sourceLine, int? sourceColumn)
+        : base(value, isConstant, isNullable, sourceLine, sourceColumn)
     {
     }
 
@@ -37,6 +39,6 @@ internal class DecimalVariable : VariableSymbol
             return;
         }
 
-        throw new VariableTypeException(value.TypeName, nameof(IntegerVariable), sourceLine, sourceColumn);
+        throw new VariableTypeException(value.TypeName, VariableTypeName, sourceLine, sourceColumn);
     }
 }

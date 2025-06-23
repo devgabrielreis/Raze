@@ -76,9 +76,12 @@ public abstract class Scope
 
     public virtual Symbol? Lookup(string symbol)
     {
-        _variables.TryGetValue(symbol, out var result);
+        if (_variables.TryGetValue(symbol, out var result))
+        {
+            return result;
+        }
 
-        return result;
+        return null;
     }
 
     public virtual Scope? Resolve(string symbol)

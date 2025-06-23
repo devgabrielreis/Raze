@@ -64,7 +64,8 @@ internal class Lexer
         ['/'] = (string lexeme, int line, int column) => new DivisionOperator(lexeme, line, column),
         ['%'] = (string lexeme, int line, int column) => new ModuloOperator(lexeme, line, column),
         ['>'] = (string lexeme, int line, int column) => new GreaterThanOperator(lexeme, line, column),
-        ['<'] = (string lexeme, int line, int column) => new LessThanOperator(lexeme, line, column)
+        ['<'] = (string lexeme, int line, int column) => new LessThanOperator(lexeme, line, column),
+        ['?'] = (string lexeme, int line, int column) => new QuestionMarkOperator(lexeme, line, column)
     };
 
     public Lexer(string sourceCode)
