@@ -132,4 +132,109 @@ public class RazeScriptControlStructuresTests
             RazeScript.Evaluate(script);
         });
     }
+
+    [Fact]
+    public void Evaluate_ForLoop_ShouldExecuteUntilConditionIsFalse()
+    {
+        var script = @"
+            var integer test = 0;
+            for (int i = 0; i < 10; i = i + 1) {
+                test = test + i;
+            }
+            test
+        ";
+
+        var result = RazeScript.Evaluate(script);
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(45, (result as IntegerValue)!.IntValue);
+    }
+
+    [Fact]
+    public void Evaluate_NonBooleanForLoopCondition_ThrowsUnexpectedTypeException()
+    {
+        var script = @"
+            var integer test = 0;
+            for (int i = 0; i + 10; i = i + 1) {
+                test = test + i;
+            }
+        ";
+
+        Assert.Throws<UnexpectedTypeException>(() =>
+        {
+            RazeScript.Evaluate(script);
+        });
+    }
+
+    [Fact]
+    public void Evaluate_NullForLoopCondition_ThrowsNullValueException()
+    {
+        var script = @"
+            var boolean? test = null;
+            for (int i = 0; test; i = i + 1) {
+                test = false;
+            }
+        ";
+
+        Assert.Throws<NullValueException>(() =>
+        {
+            RazeScript.Evaluate(script);
+        });
+    }
+
+    [Fact]
+    public void Evaluate_BreakStatement_ExitsForLoop()
+    {
+        var script = @"
+            var integer test = null;
+            for (int i = 0; i < 10; i = i + 1) {
+                if (i == 5) {
+                    break;
+                }
+                test = i;
+            }
+            test
+        ";
+
+        var result = RazeScript.Evaluate(script);
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(4, (result as IntegerValue)!.IntValue);
+    }
+
+    [Fact]
+    public void Evaluate_ContinueStatement_SkipsForLoopIteration()
+    {
+        var script = @"
+            var integer test = null;
+            for (int i = 0; i < 6; i = i + 1) {
+                if (i % 2 == 0) {
+                    continue;
+                }
+                test = i;
+            }
+            test
+        ";
+
+        var result = RazeScript.Evaluate(script);
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(9, (result as IntegerValue)!.IntValue);
+    }
+
+    [Fact]
+    public void Evaluate_ForLoopParameters_CanBeEmpty()
+    {
+        var script = @"
+            var integer test = 0;
+            for (;;) {
+                test = test + 1;
+                if (test == 10) {
+                    break;
+                }
+            }
+            test
+        ";
+
+        var result = RazeScript.Evaluate(script);
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(10, (result as IntegerValue)!.IntValue);
+    }
 }
