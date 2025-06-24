@@ -7,7 +7,7 @@ internal class DecimalVariable : VariableSymbol
 {
     public override DecimalValue? Value => _value;
 
-    private DecimalValue _value = new(null);
+    private DecimalValue? _value = null;
 
     public override string VariableTypeName => IsNullable ? "NullableDecimalVariable" : "DecimalVariable";
 

@@ -7,7 +7,7 @@ public class BooleanVariable : VariableSymbol
 {
     public override BooleanValue? Value => _value;
 
-    private BooleanValue _value = new(null);
+    private BooleanValue? _value = null;
 
     public override string VariableTypeName => IsNullable ? "NullableBooleanVariable" : "BooleanVariable";
 

@@ -7,7 +7,7 @@ public class StringVariable : VariableSymbol
 {
     public override StringValue? Value => _value;
 
-    private StringValue _value = new(null);
+    private StringValue? _value = null;
 
     public override string VariableTypeName => IsNullable ? "NullableStringVariable" : "StringVariable";
 

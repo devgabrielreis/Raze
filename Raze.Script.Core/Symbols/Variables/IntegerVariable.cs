@@ -7,7 +7,7 @@ public class IntegerVariable : VariableSymbol
 {
     public override IntegerValue? Value => _value;
 
-    private IntegerValue _value = new(null);
+    private IntegerValue? _value = null;
 
     public override string VariableTypeName => IsNullable ? "NullableIntegerVariable" : "IntegerVariable";
 
