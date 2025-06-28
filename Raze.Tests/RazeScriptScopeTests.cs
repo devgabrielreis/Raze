@@ -161,4 +161,58 @@ public class RazeScriptScopeTests
             RazeScript.Evaluate(script);
         });
     }
+
+    [Fact]
+    public void Evaluate_VariableDeclaredInsideWhileLoopConditionOutsideOfIt_ThrowsUndefinedIdentifierException()
+    {
+        var scope = new InterpreterScope();
+
+        var script = @"
+            while (true) {
+                var integer test = 10;
+                break;
+            }
+        ";
+
+        RazeScript.Evaluate(script, scope);
+
+        Assert.Throws<UndefinedIdentifierException>(() =>
+        {
+            RazeScript.Evaluate("test", scope);
+        });
+    }
+
+    [Fact]
+    public void Evaluate_AccessingVariableInsideWhileLoopBeforeItsInitialization_ThrowsUninitializedVariableException()
+    {
+        var script = @"
+            var integer test = 10;
+            while (true) {
+                test = 10;
+                var integer test = i;
+                break;
+            }
+        ";
+
+        Assert.Throws<UninitializedVariableException>(() =>
+        {
+            RazeScript.Evaluate(script);
+        });
+    }
+
+    [Fact]
+    public void Evaluate_DeclaringConstantInsideWhileLoop_ThrowsScopeDeclarationException()
+    {
+        var script = @"
+            while (true) {
+                const integer test = i;
+                break;
+            }
+        ";
+
+        Assert.Throws<ScopeDeclarationException>(() =>
+        {
+            RazeScript.Evaluate(script);
+        });
+    }
 }
