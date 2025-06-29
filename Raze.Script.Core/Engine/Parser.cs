@@ -142,7 +142,8 @@ internal class Parser
             VariableDeclarationToken => ParseVariableDeclaration(),
             OpenBraces               => ParseCodeBlock(),
             If                       => ParseIfElse(),
-            For                      => ParseFor(),
+            For                      => ParseForLoop(),
+            While                    => ParseWhileLoop(),
             Break                    => new BreakStatement(Current().Line, Current().Column),
             Continue                 => new ContinueStatement(Current().Line, Current().Column),
             _                        => ParseAssignmentStatement()
@@ -216,7 +217,7 @@ internal class Parser
         return new IfElseStatement(condition, then, elseStmt, startLine, startColumn);
     }
 
-    private ForStatement ParseFor()
+    private LoopStatement ParseForLoop()
     {
         Expect<For>();
 
@@ -265,7 +266,33 @@ internal class Parser
 
         HoistLoopBodyVariableDeclarations(ref body, ref initialization);
 
-        return new ForStatement(initialization, condition, update, body, startLine, startColumn);
+        return new LoopStatement(initialization, condition, update, body, startLine, startColumn);
+    }
+
+    private LoopStatement ParseWhileLoop()
+    {
+        Expect<While>();
+
+        int startLine = Current().Line;
+        int startColumn = Current().Column;
+
+        Advance();
+
+        Expect<OpenParenthesis>();
+        Advance();
+
+        Expression condition = ParseOrExpression();
+        Advance();
+
+        Expect<CloseParenthesis>();
+        Advance();
+
+        CodeBlockStatement body = ParseCodeBlock();
+        List<Statement> initialization = [];
+
+        HoistLoopBodyVariableDeclarations(ref body, ref initialization);
+
+        return new LoopStatement(initialization, condition, null, body, startLine, startColumn);
     }
 
     private VariableDeclarationStatement ParseVariableDeclaration()

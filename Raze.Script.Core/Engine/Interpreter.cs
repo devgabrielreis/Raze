@@ -66,8 +66,8 @@ internal class Interpreter
 
             case IfElseStatement stmt:
                 return EvaluateIfElseStatement(stmt, scope);
-            case ForStatement stmt:
-                return EvaluateForStatement(stmt, scope);
+            case LoopStatement stmt:
+                return EvaluateLoopStatement(stmt, scope);
 
             case BreakStatement stmt:
                 return EvaluateBreakStatement(stmt, scope);
@@ -224,11 +224,11 @@ internal class Interpreter
         return new VoidValue();
     }
 
-    public VoidValue EvaluateForStatement(ForStatement forStmt, Scope scope)
+    public VoidValue EvaluateLoopStatement(LoopStatement loopStmt, Scope scope)
     {
         LoopScope localScope = new LoopScope(scope);
 
-        ExecuteLoop(forStmt.Body, forStmt.Condition, forStmt.Update, forStmt.Initialization, localScope, forStmt);
+        ExecuteLoop(loopStmt.Body, loopStmt.Condition, loopStmt.Update, loopStmt.Initialization, localScope, loopStmt);
 
         return new VoidValue();
     }

@@ -2,7 +2,7 @@
 
 namespace Raze.Script.Core.Statements;
 
-internal class ForStatement : Statement
+internal class LoopStatement : Statement
 {
     public IReadOnlyList<Statement> Initialization { get; }
 
@@ -14,7 +14,7 @@ internal class ForStatement : Statement
 
     public override bool RequireSemicolon => false;
 
-    public ForStatement(List<Statement> initialization, Expression? condition, Statement? update, CodeBlockStatement body, int startLine, int startColumn)
+    public LoopStatement(List<Statement> initialization, Expression? condition, Statement? update, CodeBlockStatement body, int startLine, int startColumn)
         : base(startLine, startColumn)
     {
         Initialization = initialization;

@@ -39,6 +39,7 @@ internal class Lexer
         ["if"]       = (string lexeme, int line, int column) => new If(lexeme, line, column),
         ["else"]     = (string lexeme, int line, int column) => new Else(lexeme, line, column),
         ["for"]      = (string lexeme, int line, int column) => new For(lexeme, line, column),
+        ["while"]    = (string lexeme, int line, int column) => new While(lexeme, line, column),
         ["break"]    = (string lexeme, int line, int column) => new Break(lexeme, line, column),
         ["continue"] = (string lexeme, int line, int column) => new Continue(lexeme, line, column)
     };
