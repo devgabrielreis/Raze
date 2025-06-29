@@ -71,6 +71,8 @@ internal class Interpreter
 
             case BreakStatement stmt:
                 return EvaluateBreakStatement(stmt, scope);
+            case ContinueStatement stmt:
+                return EvaluateContinueStatement(stmt, scope);
 
             default:
                 throw new UnsupportedStatementException(statement.GetType().Name, statement.StartLine, statement.StartColumn);
@@ -245,6 +247,20 @@ internal class Interpreter
         throw new BreakException();
     }
 
+    public VoidValue EvaluateContinueStatement(ContinueStatement continueStmt, Scope scope)
+    {
+        if (_contextStack.Count == 0 || _contextStack.Last() != ExecutionContexts.Loop)
+        {
+            throw new UnexpectedStatementException(
+                "Cannot use continue outside of a loop",
+                continueStmt.StartLine,
+                continueStmt.StartColumn
+            );
+        }
+
+        throw new ContinueException();
+    }
+
     public void ExecuteLoop(CodeBlockStatement body, Expression? condition, Statement? update, IEnumerable<Statement> initialization, Scope scope, Statement source)
     {
         foreach (var stmt in initialization)
@@ -293,6 +309,9 @@ internal class Interpreter
             catch (BreakException)
             {
                 break;
+            }
+            catch (ContinueException)
+            {
             }
 
             if (update is not null)

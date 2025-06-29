@@ -144,6 +144,7 @@ internal class Parser
             If                       => ParseIfElse(),
             For                      => ParseFor(),
             Break                    => new BreakStatement(Current().Line, Current().Column),
+            Continue                 => new ContinueStatement(Current().Line, Current().Column),
             _                        => ParseAssignmentStatement()
         };
     }

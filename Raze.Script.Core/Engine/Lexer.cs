@@ -27,19 +27,20 @@ internal class Lexer
 
     private static readonly Dictionary<string, Func<string, int, int, Token>> _keywords = new()
     {
-        ["var"]     = (string lexeme, int line, int column) => new Var(lexeme, line, column),
-        ["const"]   = (string lexeme, int line, int column) => new Const(lexeme, line, column),
-        ["integer"] = (string lexeme, int line, int column) => new IntegerPrimitive(lexeme, line, column),
-        ["decimal"] = (string lexeme, int line, int column) => new DecimalPrimitive(lexeme, line, column),
-        ["boolean"] = (string lexeme, int line, int column) => new BooleanPrimitive(lexeme, line, column),
-        ["string"]  = (string lexeme, int line, int column) => new StringPrimitive(lexeme, line, column),
-        ["true"]    = (string lexeme, int line, int column) => new BooleanLiteral(lexeme, line, column),
-        ["false"]   = (string lexeme, int line, int column) => new BooleanLiteral(lexeme, line, column),
-        ["null"]    = (string lexeme, int line, int column) => new NullLiteral(lexeme, line, column),
-        ["if"]      = (string lexeme, int line, int column) => new If(lexeme, line, column),
-        ["else"]    = (string lexeme, int line, int column) => new Else(lexeme, line, column),
-        ["for"]     = (string lexeme, int line, int column) => new For(lexeme, line, column),
-        ["break"]   = (string lexeme, int line, int column) => new Break(lexeme, line, column)
+        ["var"]      = (string lexeme, int line, int column) => new Var(lexeme, line, column),
+        ["const"]    = (string lexeme, int line, int column) => new Const(lexeme, line, column),
+        ["integer"]  = (string lexeme, int line, int column) => new IntegerPrimitive(lexeme, line, column),
+        ["decimal"]  = (string lexeme, int line, int column) => new DecimalPrimitive(lexeme, line, column),
+        ["boolean"]  = (string lexeme, int line, int column) => new BooleanPrimitive(lexeme, line, column),
+        ["string"]   = (string lexeme, int line, int column) => new StringPrimitive(lexeme, line, column),
+        ["true"]     = (string lexeme, int line, int column) => new BooleanLiteral(lexeme, line, column),
+        ["false"]    = (string lexeme, int line, int column) => new BooleanLiteral(lexeme, line, column),
+        ["null"]     = (string lexeme, int line, int column) => new NullLiteral(lexeme, line, column),
+        ["if"]       = (string lexeme, int line, int column) => new If(lexeme, line, column),
+        ["else"]     = (string lexeme, int line, int column) => new Else(lexeme, line, column),
+        ["for"]      = (string lexeme, int line, int column) => new For(lexeme, line, column),
+        ["break"]    = (string lexeme, int line, int column) => new Break(lexeme, line, column),
+        ["continue"] = (string lexeme, int line, int column) => new Continue(lexeme, line, column)
     };
 
     private static readonly Dictionary<string, Func<string, int, int, Token>> _doubleCharTokens = new()
