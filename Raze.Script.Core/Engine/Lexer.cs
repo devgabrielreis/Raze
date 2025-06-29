@@ -38,6 +38,7 @@ internal class Lexer
         ["null"]    = (string lexeme, int line, int column) => new NullLiteral(lexeme, line, column),
         ["if"]      = (string lexeme, int line, int column) => new If(lexeme, line, column),
         ["else"]    = (string lexeme, int line, int column) => new Else(lexeme, line, column),
+        ["for"]     = (string lexeme, int line, int column) => new For(lexeme, line, column)
     };
 
     private static readonly Dictionary<string, Func<string, int, int, Token>> _doubleCharTokens = new()

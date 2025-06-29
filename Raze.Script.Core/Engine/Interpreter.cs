@@ -48,6 +48,9 @@ internal static class Interpreter
 
             case IfElseStatement stmt:
                 return EvaluateIfElseStatement(stmt, scope);
+            case ForStatement stmt:
+                return EvaluateForStatement(stmt, scope);
+
             default:
                 throw new UnsupportedStatementException(statement.GetType().Name, statement.StartLine, statement.StartColumn);
         }
@@ -196,5 +199,62 @@ internal static class Interpreter
         }
 
         return new VoidValue();
+    }
+
+    public static VoidValue EvaluateForStatement(ForStatement forStmt, Scope scope)
+    {
+        LocalScope localScope = new LocalScope(scope);
+
+        ExecuteLoop(forStmt.Body, forStmt.Condition, forStmt.Update, forStmt.Initialization, localScope, forStmt);
+
+        return new VoidValue();
+    }
+
+    public static void ExecuteLoop(CodeBlockStatement body, Expression? condition, Statement? update, IEnumerable<Statement> initialization, Scope scope, Statement source)
+    {
+        foreach (var stmt in initialization)
+        {
+            Evaluate(stmt, scope);
+        }
+
+        RuntimeValue? conditionResult = null;
+
+        while (true)
+        {
+            if (condition is not null)
+            {
+                conditionResult = Evaluate(condition, scope);
+
+                if (conditionResult is not BooleanValue)
+                {
+                    throw new UnexpectedTypeException(
+                        conditionResult.GetType().Name,
+                        nameof(BooleanValue),
+                        condition.StartLine,
+                        condition.StartColumn
+                    );
+                }
+
+                if ((conditionResult as BooleanValue)!.BoolValue == null)
+                {
+                    throw new NullValueException(
+                        condition.StartLine,
+                        condition.StartColumn
+                    );
+                }
+
+                if ((conditionResult as BooleanValue)!.BoolValue == false)
+                {
+                    break;
+                }
+            }
+
+            EvaluateCodeBlock(body, scope);
+
+            if (update is not null)
+            {
+                Evaluate(update, scope);
+            }
+        }
     }
 }

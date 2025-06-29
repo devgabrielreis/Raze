@@ -142,6 +142,7 @@ internal class Parser
             VariableDeclarationToken => ParseVariableDeclaration(),
             OpenBraces               => ParseCodeBlock(),
             If                       => ParseIfElse(),
+            For                      => ParseFor(),
             _                        => ParseAssignmentStatement()
         };
     }
@@ -213,8 +214,60 @@ internal class Parser
         return new IfElseStatement(condition, then, elseStmt, startLine, startColumn);
     }
 
+    private ForStatement ParseFor()
+    {
+        Expect<For>();
+
+        int startLine = Current().Line;
+        int startColumn = Current().Column;
+
+        Advance();
+
+        Expect<OpenParenthesis>();
+        Advance();
+
+        List<Statement> initialization = [];
+
+        if (Current() is not SemiColon)
+        {
+            initialization.Add(ParseVariableDeclaration());
+            Advance();
+        }
+
+        Expect<SemiColon>();
+        Advance();
+
+        Expression? condition = null;
+
+        if (Current() is not SemiColon)
+        {
+            condition = ParseOrExpression();
+            Advance();
+        }
+
+        Expect<SemiColon>();
+        Advance();
+
+        Statement? update = null;
+
+        if (Current() is not CloseParenthesis)
+        {
+            update = ParseAssignmentStatement();
+            Advance();
+        }
+
+        Expect<CloseParenthesis>();
+        Advance();
+
+        CodeBlockStatement body = ParseCodeBlock();
+
+        return new ForStatement(initialization, condition, update, body, startLine, startColumn);
+    }
+
     private VariableDeclarationStatement ParseVariableDeclaration()
     {
+        Expect<VariableDeclarationToken>();
+
         bool isConstant = Current() is Const;
         int startLine = Current().Line;
         int startColumn = Current().Column;
