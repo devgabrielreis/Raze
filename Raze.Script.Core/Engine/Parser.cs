@@ -143,6 +143,7 @@ internal class Parser
             OpenBraces               => ParseCodeBlock(),
             If                       => ParseIfElse(),
             For                      => ParseFor(),
+            Break                    => new BreakStatement(Current().Line, Current().Column),
             _                        => ParseAssignmentStatement()
         };
     }
@@ -398,7 +399,7 @@ internal class Parser
         return left;
     }
 
-    private void HoistLoopBodyVariableDeclarations(ref CodeBlockStatement body, ref List<Statement> initializationList)
+    private static void HoistLoopBodyVariableDeclarations(ref CodeBlockStatement body, ref List<Statement> initializationList)
     {
         for (int i = 0; i < body.Body.Count; i++)
         {

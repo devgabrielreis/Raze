@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.InterpreterExceptions;
+﻿using Raze.Script.Core.Exceptions.ControlExceptions;
+using Raze.Script.Core.Exceptions.InterpreterExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Scopes;
 using Raze.Script.Core.Statements;
@@ -11,9 +12,26 @@ using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Engine;
 
-internal static class Interpreter
+internal class Interpreter
 {
-    public static RuntimeValue Evaluate(Statement statement, Scope scope)
+    private enum ExecutionContexts
+    {
+        Loop
+    }
+
+    private List<ExecutionContexts> _contextStack;
+
+    public Interpreter()
+    {
+        _contextStack = [];
+    }
+
+    public void Reset()
+    {
+        _contextStack.Clear();
+    }
+
+    public RuntimeValue Evaluate(Statement statement, Scope scope)
     {
         switch (statement)
         {
@@ -51,12 +69,15 @@ internal static class Interpreter
             case ForStatement stmt:
                 return EvaluateForStatement(stmt, scope);
 
+            case BreakStatement stmt:
+                return EvaluateBreakStatement(stmt, scope);
+
             default:
                 throw new UnsupportedStatementException(statement.GetType().Name, statement.StartLine, statement.StartColumn);
         }
     }
 
-    private static RuntimeValue EvaluateProgramExpression(ProgramExpression program, Scope scope)
+    private RuntimeValue EvaluateProgramExpression(ProgramExpression program, Scope scope)
     {
         RuntimeValue lastValue = new VoidValue();
 
@@ -68,7 +89,7 @@ internal static class Interpreter
         return lastValue;
     }
 
-    private static VoidValue EvaluateVariableDeclarationStatement(VariableDeclarationStatement statement, Scope scope)
+    private VoidValue EvaluateVariableDeclarationStatement(VariableDeclarationStatement statement, Scope scope)
     {
         VariableSymbol variable = statement.Type switch
         {
@@ -107,7 +128,7 @@ internal static class Interpreter
         return new VoidValue();
     }
 
-    private static VoidValue EvaluateAssignmentStatement(AssignmentStatement statement, Scope scope)
+    private VoidValue EvaluateAssignmentStatement(AssignmentStatement statement, Scope scope)
     {
         switch (statement.Target)
         {
@@ -121,7 +142,7 @@ internal static class Interpreter
         return new VoidValue();
     }
 
-    private static RuntimeValue EvaluateBinaryExpression(BinaryExpression expression, Scope scope)
+    private RuntimeValue EvaluateBinaryExpression(BinaryExpression expression, Scope scope)
     {
         RuntimeValue leftHand = Evaluate(expression.Left, scope);
         OperatorToken op = expression.Operator;
@@ -155,7 +176,7 @@ internal static class Interpreter
         throw new Exception("nao implementado ainda");
     }
 
-    private static VoidValue EvaluateCodeBlock(CodeBlockStatement codeBlock, Scope scope)
+    private VoidValue EvaluateCodeBlock(CodeBlockStatement codeBlock, Scope scope)
     {
         var codeBlockScope = new LocalScope(scope);
 
@@ -167,7 +188,7 @@ internal static class Interpreter
         return new VoidValue();
     }
 
-    private static VoidValue EvaluateIfElseStatement(IfElseStatement ifElse, Scope scope)
+    private VoidValue EvaluateIfElseStatement(IfElseStatement ifElse, Scope scope)
     {
         var conditionResult = Evaluate(ifElse.Condition, scope);
 
@@ -201,7 +222,7 @@ internal static class Interpreter
         return new VoidValue();
     }
 
-    public static VoidValue EvaluateForStatement(ForStatement forStmt, Scope scope)
+    public VoidValue EvaluateForStatement(ForStatement forStmt, Scope scope)
     {
         LocalScope localScope = new LocalScope(scope);
 
@@ -210,12 +231,28 @@ internal static class Interpreter
         return new VoidValue();
     }
 
-    public static void ExecuteLoop(CodeBlockStatement body, Expression? condition, Statement? update, IEnumerable<Statement> initialization, Scope scope, Statement source)
+    public VoidValue EvaluateBreakStatement(BreakStatement breakStmt, Scope scope)
+    {
+        if (_contextStack.Count == 0 || _contextStack.Last() != ExecutionContexts.Loop)
+        {
+            throw new UnexpectedStatementException(
+                "Cannot use break outside of a loop",
+                breakStmt.StartLine,
+                breakStmt.StartColumn
+            );
+        }
+
+        throw new BreakException();
+    }
+
+    public void ExecuteLoop(CodeBlockStatement body, Expression? condition, Statement? update, IEnumerable<Statement> initialization, Scope scope, Statement source)
     {
         foreach (var stmt in initialization)
         {
             Evaluate(stmt, scope);
         }
+
+        _contextStack.Add(ExecutionContexts.Loop);
 
         RuntimeValue? conditionResult = null;
 
@@ -249,12 +286,26 @@ internal static class Interpreter
                 }
             }
 
-            EvaluateCodeBlock(body, scope);
+            try
+            {
+                EvaluateCodeBlock(body, scope);
+            }
+            catch (BreakException)
+            {
+                break;
+            }
 
             if (update is not null)
             {
                 Evaluate(update, scope);
             }
         }
+
+        if (_contextStack.Count == 0 || _contextStack.Last() != ExecutionContexts.Loop)
+        {
+            throw new Exception("Corrupted context stack");
+        }
+
+        _contextStack.RemoveAt(_contextStack.Count - 1);
     }
 }

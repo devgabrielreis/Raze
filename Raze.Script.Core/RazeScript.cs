@@ -22,7 +22,7 @@ public static class RazeScript
 
         var program = new Parser(tokens).Parse();
 
-        var result = Interpreter.Evaluate(program, scope);
+        var result = new Interpreter().Evaluate(program, scope);
 
         return result;
     }
