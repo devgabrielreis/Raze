@@ -312,7 +312,7 @@ public class RazeScriptControlStructuresTests
         var script = @"
             var integer? test = 0;
             while (test < 10) {
-                test = test + 3
+                test = test + 3;
                 continue;
                 
                 test = 1000;
