@@ -138,7 +138,7 @@ public class RazeScriptControlStructuresTests
     {
         var script = @"
             var integer test = 0;
-            for (int i = 0; i < 10; i = i + 1) {
+            for (var integer i = 0; i < 10; i = i + 1) {
                 test = test + i;
             }
             test
@@ -154,7 +154,7 @@ public class RazeScriptControlStructuresTests
     {
         var script = @"
             var integer test = 0;
-            for (int i = 0; i + 10; i = i + 1) {
+            for (var integer i = 0; i + 10; i = i + 1) {
                 test = test + i;
             }
         ";
@@ -170,7 +170,7 @@ public class RazeScriptControlStructuresTests
     {
         var script = @"
             var boolean? test = null;
-            for (int i = 0; test; i = i + 1) {
+            for (var integer i = 0; test; i = i + 1) {
                 test = false;
             }
         ";
@@ -186,7 +186,7 @@ public class RazeScriptControlStructuresTests
     {
         var script = @"
             var integer? test = null;
-            for (int i = 0; i < 10; i = i + 1) {
+            for (var integer i = 0; i < 10; i = i + 1) {
                 if (i == 5) {
                     break;
                 }
@@ -204,12 +204,12 @@ public class RazeScriptControlStructuresTests
     public void Evaluate_ContinueStatement_SkipsForLoopIteration()
     {
         var script = @"
-            var integer? test = null;
-            for (int i = 0; i < 6; i = i + 1) {
+            var integer test = 0;
+            for (var integer i = 0; i < 6; i = i + 1) {
                 if (i % 2 == 0) {
                     continue;
                 }
-                test = i;
+                test = test + i;
             }
             test
         ";

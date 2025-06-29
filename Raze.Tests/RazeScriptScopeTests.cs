@@ -112,7 +112,7 @@ public class RazeScriptScopeTests
         var scope = new InterpreterScope();
 
         var script = @"
-            for (int i = 0; i < 10; i = i + 1) {
+            for (var integer i = 0; i < 10; i = i + 1) {
                 var integer test = i;
             }
         ";
@@ -135,7 +135,7 @@ public class RazeScriptScopeTests
     {
         var script = @"
             var integer test = 10;
-            for (int i = 0; i < 10; i = i + 1) {
+            for (var integer i = 0; i < 10; i = i + 1) {
                 test = 10;
                 var integer test = i;
             }
@@ -151,7 +151,7 @@ public class RazeScriptScopeTests
     public void Evaluate_DeclaringConstantInsideForLoop_ThrowsScopeDeclarationException()
     {
         var script = @"
-            for (int i = 0; i < 10; i = i + 1) {
+            for (var integer i = 0; i < 10; i = i + 1) {
                 const integer test = i;
             }
         ";
