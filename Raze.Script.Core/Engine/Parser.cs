@@ -409,16 +409,25 @@ internal class Parser
                 continue;
             }
 
-            VariableDeclarationStatement varDeclaration = (body.Body[i] as VariableDeclarationStatement)!;
+            VariableDeclarationStatement oldVarDeclaration = (body.Body[i] as VariableDeclarationStatement)!;
+            VariableDeclarationStatement newVarDeclaration = new VariableDeclarationStatement(
+                oldVarDeclaration.Identifier,
+                oldVarDeclaration.Type,
+                null,
+                oldVarDeclaration.IsConstant,
+                oldVarDeclaration.IsNullable,
+                oldVarDeclaration.StartLine,
+                oldVarDeclaration.StartColumn
+            );
 
-            initializationList.Add(varDeclaration);
+            initializationList.Add(newVarDeclaration);
 
             body.Body[i] = new AssignmentStatement
             (
-                new IdentifierExpression(varDeclaration.Identifier, varDeclaration.StartLine, varDeclaration.StartColumn),
-                varDeclaration.Value ?? new NullLiteralExpression(varDeclaration.StartLine, varDeclaration.StartColumn),
-                varDeclaration.StartLine,
-                varDeclaration.StartColumn
+                new IdentifierExpression(oldVarDeclaration.Identifier, oldVarDeclaration.StartLine, oldVarDeclaration.StartColumn),
+                oldVarDeclaration.Value ?? new NullLiteralExpression(oldVarDeclaration.StartLine, oldVarDeclaration.StartColumn),
+                oldVarDeclaration.StartLine,
+                oldVarDeclaration.StartColumn
             );
         }
     }
