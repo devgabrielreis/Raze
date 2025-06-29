@@ -210,7 +210,7 @@ internal class Interpreter
 
         foreach (var stmt in loopStmt.Initialization)
         {
-            Evaluate(stmt, scope);
+            Evaluate(stmt, localScope);
         }
 
         _contextStack.Add(ExecutionContexts.Loop);
@@ -219,7 +219,7 @@ internal class Interpreter
         {
             if (loopStmt.Condition is not null)
             {
-                if (!GetValidBooleanValue(loopStmt.Condition, scope))
+                if (!GetValidBooleanValue(loopStmt.Condition, localScope))
                 {
                     break;
                 }
@@ -227,7 +227,7 @@ internal class Interpreter
 
             try
             {
-                EvaluateCodeBlock(loopStmt.Body, scope);
+                EvaluateCodeBlock(loopStmt.Body, localScope);
             }
             catch (BreakException)
             {
@@ -239,7 +239,7 @@ internal class Interpreter
 
             if (loopStmt.Update is not null)
             {
-                Evaluate(loopStmt.Update, scope);
+                Evaluate(loopStmt.Update, localScope);
             }
         }
 
