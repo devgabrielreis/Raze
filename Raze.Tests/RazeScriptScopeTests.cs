@@ -145,6 +145,19 @@ public class RazeScriptScopeTests
         {
             RazeScript.Evaluate(script);
         });
+
+        script = @"
+            var integer test = 10;
+            for (var integer i = 0; i < 10; i = i + 1) {
+                localVar = 10;
+                var integer localVar = i;
+            }
+        ";
+
+        Assert.Throws<UninitializedVariableException>(() =>
+        {
+            RazeScript.Evaluate(script);
+        });
     }
 
     [Fact]
@@ -190,6 +203,20 @@ public class RazeScriptScopeTests
             while (true) {
                 test = 10;
                 var integer test = i;
+                break;
+            }
+        ";
+
+        Assert.Throws<UninitializedVariableException>(() =>
+        {
+            RazeScript.Evaluate(script);
+        });
+
+        script = @"
+            var integer test = 10;
+            while (true) {
+                localVar = 10;
+                var integer localVar = i;
                 break;
             }
         ";
