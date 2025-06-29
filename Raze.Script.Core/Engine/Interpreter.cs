@@ -226,7 +226,7 @@ internal class Interpreter
 
     public VoidValue EvaluateForStatement(ForStatement forStmt, Scope scope)
     {
-        LocalScope localScope = new LocalScope(scope);
+        LoopScope localScope = new LoopScope(scope);
 
         ExecuteLoop(forStmt.Body, forStmt.Condition, forStmt.Update, forStmt.Initialization, localScope, forStmt);
 
@@ -261,7 +261,7 @@ internal class Interpreter
         throw new ContinueException();
     }
 
-    public void ExecuteLoop(CodeBlockStatement body, Expression? condition, Statement? update, IEnumerable<Statement> initialization, Scope scope, Statement source)
+    public void ExecuteLoop(CodeBlockStatement body, Expression? condition, Statement? update, IEnumerable<Statement> initialization, LoopScope scope, Statement source)
     {
         foreach (var stmt in initialization)
         {
