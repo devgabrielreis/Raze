@@ -13,6 +13,9 @@ public abstract class VariableSymbol : Symbol
 
     public bool IsInitialized { get; private set; }
 
+    private int? _declarationLine;
+    private int? _declarationColumn;
+
     public abstract string VariableTypeName { get; }
 
     public VariableSymbol(RuntimeValue? value, bool isConstant, bool isNullable)
@@ -27,6 +30,8 @@ public abstract class VariableSymbol : Symbol
 
     private void Initialize(RuntimeValue? value, bool isConstant, bool isNullable, int? sourceLine, int? sourceColumn)
     {
+        _declarationLine = sourceLine;
+        _declarationColumn = sourceColumn;
         IsNullable = isNullable;
         IsInitialized = false;
         IsConstant = false;
@@ -51,9 +56,23 @@ public abstract class VariableSymbol : Symbol
             throw new ConstantAssignmentException(sourceLine, sourceColumn);
         }
 
+        // dentro de loops, como é feito o hoisting da declaracao de variaveis, é possivel
+        // que a variavel seja acessada antes da linha onde ela é inicializada
+        if (!IsInitialized && _declarationLine.HasValue && _declarationColumn.HasValue)
+        {
+            bool isBeforeDeclaration =
+                (sourceLine < _declarationLine) ||
+                (sourceLine == _declarationLine && sourceColumn < _declarationColumn);
+
+            if (isBeforeDeclaration)
+            {
+                throw new UninitializedVariableException(sourceLine, sourceColumn);
+            }
+        }
+
         if (!IsNullable && (newValue is NullValue || newValue.Value is null))
         {
-            throw new VariableTypeException("NULL", VariableTypeName, sourceLine, sourceColumn);
+            throw new VariableTypeException(nameof(NullValue), VariableTypeName, sourceLine, sourceColumn);
         }
 
         IsInitialized = true;
