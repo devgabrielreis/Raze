@@ -70,9 +70,9 @@ internal class Interpreter
                 return EvaluateLoopStatement(stmt, scope);
 
             case BreakStatement stmt:
-                return EvaluateBreakStatement(stmt, scope);
+                return EvaluateBreakStatement(stmt);
             case ContinueStatement stmt:
-                return EvaluateContinueStatement(stmt, scope);
+                return EvaluateContinueStatement(stmt);
 
             default:
                 throw new UnsupportedStatementException(statement.GetType().Name, statement.StartLine, statement.StartColumn);
@@ -192,27 +192,7 @@ internal class Interpreter
 
     private VoidValue EvaluateIfElseStatement(IfElseStatement ifElse, Scope scope)
     {
-        var conditionResult = Evaluate(ifElse.Condition, scope);
-
-        if (conditionResult is not BooleanValue)
-        {
-            throw new UnexpectedTypeException(
-                conditionResult.GetType().Name,
-                nameof(BooleanValue),
-                ifElse.Condition.StartLine,
-                ifElse.Condition.StartColumn
-            );
-        }
-
-        if ((conditionResult as BooleanValue)!.BoolValue == null)
-        {
-            throw new NullValueException(
-                ifElse.Condition.StartLine,
-                ifElse.Condition.StartColumn
-            );
-        }
-
-        if ((conditionResult as BooleanValue)!.BoolValue!.Value)
+        if (GetValidBooleanValue(ifElse.Condition, scope))
         {
             Evaluate(ifElse.Then, scope);
         }
@@ -226,14 +206,54 @@ internal class Interpreter
 
     public VoidValue EvaluateLoopStatement(LoopStatement loopStmt, Scope scope)
     {
-        LoopScope localScope = new LoopScope(scope);
+        var localScope = new LoopScope(scope);
 
-        ExecuteLoop(loopStmt.Body, loopStmt.Condition, loopStmt.Update, loopStmt.Initialization, localScope, loopStmt);
+        foreach (var stmt in loopStmt.Initialization)
+        {
+            Evaluate(stmt, scope);
+        }
+
+        _contextStack.Add(ExecutionContexts.Loop);
+
+        while (true)
+        {
+            if (loopStmt.Condition is not null)
+            {
+                if (!GetValidBooleanValue(loopStmt.Condition, scope))
+                {
+                    break;
+                }
+            }
+
+            try
+            {
+                EvaluateCodeBlock(loopStmt.Body, scope);
+            }
+            catch (BreakException)
+            {
+                break;
+            }
+            catch (ContinueException)
+            {
+            }
+
+            if (loopStmt.Update is not null)
+            {
+                Evaluate(loopStmt.Update, scope);
+            }
+        }
+
+        if (_contextStack.Count == 0 || _contextStack.Last() != ExecutionContexts.Loop)
+        {
+            throw new Exception("Corrupted context stack");
+        }
+
+        _contextStack.RemoveAt(_contextStack.Count - 1);
 
         return new VoidValue();
     }
 
-    public VoidValue EvaluateBreakStatement(BreakStatement breakStmt, Scope scope)
+    public VoidValue EvaluateBreakStatement(BreakStatement breakStmt)
     {
         if (_contextStack.Count == 0 || _contextStack.Last() != ExecutionContexts.Loop)
         {
@@ -247,7 +267,7 @@ internal class Interpreter
         throw new BreakException();
     }
 
-    public VoidValue EvaluateContinueStatement(ContinueStatement continueStmt, Scope scope)
+    public VoidValue EvaluateContinueStatement(ContinueStatement continueStmt)
     {
         if (_contextStack.Count == 0 || _contextStack.Last() != ExecutionContexts.Loop)
         {
@@ -261,70 +281,28 @@ internal class Interpreter
         throw new ContinueException();
     }
 
-    public void ExecuteLoop(CodeBlockStatement body, Expression? condition, Statement? update, IEnumerable<Statement> initialization, LoopScope scope, Statement source)
+    private bool GetValidBooleanValue(Expression condition, Scope scope)
     {
-        foreach (var stmt in initialization)
+        var conditionResult = Evaluate(condition, scope);
+
+        if (conditionResult is not BooleanValue)
         {
-            Evaluate(stmt, scope);
+            throw new UnexpectedTypeException(
+                conditionResult.GetType().Name,
+                nameof(BooleanValue),
+                condition.StartLine,
+                condition.StartColumn
+            );
         }
 
-        _contextStack.Add(ExecutionContexts.Loop);
-
-        RuntimeValue? conditionResult = null;
-
-        while (true)
+        if ((conditionResult as BooleanValue)!.BoolValue == null)
         {
-            if (condition is not null)
-            {
-                conditionResult = Evaluate(condition, scope);
-
-                if (conditionResult is not BooleanValue)
-                {
-                    throw new UnexpectedTypeException(
-                        conditionResult.GetType().Name,
-                        nameof(BooleanValue),
-                        condition.StartLine,
-                        condition.StartColumn
-                    );
-                }
-
-                if ((conditionResult as BooleanValue)!.BoolValue == null)
-                {
-                    throw new NullValueException(
-                        condition.StartLine,
-                        condition.StartColumn
-                    );
-                }
-
-                if ((conditionResult as BooleanValue)!.BoolValue == false)
-                {
-                    break;
-                }
-            }
-
-            try
-            {
-                EvaluateCodeBlock(body, scope);
-            }
-            catch (BreakException)
-            {
-                break;
-            }
-            catch (ContinueException)
-            {
-            }
-
-            if (update is not null)
-            {
-                Evaluate(update, scope);
-            }
+            throw new NullValueException(
+                condition.StartLine,
+                condition.StartColumn
+            );
         }
 
-        if (_contextStack.Count == 0 || _contextStack.Last() != ExecutionContexts.Loop)
-        {
-            throw new Exception("Corrupted context stack");
-        }
-
-        _contextStack.RemoveAt(_contextStack.Count - 1);
+        return (conditionResult as BooleanValue)!.BoolValue!.Value;
     }
 }
