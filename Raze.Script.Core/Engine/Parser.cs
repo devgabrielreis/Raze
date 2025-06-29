@@ -261,6 +261,8 @@ internal class Parser
 
         CodeBlockStatement body = ParseCodeBlock();
 
+        HoistLoopBodyVariableDeclarations(ref body, ref initialization);
+
         return new ForStatement(initialization, condition, update, body, startLine, startColumn);
     }
 
@@ -394,5 +396,28 @@ internal class Parser
         Return();
 
         return left;
+    }
+
+    private void HoistLoopBodyVariableDeclarations(ref CodeBlockStatement body, ref List<Statement> initializationList)
+    {
+        for (int i = 0; i < body.Body.Count; i++)
+        {
+            if (body.Body[i] is not VariableDeclarationStatement)
+            {
+                continue;
+            }
+
+            VariableDeclarationStatement varDeclaration = (body.Body[i] as VariableDeclarationStatement)!;
+
+            initializationList.Add(varDeclaration);
+
+            body.Body[i] = new AssignmentStatement
+            (
+                new IdentifierExpression(varDeclaration.Identifier, varDeclaration.StartLine, varDeclaration.StartColumn),
+                varDeclaration.Value ?? new NullLiteralExpression(varDeclaration.StartLine, varDeclaration.StartColumn),
+                varDeclaration.StartLine,
+                varDeclaration.StartColumn
+            );
+        }
     }
 }
