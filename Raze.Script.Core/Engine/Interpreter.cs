@@ -19,11 +19,11 @@ internal class Interpreter
         Loop
     }
 
-    private List<ExecutionContexts> _contextStack;
+    private Stack<ExecutionContexts> _contextStack;
 
     public Interpreter()
     {
-        _contextStack = [];
+        _contextStack = new Stack<ExecutionContexts>();
     }
 
     public void Reset()
@@ -213,7 +213,7 @@ internal class Interpreter
             Evaluate(stmt, localScope);
         }
 
-        _contextStack.Add(ExecutionContexts.Loop);
+        _contextStack.Push(ExecutionContexts.Loop);
 
         while (true)
         {
@@ -243,19 +243,19 @@ internal class Interpreter
             }
         }
 
-        if (_contextStack.Count == 0 || _contextStack.Last() != ExecutionContexts.Loop)
+        if (_contextStack.Count == 0 || _contextStack.Peek() != ExecutionContexts.Loop)
         {
             throw new Exception("Corrupted context stack");
         }
 
-        _contextStack.RemoveAt(_contextStack.Count - 1);
+        _contextStack.Pop();
 
         return new VoidValue();
     }
 
     public VoidValue EvaluateBreakStatement(BreakStatement breakStmt)
     {
-        if (_contextStack.Count == 0 || _contextStack.Last() != ExecutionContexts.Loop)
+        if (_contextStack.Count == 0 || _contextStack.Peek() != ExecutionContexts.Loop)
         {
             throw new UnexpectedStatementException(
                 "Cannot use break outside of a loop",
@@ -269,7 +269,7 @@ internal class Interpreter
 
     public VoidValue EvaluateContinueStatement(ContinueStatement continueStmt)
     {
-        if (_contextStack.Count == 0 || _contextStack.Last() != ExecutionContexts.Loop)
+        if (_contextStack.Count == 0 || _contextStack.Peek() != ExecutionContexts.Loop)
         {
             throw new UnexpectedStatementException(
                 "Cannot use continue outside of a loop",
