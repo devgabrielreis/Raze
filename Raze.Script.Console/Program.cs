@@ -96,14 +96,15 @@ internal class Program
         
         if (ex.Line is not null && ex.Column is not null)
         {
-            Console.WriteLine(source.Split('\n')[ex.Line.Value]);
+            string errorLine = source.Split('\n')[ex.Line.Value];
+            Console.WriteLine(errorLine);
 
             for (int i = 0; i < ex.Column; i++)
             {
-                Console.Write(" ");
+                Console.Write(errorLine[i] == '\t' ? '\t' : ' ');
             }
 
-            Console.WriteLine("^");
+            Console.WriteLine('^');
         }
         else
         {
