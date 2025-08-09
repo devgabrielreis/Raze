@@ -65,12 +65,6 @@ internal class Program
             command += '\n';
 
             Console.Write("..");
-            for (int i = 0; i < level; i++)
-            {
-                Console.Write("    ");
-                command += "    ";
-            }
-
             command += Console.ReadLine()!;
         }
 
