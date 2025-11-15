@@ -110,4 +110,22 @@ public class ForLoopTests
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(10, (result as IntegerValue)!.IntValue);
     }
+
+    [Fact]
+    public void Evaluate_ForLoopInitialization_CanUseVariableAlreadyDeclared()
+    {
+        var script = @"
+            var integer test = 500;
+
+            for (test = 0; test < 5; test = test + 1) { }
+
+            test
+        ";
+        Int128 expectedResult = 5;
+
+        var result = RazeScript.Evaluate(script);
+
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(expectedResult, (result as IntegerValue)!.IntValue);
+    }
 }
