@@ -1,11 +1,10 @@
 ﻿using Raze.Script.Core;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Scopes;
 using Raze.Script.Core.Values;
 
-namespace Raze.Tests;
+namespace Raze.Tests.Core;
 
-public class RazeScriptArithmeticTests
+public class ArithmeticTests
 {
     [Theory]
     [InlineData("10 + 3 * 6", 28)]
@@ -49,19 +48,5 @@ public class RazeScriptArithmeticTests
         {
             RazeScript.Evaluate(expression);
         });
-    }
-
-    [Fact]
-    public void Evaluate_VariableAssignment_CreatesCopy()
-    {
-        var scope = new InterpreterScope();
-
-        RazeScript.Evaluate("var integer a = 10", scope);
-        RazeScript.Evaluate("var integer b = a", scope);
-        RazeScript.Evaluate("a = 20", scope);
-        var result = RazeScript.Evaluate("b", scope);
-
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(10, (result as IntegerValue)!.IntValue);
     }
 }

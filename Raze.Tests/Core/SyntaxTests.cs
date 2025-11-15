@@ -3,9 +3,9 @@ using Raze.Script.Core.Exceptions.LexerExceptions;
 using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Values;
 
-namespace Raze.Tests;
+namespace Raze.Tests.Core;
 
-public class RazeScriptSyntaxTests
+public class SyntaxTests
 {
     [Theory]
     [InlineData("@")]
@@ -43,17 +43,6 @@ public class RazeScriptSyntaxTests
         Assert.Throws<InvalidStringException>(() =>
         {
             RazeScript.Evaluate(expreesion);
-        });
-    }
-
-    [Theory]
-    [InlineData("\"hello\\zword\"")]
-    [InlineData("\"\\'\"")]
-    public void Evaluate_InvalidEscapeSequence_ThrowsUnrecognizedEscapeSequenceException(string expression)
-    {
-        Assert.Throws<UnrecognizedEscapeSequenceException>(() =>
-        {
-            RazeScript.Evaluate(expression);
         });
     }
 

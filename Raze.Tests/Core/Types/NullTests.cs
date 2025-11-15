@@ -1,9 +1,9 @@
 ﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core;
 
-namespace Raze.Tests;
+namespace Raze.Tests.Core.Types;
 
-public class RazeScriptNullTests
+public class NullTests
 {
     [Theory]
     [InlineData("null + 10")]

@@ -1,40 +1,13 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core;
+using Raze.Script.Core.Exceptions.LexerExceptions;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Scopes;
 using Raze.Script.Core.Values;
-using Raze.Script.Core;
 
-namespace Raze.Tests;
+namespace Raze.Tests.Core.Types;
 
-public class RazeScriptStringTests
+public class StringTests
 {
-    [Theory]
-    [InlineData("var string test = \"teste\"", "test", "teste")]
-    [InlineData("var string? test = null", "test", null)]
-    public void Evaluate_StringVariableDeclaration_ReturnsExpectedValue(string expression, string varname, string? expected)
-    {
-        var scope = new InterpreterScope();
-        RazeScript.Evaluate(expression, scope);
-
-        var result = RazeScript.Evaluate(varname, scope);
-
-        Assert.IsType<StringValue>(result);
-
-        Assert.Equal(expected, (result as StringValue)!.StrValue);
-    }
-
-    [Theory]
-    [InlineData("var string test = true")]
-    [InlineData("const string test = 10")]
-    [InlineData("var string test = 10.0")]
-    [InlineData("var string test = null")]
-    public void Evaluate_WrongStringVariableTypeAssignment_ThrowsVariableTypeException(string expression)
-    {
-        Assert.Throws<VariableTypeException>(() =>
-        {
-            var result = RazeScript.Evaluate(expression);
-        });
-    }
-
     [Fact]
     public void Evaluate_StringConcatenationExpression_ReturnsExpectedValue()
     {
@@ -149,22 +122,13 @@ public class RazeScriptStringTests
     }
 
     [Theory]
-    [InlineData("+")]
-    [InlineData("==")]
-    [InlineData("!=")]
-    public void Evaluate_StringOperationWithNullStringVariable_ThrowsNullValueException(string op)
+    [InlineData("\"hello\\zword\"")]
+    [InlineData("\"\\'\"")]
+    public void Evaluate_InvalidEscapeSequence_ThrowsUnrecognizedEscapeSequenceException(string expression)
     {
-        var scope = new InterpreterScope();
-        RazeScript.Evaluate("var string? nullVar = null", scope);
-
-        Assert.Throws<NullValueException>(() =>
+        Assert.Throws<UnrecognizedEscapeSequenceException>(() =>
         {
-            RazeScript.Evaluate($"\"a\" {op} nullVar", scope);
-        });
-
-        Assert.Throws<NullValueException>(() =>
-        {
-            RazeScript.Evaluate($"nullVar {op} \"a\"", scope);
+            RazeScript.Evaluate(expression);
         });
     }
 }

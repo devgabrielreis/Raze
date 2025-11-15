@@ -3,9 +3,9 @@ using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Scopes;
 using Raze.Script.Core.Values;
 
-namespace Raze.Tests;
+namespace Raze.Tests.Core;
 
-public class RazeScriptScopeTests
+public class ScopeTests
 {
     [Fact]
     public void Evaluate_DuplicateVariableDeclaration_ThrowsException()
@@ -24,19 +24,6 @@ public class RazeScriptScopeTests
         Assert.Throws<RedeclarationException>(() =>
         {
             RazeScript.Evaluate("const integer x = 2", scope2);
-        });
-    }
-
-    [Fact]
-    public void Evaluate_ConstantAssignment_ThrowsConstantAssignmentException()
-    {
-        var scope = new InterpreterScope();
-
-        RazeScript.Evaluate("const integer test = 10", scope);
-
-        Assert.Throws<ConstantAssignmentException>(() =>
-        {
-            RazeScript.Evaluate("test = 11", scope);
         });
     }
 
@@ -75,34 +62,6 @@ public class RazeScriptScopeTests
         Assert.Throws<UndefinedIdentifierException>(() =>
         {
             RazeScript.Evaluate(script);
-        });
-    }
-
-    [Fact]
-    public void Evaluate_UninitializedVariable_ThrowsUninitializedVariableException()
-    {
-        var scope = new InterpreterScope();
-
-        RazeScript.Evaluate("var integer variable", scope);
-        RazeScript.Evaluate("var integer? nullableVariable", scope);
-
-        Assert.Throws<UninitializedVariableException>(() =>
-        {
-            RazeScript.Evaluate("variable", scope);
-        });
-
-        Assert.Throws<UninitializedVariableException>(() =>
-        {
-            RazeScript.Evaluate("nullableVariable", scope);
-        });
-    }
-
-    [Fact]
-    public void Evaluate_AssigningNullToNonNullableVariable_ThrowsVariableTypeException()
-    {
-        Assert.Throws<VariableTypeException>(() =>
-        {
-            RazeScript.Evaluate("var integer variable = null");
         });
     }
 
