@@ -9,7 +9,7 @@ public class SyntaxTests
 {
     [Theory]
     [InlineData("@")]
-    [InlineData(".0")]
+    [InlineData(".")]
     [InlineData("0.")]
     [InlineData("0.0.")]
     public void Evaluate_Expression_ThrowsUnexpectedCharacterException(string expression)

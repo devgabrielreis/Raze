@@ -122,4 +122,21 @@ public class DecimalTests
             var result = RazeScript.Evaluate(expression);
         });
     }
+
+    [Fact]
+    public void Evaluate_DecimalValue_CanStartWithDot()
+    {
+        var script = @"
+            var decimal test = .5;
+            test = test + .05;
+            test = test + .0;
+            test = test + .00;
+            test = test + .450;
+            test
+        ";
+        decimal expectedResult = 1.0M;
+
+        var result = RazeScript.Evaluate(script);
+        Assert.Equal(expectedResult, (result as DecimalValue)!.DecValue);
+    }
 }
