@@ -108,4 +108,23 @@ public class WhileLoopTests
             RazeScript.Evaluate(script);
         });
     }
+
+    [Fact]
+    public void Evaluate_WhileLoopBody_CanHaveConstantDeclaration()
+    {
+        var script = @"
+            var integer test = 0;
+            while (test < 10) {
+                const integer valueToAdd = 5;
+                test = test + valueToAdd;
+            }
+            test
+        ";
+        Int128 expectedResult = 10;
+
+        var result = RazeScript.Evaluate(script);
+
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(expectedResult, (result as IntegerValue)!.IntValue);
+    }
 }

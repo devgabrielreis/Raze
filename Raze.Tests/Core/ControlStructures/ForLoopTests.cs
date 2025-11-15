@@ -128,4 +128,23 @@ public class ForLoopTests
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(expectedResult, (result as IntegerValue)!.IntValue);
     }
+
+    [Fact]
+    public void Evaluate_ForLoopBody_CanHaveConstantDeclaration()
+    {
+        var script = @"
+            var integer test = 0;
+            for (var integer i = 0; i < 2; i = i + 1) {
+                const integer valueToAdd = 5;
+                test = test + valueToAdd;
+            }
+            test
+        ";
+        Int128 expectedResult = 10;
+
+        var result = RazeScript.Evaluate(script);
+
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(expectedResult, (result as IntegerValue)!.IntValue);
+    }
 }
