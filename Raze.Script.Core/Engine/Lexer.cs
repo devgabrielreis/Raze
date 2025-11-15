@@ -184,7 +184,7 @@ internal class Lexer
             return;
         }
 
-        if (CharUtils.IsNumber(Current()))
+        if (CharUtils.IsNumber(Current()) || Current() == '.')
         {
             ProcessNumber();
             return;
