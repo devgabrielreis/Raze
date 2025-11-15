@@ -206,11 +206,11 @@ internal class Interpreter
 
     public VoidValue EvaluateLoopStatement(LoopStatement loopStmt, Scope scope)
     {
-        var localScope = new LoopScope(scope);
+        var outerLoopScope = new LocalScope(scope);
 
         foreach (var stmt in loopStmt.Initialization)
         {
-            Evaluate(stmt, localScope);
+            Evaluate(stmt, outerLoopScope);
         }
 
         _contextStack.Push(ExecutionContexts.Loop);
@@ -219,7 +219,7 @@ internal class Interpreter
         {
             if (loopStmt.Condition is not null)
             {
-                if (!GetValidBooleanValue(loopStmt.Condition, localScope))
+                if (!GetValidBooleanValue(loopStmt.Condition, outerLoopScope))
                 {
                     break;
                 }
@@ -227,7 +227,8 @@ internal class Interpreter
 
             try
             {
-                EvaluateCodeBlock(loopStmt.Body, localScope);
+                var currentIterationScope = new LocalScope(outerLoopScope);
+                EvaluateCodeBlock(loopStmt.Body, currentIterationScope);
             }
             catch (BreakException)
             {
@@ -239,7 +240,7 @@ internal class Interpreter
 
             if (loopStmt.Update is not null)
             {
-                Evaluate(loopStmt.Update, localScope);
+                Evaluate(loopStmt.Update, outerLoopScope);
             }
         }
 

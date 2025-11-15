@@ -269,8 +269,6 @@ internal class Parser
 
         CodeBlockStatement body = ParseCodeBlock();
 
-        HoistLoopBodyVariableDeclarations(ref body, ref initialization);
-
         return new LoopStatement(initialization, condition, update, body, startLine, startColumn);
     }
 
@@ -294,8 +292,6 @@ internal class Parser
 
         CodeBlockStatement body = ParseCodeBlock();
         List<Statement> initialization = [];
-
-        HoistLoopBodyVariableDeclarations(ref body, ref initialization);
 
         return new LoopStatement(initialization, condition, null, body, startLine, startColumn);
     }
@@ -430,37 +426,5 @@ internal class Parser
         Return();
 
         return left;
-    }
-
-    private static void HoistLoopBodyVariableDeclarations(ref CodeBlockStatement body, ref List<Statement> initializationList)
-    {
-        for (int i = 0; i < body.Body.Count; i++)
-        {
-            if (body.Body[i] is not VariableDeclarationStatement)
-            {
-                continue;
-            }
-
-            VariableDeclarationStatement oldVarDeclaration = (body.Body[i] as VariableDeclarationStatement)!;
-            VariableDeclarationStatement newVarDeclaration = new VariableDeclarationStatement(
-                oldVarDeclaration.Identifier,
-                oldVarDeclaration.Type,
-                null,
-                oldVarDeclaration.IsConstant,
-                oldVarDeclaration.IsNullable,
-                oldVarDeclaration.StartLine,
-                oldVarDeclaration.StartColumn
-            );
-
-            initializationList.Add(newVarDeclaration);
-
-            body.Body[i] = new AssignmentStatement
-            (
-                new IdentifierExpression(oldVarDeclaration.Identifier, oldVarDeclaration.StartLine, oldVarDeclaration.StartColumn),
-                oldVarDeclaration.Value ?? new NullLiteralExpression(oldVarDeclaration.StartLine, oldVarDeclaration.StartColumn),
-                oldVarDeclaration.StartLine,
-                oldVarDeclaration.StartColumn
-            );
-        }
     }
 }
