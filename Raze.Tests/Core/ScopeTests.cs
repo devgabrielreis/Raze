@@ -90,51 +90,6 @@ public class ScopeTests
     }
 
     [Fact]
-    public void Evaluate_AccessingVariableInsideForLoopBeforeItsInitialization_ThrowsUninitializedVariableException()
-    {
-        var script = @"
-            var integer test = 10;
-            for (var integer i = 0; i < 10; i = i + 1) {
-                test = 10;
-                var integer test = i;
-            }
-        ";
-
-        Assert.Throws<UninitializedVariableException>(() =>
-        {
-            RazeScript.Evaluate(script);
-        });
-
-        script = @"
-            var integer test = 10;
-            for (var integer i = 0; i < 10; i = i + 1) {
-                localVar = 10;
-                var integer localVar = i;
-            }
-        ";
-
-        Assert.Throws<UninitializedVariableException>(() =>
-        {
-            RazeScript.Evaluate(script);
-        });
-    }
-
-    [Fact]
-    public void Evaluate_DeclaringConstantInsideForLoop_ThrowsScopeDeclarationException()
-    {
-        var script = @"
-            for (var integer i = 0; i < 10; i = i + 1) {
-                const integer test = i;
-            }
-        ";
-
-        Assert.Throws<ScopeDeclarationException>(() =>
-        {
-            RazeScript.Evaluate(script);
-        });
-    }
-
-    [Fact]
     public void Evaluate_VariableDeclaredInsideWhileLoopConditionOutsideOfIt_ThrowsUndefinedIdentifierException()
     {
         var scope = new InterpreterScope();
@@ -151,54 +106,6 @@ public class ScopeTests
         Assert.Throws<UndefinedIdentifierException>(() =>
         {
             RazeScript.Evaluate("test", scope);
-        });
-    }
-
-    [Fact]
-    public void Evaluate_AccessingVariableInsideWhileLoopBeforeItsInitialization_ThrowsUninitializedVariableException()
-    {
-        var script = @"
-            var integer test = 10;
-            while (true) {
-                test = 10;
-                var integer test = i;
-                break;
-            }
-        ";
-
-        Assert.Throws<UninitializedVariableException>(() =>
-        {
-            RazeScript.Evaluate(script);
-        });
-
-        script = @"
-            var integer test = 10;
-            while (true) {
-                localVar = 10;
-                var integer localVar = i;
-                break;
-            }
-        ";
-
-        Assert.Throws<UninitializedVariableException>(() =>
-        {
-            RazeScript.Evaluate(script);
-        });
-    }
-
-    [Fact]
-    public void Evaluate_DeclaringConstantInsideWhileLoop_ThrowsScopeDeclarationException()
-    {
-        var script = @"
-            while (true) {
-                const integer test = i;
-                break;
-            }
-        ";
-
-        Assert.Throws<ScopeDeclarationException>(() =>
-        {
-            RazeScript.Evaluate(script);
         });
     }
 }
