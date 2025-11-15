@@ -233,7 +233,12 @@ internal class Parser
 
         if (Current() is not SemiColon)
         {
-            initialization.Add(ParseVariableDeclaration());
+            initialization.Add(
+                Current() is VariableDeclarationToken
+                    ? ParseVariableDeclaration()
+                    : ParseAssignmentStatement()
+            );
+
             Advance();
         }
 
