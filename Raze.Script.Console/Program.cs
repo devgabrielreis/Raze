@@ -18,7 +18,6 @@ internal class Program
     private static void RunInterpreter()
     {
         Console.WriteLine("Raze Interpreter");
-        Console.WriteLine($"Raze.Core    version {RazeScript.Version.ToString()}");
         Console.WriteLine($"Raze.Console version {Version.ToString()}");
 
 #if !RELEASE
