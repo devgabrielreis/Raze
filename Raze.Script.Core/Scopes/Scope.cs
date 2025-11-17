@@ -1,7 +1,6 @@
 ﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Symbols;
-using Raze.Script.Core.Symbols.Variables;
 using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Scopes;
@@ -44,7 +43,7 @@ public abstract class Scope
             throw new ScopeDeclarationException("constant", this.GetType().Name, sourceLine, sourceColumn);
         }
 
-        if (Lookup(name) is not null)
+        if (FindSymbol(name) is not null)
         {
             throw new RedeclarationException($"Symbol {name} is already declared", sourceLine, sourceColumn);
         }
@@ -64,17 +63,17 @@ public abstract class Scope
 
     protected virtual void AssignVariable(string name, RuntimeValue value, int? line, int? column)
     {
-        var resolvedScope = Resolve(name);
+        var resolvedScope = FindSymbolScope(name);
 
         if (resolvedScope is null)
         {
             throw new UndefinedIdentifierException(name, line, column);
         }
 
-        resolvedScope._variables[name].SetNewValue(value, line, column);
+        resolvedScope._variables[name].SetValue(value, line, column);
     }
 
-    public virtual Symbol? Lookup(string symbol)
+    public virtual Symbol? FindSymbol(string symbol)
     {
         if (_variables.TryGetValue(symbol, out var result))
         {
@@ -84,14 +83,14 @@ public abstract class Scope
         return null;
     }
 
-    public virtual Scope? Resolve(string symbol)
+    public virtual Scope? FindSymbolScope(string symbol)
     {
-        if (Lookup(symbol) is not null)
+        if (FindSymbol(symbol) is not null)
         {
             return this;
         }
 
-        if (_parent is not null && _parent.Resolve(symbol) is Scope result)
+        if (_parent is not null && _parent.FindSymbolScope(symbol) is Scope result)
         {
             return result;
         }

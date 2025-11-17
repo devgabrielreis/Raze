@@ -10,15 +10,15 @@ namespace Raze.Script.Core.Values;
 
 public class IntegerValue : RuntimeValue
 {
-    public override object? Value => _value;
+    public override object Value => _value;
 
-    public Int128? IntValue => _value;
+    public Int128 IntValue => _value;
 
     public override string TypeName => "Integer";
 
-    private readonly Int128? _value;
+    private readonly Int128 _value;
 
-    public IntegerValue(Int128? value)
+    public IntegerValue(Int128 value)
     {
         _value = value;
     }
@@ -28,10 +28,6 @@ public class IntegerValue : RuntimeValue
         if (other is IntegerValue intValue)
         {
             return ExecuteBinaryOperationWithInteger(op, intValue, source);
-        }
-        else if (other is DecimalValue decimalValue)
-        {
-            return ExecuteBinaryOperationWithDecimal(op, decimalValue, source);
         }
 
         throw new UnsupportedBinaryOperationException(
@@ -45,21 +41,11 @@ public class IntegerValue : RuntimeValue
 
     public override string ToString()
     {
-        if (_value is null)
-        {
-            return "null";
-        }
-
-        return _value.ToString()!;
+        return _value.ToString();
     }
 
     private RuntimeValue ExecuteBinaryOperationWithInteger(OperatorToken op, IntegerValue other, BinaryExpression source)
     {
-        if (IntValue is null || other.IntValue is null)
-        {
-            throw new NullValueException(source.StartLine, source.StartColumn);
-        }
-
         switch (op)
         {
             case AdditionOperator:
@@ -99,49 +85,8 @@ public class IntegerValue : RuntimeValue
         );
     }
 
-    private RuntimeValue ExecuteBinaryOperationWithDecimal(OperatorToken op, DecimalValue other, BinaryExpression source)
+    public override object Clone()
     {
-        if (IntValue is null || other.DecValue is null)
-        {
-            throw new NullValueException(source.StartLine, source.StartColumn);
-        }
-
-        switch (op)
-        {
-            case AdditionOperator:
-                return new DecimalValue((decimal)IntValue + other.DecValue);
-            case SubtractionOperator:
-                return new DecimalValue((decimal)IntValue - other.DecValue);
-            case MultiplicationOperator:
-                return new DecimalValue((decimal)IntValue * other.DecValue);
-            case DivisionOperator:
-                if (other.DecValue == 0)
-                {
-                    throw new DivisionByZeroException(source.StartLine, source.StartColumn);
-                }
-                return new DecimalValue((decimal)IntValue / other.DecValue);
-            case ModuloOperator:
-                return new DecimalValue((decimal)IntValue % other.DecValue);
-            case EqualOperator:
-                return new BooleanValue((decimal)IntValue == other.DecValue);
-            case NotEqualOperator:
-                return new BooleanValue((decimal)IntValue != other.DecValue);
-            case GreaterThanOperator:
-                return new BooleanValue((decimal)IntValue > other.DecValue);
-            case LessThanOperator:
-                return new BooleanValue((decimal)IntValue < other.DecValue);
-            case GreaterOrEqualThanOperator:
-                return new BooleanValue((decimal)IntValue >= other.DecValue);
-            case LessOrEqualThanOperator:
-                return new BooleanValue((decimal)IntValue <= other.DecValue);
-        }
-
-        throw new UnsupportedBinaryOperationException(
-            TypeName,
-            other.TypeName,
-            op.Lexeme,
-            source.StartLine,
-            source.StartColumn
-        );
+        return new IntegerValue(_value);
     }
 }

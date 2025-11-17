@@ -39,7 +39,7 @@ public class ForLoopTests
     }
 
     [Fact]
-    public void Evaluate_NullForLoopCondition_ThrowsNullValueException()
+    public void Evaluate_NullForLoopCondition_ThrowsUnexpectedTypeException()
     {
         var script = @"
             var boolean? test = null;
@@ -48,7 +48,7 @@ public class ForLoopTests
             }
         ";
 
-        Assert.Throws<NullValueException>(() =>
+        Assert.Throws<UnexpectedTypeException>(() =>
         {
             RazeScript.Evaluate(script);
         });

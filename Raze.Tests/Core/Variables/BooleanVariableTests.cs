@@ -18,9 +18,16 @@ public class BooleanVariableTests
 
         var result = RazeScript.Evaluate(varname, scope);
 
-        Assert.IsType<BooleanValue>(result);
+        if (expected is null)
+        {
+            Assert.IsType<NullValue>(result);
+        }
+        else
+        {
+            Assert.IsType<BooleanValue>(result);
 
-        Assert.Equal(expected, (result as BooleanValue)!.BoolValue);
+            Assert.Equal(expected, (result as BooleanValue)!.BoolValue);
+        }
     }
 
     [Theory]
@@ -33,27 +40,6 @@ public class BooleanVariableTests
         Assert.Throws<VariableTypeException>(() =>
         {
             var result = RazeScript.Evaluate(expression);
-        });
-    }
-
-    [Theory]
-    [InlineData("==")]
-    [InlineData("!=")]
-    [InlineData("&&")]
-    [InlineData("||")]
-    public void Evaluate_BooleanOperationWithNullBooleanVariable_ThrowsNullValueException(string op)
-    {
-        var scope = new InterpreterScope();
-        RazeScript.Evaluate("var boolean? nullVar = null", scope);
-
-        Assert.Throws<NullValueException>(() =>
-        {
-            RazeScript.Evaluate($"false {op} nullVar", scope);
-        });
-
-        Assert.Throws<NullValueException>(() =>
-        {
-            RazeScript.Evaluate($"nullVar {op} true", scope);
         });
     }
 }

@@ -7,15 +7,15 @@ namespace Raze.Script.Core.Values;
 
 public class BooleanValue : RuntimeValue
 {
-    public override object? Value => _value;
+    public override object Value => _value;
 
-    public bool? BoolValue => _value;
+    public bool BoolValue => _value;
 
     public override string TypeName => "Boolean";
 
-    private readonly bool? _value;
+    private readonly bool _value;
 
-    public BooleanValue(bool? value)
+    public BooleanValue(bool value)
     {
         _value = value;
     }
@@ -38,11 +38,6 @@ public class BooleanValue : RuntimeValue
 
     private BooleanValue ExecuteBinaryOperationWithBoolean(OperatorToken op, BooleanValue other, BinaryExpression source)
     {
-        if (BoolValue is null || other.BoolValue is null)
-        {
-            throw new NullValueException(source.StartLine, source.StartColumn);
-        }
-
         switch (op)
         {
             case EqualOperator:
@@ -50,9 +45,9 @@ public class BooleanValue : RuntimeValue
             case NotEqualOperator:
                 return new BooleanValue(BoolValue != other.BoolValue);
             case AndOperator:
-                return new BooleanValue(BoolValue.Value && other.BoolValue.Value);
+                return new BooleanValue(BoolValue && other.BoolValue);
             case OrOperator:
-                return new BooleanValue(BoolValue.Value || other.BoolValue.Value);
+                return new BooleanValue(BoolValue || other.BoolValue);
         }
 
         throw new UnsupportedBinaryOperationException(
@@ -66,11 +61,11 @@ public class BooleanValue : RuntimeValue
 
     public override string ToString()
     {
-        if (_value is null)
-        {
-            return "null";
-        }
+        return _value.ToString().ToLower();
+    }
 
-        return _value.ToString()!.ToLower();
+    public override object Clone()
+    {
+        return new BooleanValue(_value);
     }
 }

@@ -6,7 +6,7 @@ namespace Raze.Script.Core.Values;
 
 public class VoidValue : RuntimeValue
 {
-    public override object? Value => new object();
+    public override object Value => this;
 
     public override string TypeName => "Undefined";
 
@@ -24,5 +24,10 @@ public class VoidValue : RuntimeValue
     public override string ToString()
     {
         return "undefined";
+    }
+
+    public override object Clone()
+    {
+        return new VoidValue();
     }
 }

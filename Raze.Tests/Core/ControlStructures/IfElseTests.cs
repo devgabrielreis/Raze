@@ -116,7 +116,7 @@ public class IfElseTests
     }
 
     [Fact]
-    public void Evaluate_NullBooleanIfCondition_ThrowsNullValueException()
+    public void Evaluate_NullBooleanIfCondition_ThrowsUnexpectedTypeException()
     {
         var script = @"
             var integer test = 0;
@@ -127,7 +127,7 @@ public class IfElseTests
             test
         ";
 
-        Assert.Throws<NullValueException>(() =>
+        Assert.Throws<UnexpectedTypeException>(() =>
         {
             RazeScript.Evaluate(script);
         });

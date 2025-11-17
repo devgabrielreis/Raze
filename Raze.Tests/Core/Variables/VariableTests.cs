@@ -54,6 +54,20 @@ public class VariableTests
     }
 
     [Fact]
+    public void Evaluate_UninitializedConstant_ThrowsUninitializedConstantException()
+    {
+        Assert.Throws<UninitializedConstantException>(() =>
+        {
+            RazeScript.Evaluate("const integer constant");
+        });
+
+        Assert.Throws<UninitializedConstantException>(() =>
+        {
+            RazeScript.Evaluate("const integer? nullableConstant");
+        });
+    }
+
+    [Fact]
     public void Evaluate_AssigningNullToNonNullableVariable_ThrowsVariableTypeException()
     {
         Assert.Throws<VariableTypeException>(() =>

@@ -17,9 +17,15 @@ public class StringVariableTests
 
         var result = RazeScript.Evaluate(varname, scope);
 
-        Assert.IsType<StringValue>(result);
-
-        Assert.Equal(expected, (result as StringValue)!.StrValue);
+        if (expected is null)
+        {
+            Assert.IsType<NullValue>(result);
+        }
+        else
+        {
+            Assert.IsType<StringValue>(result);
+            Assert.Equal(expected, (result as StringValue)!.StrValue);
+        }
     }
 
     [Theory]
@@ -32,26 +38,6 @@ public class StringVariableTests
         Assert.Throws<VariableTypeException>(() =>
         {
             var result = RazeScript.Evaluate(expression);
-        });
-    }
-
-    [Theory]
-    [InlineData("+")]
-    [InlineData("==")]
-    [InlineData("!=")]
-    public void Evaluate_StringOperationWithNullStringVariable_ThrowsNullValueException(string op)
-    {
-        var scope = new InterpreterScope();
-        RazeScript.Evaluate("var string? nullVar = null", scope);
-
-        Assert.Throws<NullValueException>(() =>
-        {
-            RazeScript.Evaluate($"\"a\" {op} nullVar", scope);
-        });
-
-        Assert.Throws<NullValueException>(() =>
-        {
-            RazeScript.Evaluate($"nullVar {op} \"a\"", scope);
         });
     }
 }

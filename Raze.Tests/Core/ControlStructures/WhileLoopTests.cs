@@ -41,7 +41,7 @@ public class WhileLoopTests
     }
 
     [Fact]
-    public void Evaluate_NullWhileLoopCondition_ThrowsNullValueException()
+    public void Evaluate_NullWhileLoopCondition_ThrowsUnexpectedTypeException()
     {
         var script = @"
             var boolean? test = null;
@@ -50,7 +50,7 @@ public class WhileLoopTests
             }
         ";
 
-        Assert.Throws<NullValueException>(() =>
+        Assert.Throws<UnexpectedTypeException>(() =>
         {
             RazeScript.Evaluate(script);
         });

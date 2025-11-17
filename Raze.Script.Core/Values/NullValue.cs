@@ -6,7 +6,7 @@ namespace Raze.Script.Core.Values;
 
 public class NullValue : RuntimeValue
 {
-    public override object? Value => null;
+    public override object Value => this;
 
     public override string TypeName => "Null";
 
@@ -24,5 +24,10 @@ public class NullValue : RuntimeValue
     public override string ToString()
     {
         return "null";
+    }
+
+    public override object Clone()
+    {
+        return new NullValue();
     }
 }

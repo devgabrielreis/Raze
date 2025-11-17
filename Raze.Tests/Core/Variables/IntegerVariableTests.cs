@@ -17,9 +17,16 @@ public class IntegerVariableTests
 
         var result = RazeScript.Evaluate(varname, scope);
 
-        Assert.IsType<IntegerValue>(result);
+        if (expected is null)
+        {
+            Assert.IsType<NullValue>(result);
+        }
+        else
+        {
+            Assert.IsType<IntegerValue>(result);
 
-        Assert.Equal(expected, (result as IntegerValue)!.IntValue);
+            Assert.Equal((Int128)expected!, (result as IntegerValue)!.IntValue);
+        }
     }
 
     [Theory]
@@ -32,62 +39,6 @@ public class IntegerVariableTests
         Assert.Throws<VariableTypeException>(() =>
         {
             var result = RazeScript.Evaluate(expression);
-        });
-    }
-
-    [Theory]
-    [InlineData("+")]
-    [InlineData("-")]
-    [InlineData("*")]
-    [InlineData("/")]
-    [InlineData("%")]
-    [InlineData("==")]
-    [InlineData("!=")]
-    [InlineData(">")]
-    [InlineData("<")]
-    [InlineData(">=")]
-    [InlineData("<=")]
-    public void Evaluate_IntegerOperationWithNullIntegerVariable_ThrowsNullValueException(string op)
-    {
-        var scope = new InterpreterScope();
-        RazeScript.Evaluate("var integer? nullVar = null", scope);
-
-        Assert.Throws<NullValueException>(() =>
-        {
-            RazeScript.Evaluate($"1 {op} nullVar", scope);
-        });
-
-        Assert.Throws<NullValueException>(() =>
-        {
-            RazeScript.Evaluate($"nullVar {op} 1", scope);
-        });
-    }
-
-    [Theory]
-    [InlineData("+")]
-    [InlineData("-")]
-    [InlineData("*")]
-    [InlineData("/")]
-    [InlineData("%")]
-    [InlineData("==")]
-    [InlineData("!=")]
-    [InlineData(">")]
-    [InlineData("<")]
-    [InlineData(">=")]
-    [InlineData("<=")]
-    public void Evaluate_IntegerOperationWithNullDecimalVariable_ThrowsNullValueException(string op)
-    {
-        var scope = new InterpreterScope();
-        RazeScript.Evaluate("var decimal? nullVar = null", scope);
-
-        Assert.Throws<NullValueException>(() =>
-        {
-            RazeScript.Evaluate($"1 {op} nullVar", scope);
-        });
-
-        Assert.Throws<NullValueException>(() =>
-        {
-            RazeScript.Evaluate($"nullVar {op} 1", scope);
         });
     }
 }

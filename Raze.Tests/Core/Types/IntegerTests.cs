@@ -25,37 +25,21 @@ public class IntegerTests
 
     [Theory]
     [InlineData("10 == 10", true)]
-    [InlineData("10 == 10.0", true)]
     [InlineData("10 == 11", false)]
-    [InlineData("10 == 10.1", false)]
     [InlineData("10 != 10", false)]
-    [InlineData("10 != 10.0", false)]
     [InlineData("10 != 11", true)]
-    [InlineData("10 != 10.1", true)]
     [InlineData("10 > 9", true)]
     [InlineData("10 > 10", false)]
     [InlineData("10 > 11", false)]
-    [InlineData("10 > 9.9", true)]
-    [InlineData("10 > 10.0", false)]
-    [InlineData("10 > 10.1", false)]
     [InlineData("10 < 9", false)]
     [InlineData("10 < 10", false)]
     [InlineData("10 < 11", true)]
-    [InlineData("10 < 9.9", false)]
-    [InlineData("10 < 10.0", false)]
-    [InlineData("10 < 10.1", true)]
     [InlineData("10 >= 9", true)]
     [InlineData("10 >= 10", true)]
     [InlineData("10 >= 11", false)]
-    [InlineData("10 >= 9.9", true)]
-    [InlineData("10 >= 10.0", true)]
-    [InlineData("10 >= 10.1", false)]
     [InlineData("10 <= 9", false)]
     [InlineData("10 <= 10", true)]
     [InlineData("10 <= 11", true)]
-    [InlineData("10 <= 9.9", false)]
-    [InlineData("10 <= 10.0", true)]
-    [InlineData("10 <= 10.1", true)]
     public void Evaluate_IntegerComparisonExpression_ReturnsExpectedValue(string expression, bool expected)
     {
         var scope = new InterpreterScope();
@@ -66,23 +50,17 @@ public class IntegerTests
     }
 
     [Theory]
-    [InlineData("10 + 10.0", "20.0")]
-    [InlineData("10 - 15.0", "-5.0")]
-    [InlineData("6 / 2.0", "3.0")]
-    [InlineData("10 * 3.0", "30.0")]
-    [InlineData("10 % 3.0", "1.0")]
-    public void Evaluate_IntegerArithmeticExpressionWithDecimal_ReturnsExpectedValue(string expression, string expectedDecimalStr)
-    {
-        decimal expected = decimal.Parse(expectedDecimalStr, CultureInfo.InvariantCulture);
-
-        var scope = new InterpreterScope();
-        var result = RazeScript.Evaluate(expression, scope);
-
-        Assert.IsType<DecimalValue>(result);
-        Assert.Equal(expected, (result as DecimalValue)!.DecValue);
-    }
-
-    [Theory]
+    [InlineData("10 + 10.0")]
+    [InlineData("10 - 15.0")]
+    [InlineData("6 / 2.0")]
+    [InlineData("10 * 3.0")]
+    [InlineData("10 % 3.0")]
+    [InlineData("10 == 10.0")]
+    [InlineData("10 != 10.1")]
+    [InlineData("10 > 9.9")]
+    [InlineData("10 < 9.9")]
+    [InlineData("10 >= 9.9")]
+    [InlineData("10 <= 9.9")]
     [InlineData("10 && 10.0")]
     [InlineData("10 || 10.0")]
     [InlineData("10 && 10")]

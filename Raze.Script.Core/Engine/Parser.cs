@@ -14,6 +14,7 @@ using Raze.Script.Core.Tokens.Operators.MultiplicativeOperators;
 using Raze.Script.Core.Tokens.Operators.RelationalOperators;
 using Raze.Script.Core.Tokens.Primitives;
 using Raze.Script.Core.Tokens.VariableDeclaration;
+using Raze.Script.Core.Types;
 using System.Globalization;
 
 namespace Raze.Script.Core.Engine;
@@ -305,16 +306,8 @@ internal class Parser
         int startColumn = Current().Column;
         Advance();
 
-        Expect<PrimitiveTypeToken>();
-        PrimitiveTypeToken type = (Current() as PrimitiveTypeToken)!;
+        RuntimeType type = ParseType();
         Advance();
-
-        var isNullable = false;
-        if (Current() is QuestionMarkOperator)
-        {
-            isNullable = true;
-            Advance();
-        }
 
         Expect<Identifier>();
         string identifier = Current().Lexeme;
@@ -323,13 +316,35 @@ internal class Parser
         if (Current() is not AssignmentOperator)
         {
             Return();
-            return new VariableDeclarationStatement(identifier, type, null, isConstant, isNullable, startLine, startColumn);
+            return new VariableDeclarationStatement(identifier, type, null, isConstant, startLine, startColumn);
         }
 
         Advance();
         Expression value = ParseOrExpression();
 
-        return new VariableDeclarationStatement(identifier, type, value, isConstant, isNullable, startLine, startColumn);
+        return new VariableDeclarationStatement(identifier, type, value, isConstant, startLine, startColumn);
+    }
+
+    private RuntimeType ParseType()
+    {
+        Expect<PrimitiveTypeToken>();
+        PrimitiveTypeToken type = (Current() as PrimitiveTypeToken)!;
+
+        var isNullable = false;
+        if (Peek() is QuestionMarkOperator)
+        {
+            isNullable = true;
+            Advance();
+        }
+
+        return (type) switch
+        {
+            BooleanPrimitive => new BooleanType(isNullable),
+            DecimalPrimitive => new DecimalType(isNullable),
+            IntegerPrimitive => new IntegerType(isNullable),
+            StringPrimitive => new StringType(isNullable),
+            _ => throw new UnexpectedTokenException(type.GetType().Name, type.Lexeme, type.Line, type.Column)
+        };
     }
 
     private Statement ParseAssignmentStatement()

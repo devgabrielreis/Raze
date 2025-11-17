@@ -5,9 +5,8 @@ using Raze.Script.Core.Scopes;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
-using Raze.Script.Core.Symbols.Variables;
+using Raze.Script.Core.Symbols;
 using Raze.Script.Core.Tokens.Operators;
-using Raze.Script.Core.Tokens.Primitives;
 using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Engine;
@@ -93,38 +92,13 @@ internal class Interpreter
 
     private VoidValue EvaluateVariableDeclarationStatement(VariableDeclarationStatement statement, Scope scope)
     {
-        VariableSymbol variable = statement.Type switch
-        {
-            IntegerPrimitive => new IntegerVariable(
-                statement.Value is null ? null : Evaluate(statement.Value, scope),
-                statement.IsConstant,
-                statement.IsNullable,
-                statement.StartLine,
-                statement.StartColumn
-            ),
-            DecimalPrimitive => new DecimalVariable(
-                statement.Value is null ? null : Evaluate(statement.Value, scope),
-                statement.IsConstant,
-                statement.IsNullable,
-                statement.StartLine,
-                statement.StartColumn
-            ),
-            BooleanPrimitive => new BooleanVariable(
-                statement.Value is null ? null : Evaluate(statement.Value, scope),
-                statement.IsConstant,
-                statement.IsNullable,
-                statement.StartLine,
-                statement.StartColumn
-            ),
-            StringPrimitive => new StringVariable(
-                statement.Value is null ? null : Evaluate(statement.Value, scope),
-                statement.IsConstant,
-                statement.IsNullable,
-                statement.StartLine,
-                statement.StartColumn
-            ),
-            _ => throw new Exception("Tipo ainda não suportado")
-        };
+        VariableSymbol variable = new VariableSymbol(
+            statement.Value is null ? null : Evaluate(statement.Value, scope),
+            statement.Type,
+            statement.IsConstant,
+            statement.StartLine,
+            statement.StartColumn
+        );
 
         scope.DeclareVariable(statement.Identifier, variable, statement);
         return new VoidValue();
@@ -155,19 +129,18 @@ internal class Interpreter
 
     private static RuntimeValue EvaluateIdentifierExpression(IdentifierExpression expression, Scope scope)
     {
-        var resolvedScope = scope.Resolve(expression.Symbol);
+        var resolvedScope = scope.FindSymbolScope(expression.Symbol);
 
         if (resolvedScope is null)
         {
             throw new UndefinedIdentifierException(expression.Symbol, expression.StartLine, expression.StartColumn);
         }
-            
-            
-        var result = resolvedScope.Lookup(expression.Symbol);
+ 
+        var result = resolvedScope.FindSymbol(expression.Symbol);
 
         if (result is VariableSymbol variable)
         {
-            if (!variable.IsInitialized || variable.Value is null)
+            if (!variable.IsInitialized)
             {
                 throw new UninitializedVariableException(expression.StartLine, expression.StartColumn);
             }
@@ -296,14 +269,6 @@ internal class Interpreter
             );
         }
 
-        if ((conditionResult as BooleanValue)!.BoolValue == null)
-        {
-            throw new NullValueException(
-                condition.StartLine,
-                condition.StartColumn
-            );
-        }
-
-        return (conditionResult as BooleanValue)!.BoolValue!.Value;
+        return (conditionResult as BooleanValue)!.BoolValue;
     }
 }
