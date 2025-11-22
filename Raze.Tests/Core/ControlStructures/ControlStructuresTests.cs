@@ -22,4 +22,13 @@ public class ControlStructuresTests
             RazeScript.Evaluate("break");
         });
     }
+
+    [Fact]
+    public void Evaluate_ReturnStatementOutsideFunction_ThrowsUnexpectedStatementException()
+    {
+        Assert.Throws<UnexpectedStatementException>(() =>
+        {
+            RazeScript.Evaluate("return");
+        });
+    }
 }

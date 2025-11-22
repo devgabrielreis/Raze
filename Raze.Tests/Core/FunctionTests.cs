@@ -112,14 +112,28 @@ public class FunctionTests
                 return closure;
             }
 
-            const function<integer> counter = makeCounter(100);
-
-            counter();
+            const function<integer> counter1 = makeCounter(100);
+            const function<integer> counter2 = makeCounter(50);
         ";
 
-        var result = RazeScript.Evaluate(script);
+        var scope = new InterpreterScope();
+        RazeScript.Evaluate(script, scope);
+
+        var result = RazeScript.Evaluate("counter2()", scope);
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(51, (result as IntegerValue)!.IntValue);
+
+        result = RazeScript.Evaluate("counter1()", scope);
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(101, (result as IntegerValue)!.IntValue);
+
+        result = RazeScript.Evaluate("counter2()", scope);
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(52, (result as IntegerValue)!.IntValue);
+
+        result = RazeScript.Evaluate("counter1()", scope);
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(102, (result as IntegerValue)!.IntValue);
     }
 
     [Fact]
