@@ -108,4 +108,26 @@ public class ScopeTests
             RazeScript.Evaluate("test", scope);
         });
     }
+
+    [Fact]
+    public void Evaluate_FunctionTryingToAccessCallerScope_ThrowsUndefinedIdentifierException()
+    {
+        var script = @"
+            def void outer() {
+	            var integer cantAccess = 5;
+	            inner();
+            }
+
+            def void inner() {
+	            cantAccess = 6;
+            }
+
+            outer();
+        ";
+
+        Assert.Throws<UndefinedIdentifierException>(() =>
+        {
+            RazeScript.Evaluate(script);
+        });
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using Raze.Script.Core;
+using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Scopes;
 using Raze.Script.Core.Values;
@@ -73,6 +74,20 @@ public class VariableTests
         Assert.Throws<VariableTypeException>(() =>
         {
             RazeScript.Evaluate("var integer variable = null");
+        });
+    }
+
+    [Fact]
+    public void Evaluate_DeclaringVoidTypeVariable_ThrowsUnexpectedTokenException()
+    {
+        Assert.Throws<UnexpectedTokenException>(() =>
+        {
+            RazeScript.Evaluate("var void variable");
+        });
+
+        Assert.Throws<UnexpectedTokenException>(() =>
+        {
+            RazeScript.Evaluate("var void? variable");
         });
     }
 }
