@@ -245,4 +245,24 @@ public class FunctionTests
             RazeScript.Evaluate(script);
         });
     }
+
+    [Fact]
+    public void Evaluate_FunctionCalls_CanBeChained()
+    {
+        var script = @"
+            def function<integer> makeCounter(integer start) {
+                def integer closure() {
+                    start = start + 1;
+                    return start;
+                }
+                return closure;
+            }
+
+            makeCounter(0)();
+        ";
+
+        var result = RazeScript.Evaluate(script);
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(1, (result as IntegerValue)!.IntValue);
+    }
 }
