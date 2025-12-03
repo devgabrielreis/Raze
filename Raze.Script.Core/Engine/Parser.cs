@@ -507,20 +507,43 @@ internal class Parser
     {
         var member = ParseMemberExpression();
 
-        if (Peek() is OpenParenthesis)
+        while (Peek() is OpenParenthesis)
         {
             Advance();
-            return ParseCallExpression(member);
+            member = ParseCallExpression(member);
         }
 
         return member;
     }
 
-    private Expression ParseCallExpression(Expression caller)
+    private CallExpression ParseCallExpression(Expression caller)
     {
         Expect<OpenParenthesis>();
+        Advance();
 
-        throw new Exception("not implemented");
+        List<Expression> argumentList = [];
+
+        while (Current() is not CloseParenthesis)
+        {
+            argumentList.Add(ParseOrExpression());
+            Advance();
+
+            if (Current() is Comma)
+            {
+                Advance();
+
+                if (Current() is CloseParenthesis)
+                {
+                    throw new UnexpectedTokenException(
+                        Current().GetType().Name, Current().Lexeme, Current().Line, Current().Column
+                    );
+                }
+            }
+        }
+
+        Expect<CloseParenthesis>();
+
+        return new CallExpression(caller, argumentList, caller.StartLine, caller.StartColumn);
     }
 
     private Expression ParseMemberExpression()
