@@ -42,7 +42,8 @@ internal class Lexer
         ["while"]    = (string lexeme, int line, int column) => new While(lexeme, line, column),
         ["break"]    = (string lexeme, int line, int column) => new Break(lexeme, line, column),
         ["continue"] = (string lexeme, int line, int column) => new Continue(lexeme, line, column),
-        ["def"]      = (string lexeme, int line, int column) => new FunctionDeclaration(lexeme, line, column)
+        ["def"]      = (string lexeme, int line, int column) => new FunctionDeclaration(lexeme, line, column),
+        ["return"]   = (string lexeme, int line, int column) => new Return(lexeme, line, column)
     };
 
     private static readonly Dictionary<string, Func<string, int, int, Token>> _doubleCharTokens = new()

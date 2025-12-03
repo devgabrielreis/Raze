@@ -127,7 +127,7 @@ internal class Parser
         _currentIndex += howMuch;
     }
 
-    private void Return()
+    private void Recede()
     {
         _currentIndex--;
     }
@@ -149,8 +149,26 @@ internal class Parser
             While                    => ParseWhileLoop(),
             Break                    => new BreakStatement(Current().Line, Current().Column),
             Continue                 => new ContinueStatement(Current().Line, Current().Column),
+            Return                   => ParseReturnStatement(),
             _                        => ParseAssignmentStatement()
         };
+    }
+
+    private ReturnStatement ParseReturnStatement()
+    {
+        Expect<Return>();
+        int startLine = Current().Line;
+        int startColumn = Current().Column;
+        
+        if (Peek() is SemiColon || Peek() is EOF)
+        {
+            return new ReturnStatement(null, startLine, startColumn);
+        }
+
+        Advance();
+        var returnedValue = ParseOrExpression();
+
+        return new ReturnStatement(returnedValue, startLine, startColumn);
     }
 
     private CodeBlockStatement ParseCodeBlock()
@@ -317,7 +335,7 @@ internal class Parser
 
         if (Current() is not AssignmentOperator)
         {
-            Return();
+            Recede();
             return new VariableDeclarationStatement(identifier, type, null, isConstant, startLine, startColumn);
         }
 
@@ -558,7 +576,7 @@ internal class Parser
         }
 
         // coloca o indice de volta no lugar
-        Return();
+        Recede();
 
         return left;
     }
