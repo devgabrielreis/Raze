@@ -2,6 +2,7 @@
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
+using Raze.Script.Core.Symbols;
 using Raze.Script.Core.Tokens;
 using Raze.Script.Core.Tokens.ControlStructures;
 using Raze.Script.Core.Tokens.Delimiters;
@@ -141,6 +142,7 @@ internal class Parser
         return Current() switch
         {
             VariableDeclarationToken => ParseVariableDeclaration(),
+            FunctionDeclaration      => ParseFunctionDeclaration(),
             OpenBraces               => ParseCodeBlock(),
             If                       => ParseIfElse(),
             For                      => ParseForLoop(),
@@ -325,6 +327,97 @@ internal class Parser
         return new VariableDeclarationStatement(identifier, type, value, isConstant, startLine, startColumn);
     }
 
+    private FunctionDeclarationStatement ParseFunctionDeclaration()
+    {
+        Expect<FunctionDeclaration>();
+        int startLine = Current().Line;
+        int startColumn = Current().Column;
+        Advance();
+
+        var returnType = ParseType();
+        Advance();
+
+        Expect<Identifier>();
+        string identifier = Current().Lexeme;
+        Advance();
+
+        var parameterList = ParseParameterList();
+        Advance();
+
+        var functionBody = ParseCodeBlock();
+
+        return new FunctionDeclarationStatement(
+            identifier, returnType, parameterList, functionBody, startLine, startColumn
+        );
+    }
+
+    private List<ParameterSymbol> ParseParameterList()
+    {
+        Expect<OpenParenthesis>();
+        Advance();
+
+        List<ParameterSymbol> parameterList = [];
+        bool isDefaultParameterRequired = false;
+
+        while (Current() is Const || Current() is PrimitiveTypeToken)
+        {
+            int startLine = Current().Line;
+            int startColumn = Current().Column;
+
+            bool isConstant = false;
+
+            if (Current() is Const)
+            {
+                isConstant = true;
+                Advance();
+            }
+
+            RuntimeType type = ParseType();
+            Advance();
+
+            Expect<Identifier>();
+            string identifier = Current().Lexeme;
+            Advance();
+
+            Expression? defaultValue = null;
+            if (Current() is AssignmentOperator)
+            {
+                Advance();
+                defaultValue = ParseOrExpression();
+                isDefaultParameterRequired = true;
+            }
+            else if (isDefaultParameterRequired)
+            {
+                throw new InvalidParameterListException(
+                    "A non-default parameter cannot appear after a default parameter", startLine, startColumn
+                );
+            }
+
+            Advance();
+
+            if (Current() is Comma)
+            {
+                Advance();
+                Expect<Const, PrimitiveTypeToken>();
+            }
+
+            parameterList.Add(
+                new ParameterSymbol(
+                    isConstant,
+                    type,
+                    identifier,
+                    defaultValue,
+                    startLine,
+                    startColumn
+                )
+            );
+        }
+
+        Expect<CloseParenthesis>();
+
+        return parameterList;
+    }
+
     private RuntimeType ParseType()
     {
         Expect<PrimitiveTypeToken>();
@@ -389,7 +482,34 @@ internal class Parser
 
     private Expression ParseMultiplicativeExpression()
     {
-        return ParseBinaryExpression<MultiplicativeOperator>(ParsePrimaryExpression);
+        return ParseBinaryExpression<MultiplicativeOperator>(ParseCallMemberExpression);
+    }
+
+    private Expression ParseCallMemberExpression()
+    {
+        var member = ParseMemberExpression();
+
+        if (Peek() is OpenParenthesis)
+        {
+            Advance();
+            return ParseCallExpression(member);
+        }
+
+        return member;
+    }
+
+    private Expression ParseCallExpression(Expression caller)
+    {
+        Expect<OpenParenthesis>();
+
+        throw new Exception("not implemented");
+    }
+
+    private Expression ParseMemberExpression()
+    {
+        var obj = ParsePrimaryExpression();
+
+        return obj;
     }
 
     private Expression ParsePrimaryExpression()

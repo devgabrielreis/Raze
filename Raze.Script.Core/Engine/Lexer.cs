@@ -41,7 +41,8 @@ internal class Lexer
         ["for"]      = (string lexeme, int line, int column) => new For(lexeme, line, column),
         ["while"]    = (string lexeme, int line, int column) => new While(lexeme, line, column),
         ["break"]    = (string lexeme, int line, int column) => new Break(lexeme, line, column),
-        ["continue"] = (string lexeme, int line, int column) => new Continue(lexeme, line, column)
+        ["continue"] = (string lexeme, int line, int column) => new Continue(lexeme, line, column),
+        ["def"]      = (string lexeme, int line, int column) => new FunctionDeclaration(lexeme, line, column)
     };
 
     private static readonly Dictionary<string, Func<string, int, int, Token>> _doubleCharTokens = new()
@@ -57,6 +58,7 @@ internal class Lexer
     private static readonly Dictionary<char, Func<string, int, int, Token>> _singleCharTokens = new()
     {
         [';'] = (string lexeme, int line, int column) => new SemiColon(lexeme, line, column),
+        [','] = (string lexeme, int line, int column) => new Comma(lexeme, line, column),
         ['('] = (string lexeme, int line, int column) => new OpenParenthesis(lexeme, line, column),
         [')'] = (string lexeme, int line, int column) => new CloseParenthesis(lexeme, line, column),
         ['{'] = (string lexeme, int line, int column) => new OpenBraces(lexeme, line, column),
