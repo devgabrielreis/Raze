@@ -28,35 +28,22 @@ public class BooleanValue : RuntimeValue
         }
 
         throw new UnsupportedBinaryOperationException(
-            TypeName,
-            other.TypeName,
-            op.Lexeme,
-            source.StartLine,
-            source.StartColumn
+            TypeName, other.TypeName, op.Lexeme, source.StartLine, source.StartColumn
         );
     }
 
     private BooleanValue ExecuteBinaryOperationWithBoolean(OperatorToken op, BooleanValue other, BinaryExpression source)
     {
-        switch (op)
+        return op switch
         {
-            case EqualOperator:
-                return new BooleanValue(BoolValue == other.BoolValue);
-            case NotEqualOperator:
-                return new BooleanValue(BoolValue != other.BoolValue);
-            case AndOperator:
-                return new BooleanValue(BoolValue && other.BoolValue);
-            case OrOperator:
-                return new BooleanValue(BoolValue || other.BoolValue);
-        }
-
-        throw new UnsupportedBinaryOperationException(
-            TypeName,
-            other.TypeName,
-            op.Lexeme,
-            source.StartLine,
-            source.StartColumn
-        );
+            EqualToken    => new BooleanValue(BoolValue == other.BoolValue),
+            NotEqualToken => new BooleanValue(BoolValue != other.BoolValue),
+            AndToken      => new BooleanValue(BoolValue && other.BoolValue),
+            OrToken       => new BooleanValue(BoolValue || other.BoolValue),
+            _ => throw new UnsupportedBinaryOperationException(
+                TypeName, other.TypeName, op.Lexeme, source.StartLine, source.StartColumn
+            ),
+        };
     }
 
     public override string ToString()

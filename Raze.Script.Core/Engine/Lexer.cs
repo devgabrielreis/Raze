@@ -27,52 +27,52 @@ internal class Lexer
 
     private static readonly Dictionary<string, Func<string, int, int, Token>> _keywords = new()
     {
-        ["var"]      = (string lexeme, int line, int column) => new Var(lexeme, line, column),
-        ["const"]    = (string lexeme, int line, int column) => new Const(lexeme, line, column),
-        ["integer"]  = (string lexeme, int line, int column) => new IntegerPrimitive(lexeme, line, column),
-        ["decimal"]  = (string lexeme, int line, int column) => new DecimalPrimitive(lexeme, line, column),
-        ["boolean"]  = (string lexeme, int line, int column) => new BooleanPrimitive(lexeme, line, column),
-        ["string"]   = (string lexeme, int line, int column) => new StringPrimitive(lexeme, line, column),
-        ["true"]     = (string lexeme, int line, int column) => new BooleanLiteral(lexeme, line, column),
-        ["false"]    = (string lexeme, int line, int column) => new BooleanLiteral(lexeme, line, column),
-        ["null"]     = (string lexeme, int line, int column) => new NullLiteral(lexeme, line, column),
-        ["if"]       = (string lexeme, int line, int column) => new If(lexeme, line, column),
-        ["else"]     = (string lexeme, int line, int column) => new Else(lexeme, line, column),
-        ["for"]      = (string lexeme, int line, int column) => new For(lexeme, line, column),
-        ["while"]    = (string lexeme, int line, int column) => new While(lexeme, line, column),
-        ["break"]    = (string lexeme, int line, int column) => new Break(lexeme, line, column),
-        ["continue"] = (string lexeme, int line, int column) => new Continue(lexeme, line, column),
-        ["def"]      = (string lexeme, int line, int column) => new FunctionDeclaration(lexeme, line, column),
-        ["return"]   = (string lexeme, int line, int column) => new Return(lexeme, line, column)
+        ["var"]      = (string lexeme, int line, int column) => new VarToken(lexeme, line, column),
+        ["const"]    = (string lexeme, int line, int column) => new ConstToken(lexeme, line, column),
+        ["integer"]  = (string lexeme, int line, int column) => new IntegerPrimitiveToken(lexeme, line, column),
+        ["decimal"]  = (string lexeme, int line, int column) => new DecimalPrimitiveToken(lexeme, line, column),
+        ["boolean"]  = (string lexeme, int line, int column) => new BooleanPrimitiveToken(lexeme, line, column),
+        ["string"]   = (string lexeme, int line, int column) => new StringPrimitiveToken(lexeme, line, column),
+        ["true"]     = (string lexeme, int line, int column) => new BooleanLiteralToken(lexeme, line, column),
+        ["false"]    = (string lexeme, int line, int column) => new BooleanLiteralToken(lexeme, line, column),
+        ["null"]     = (string lexeme, int line, int column) => new NullLiteralToken(lexeme, line, column),
+        ["if"]       = (string lexeme, int line, int column) => new IfToken(lexeme, line, column),
+        ["else"]     = (string lexeme, int line, int column) => new ElseToken(lexeme, line, column),
+        ["for"]      = (string lexeme, int line, int column) => new ForToken(lexeme, line, column),
+        ["while"]    = (string lexeme, int line, int column) => new WhileToken(lexeme, line, column),
+        ["break"]    = (string lexeme, int line, int column) => new BreakToken(lexeme, line, column),
+        ["continue"] = (string lexeme, int line, int column) => new ContinueToken(lexeme, line, column),
+        ["def"]      = (string lexeme, int line, int column) => new FunctionDeclarationToken(lexeme, line, column),
+        ["return"]   = (string lexeme, int line, int column) => new ReturnToken(lexeme, line, column)
     };
 
     private static readonly Dictionary<string, Func<string, int, int, Token>> _doubleCharTokens = new()
     {
-        ["=="] = (string lexeme, int line, int column) => new EqualOperator(lexeme, line, column),
-        ["!="] = (string lexeme, int line, int column) => new NotEqualOperator(lexeme, line, column),
-        [">="] = (string lexeme, int line, int column) => new GreaterOrEqualThanOperator(lexeme, line, column),
-        ["<="] = (string lexeme, int line, int column) => new LessOrEqualThanOperator(lexeme, line, column),
-        ["&&"] = (string lexeme, int line, int column) => new AndOperator(lexeme, line, column),
-        ["||"] = (string lexeme, int line, int column) => new OrOperator(lexeme, line, column)
+        ["=="] = (string lexeme, int line, int column) => new EqualToken(lexeme, line, column),
+        ["!="] = (string lexeme, int line, int column) => new NotEqualToken(lexeme, line, column),
+        [">="] = (string lexeme, int line, int column) => new GreaterOrEqualThanToken(lexeme, line, column),
+        ["<="] = (string lexeme, int line, int column) => new LessOrEqualThanToken(lexeme, line, column),
+        ["&&"] = (string lexeme, int line, int column) => new AndToken(lexeme, line, column),
+        ["||"] = (string lexeme, int line, int column) => new OrToken(lexeme, line, column)
     };
 
     private static readonly Dictionary<char, Func<string, int, int, Token>> _singleCharTokens = new()
     {
-        [';'] = (string lexeme, int line, int column) => new SemiColon(lexeme, line, column),
-        [','] = (string lexeme, int line, int column) => new Comma(lexeme, line, column),
-        ['('] = (string lexeme, int line, int column) => new OpenParenthesis(lexeme, line, column),
-        [')'] = (string lexeme, int line, int column) => new CloseParenthesis(lexeme, line, column),
-        ['{'] = (string lexeme, int line, int column) => new OpenBraces(lexeme, line, column),
-        ['}'] = (string lexeme, int line, int column) => new CloseBraces(lexeme, line, column),
-        ['='] = (string lexeme, int line, int column) => new AssignmentOperator(lexeme, line, column),
-        ['+'] = (string lexeme, int line, int column) => new AdditionOperator(lexeme, line, column),
-        ['-'] = (string lexeme, int line, int column) => new SubtractionOperator(lexeme, line, column),
-        ['*'] = (string lexeme, int line, int column) => new MultiplicationOperator(lexeme, line, column),
-        ['/'] = (string lexeme, int line, int column) => new DivisionOperator(lexeme, line, column),
-        ['%'] = (string lexeme, int line, int column) => new ModuloOperator(lexeme, line, column),
-        ['>'] = (string lexeme, int line, int column) => new GreaterThanOperator(lexeme, line, column),
-        ['<'] = (string lexeme, int line, int column) => new LessThanOperator(lexeme, line, column),
-        ['?'] = (string lexeme, int line, int column) => new QuestionMarkOperator(lexeme, line, column)
+        [';'] = (string lexeme, int line, int column) => new SemiColonToken(lexeme, line, column),
+        [','] = (string lexeme, int line, int column) => new CommaToken(lexeme, line, column),
+        ['('] = (string lexeme, int line, int column) => new OpenParenthesisToken(lexeme, line, column),
+        [')'] = (string lexeme, int line, int column) => new CloseParenthesisToken(lexeme, line, column),
+        ['{'] = (string lexeme, int line, int column) => new OpenBracesToken(lexeme, line, column),
+        ['}'] = (string lexeme, int line, int column) => new CloseBracesToken(lexeme, line, column),
+        ['='] = (string lexeme, int line, int column) => new AssignmentToken(lexeme, line, column),
+        ['+'] = (string lexeme, int line, int column) => new AdditionToken(lexeme, line, column),
+        ['-'] = (string lexeme, int line, int column) => new SubtractionToken(lexeme, line, column),
+        ['*'] = (string lexeme, int line, int column) => new MultiplicationToken(lexeme, line, column),
+        ['/'] = (string lexeme, int line, int column) => new DivisionToken(lexeme, line, column),
+        ['%'] = (string lexeme, int line, int column) => new ModuloToken(lexeme, line, column),
+        ['>'] = (string lexeme, int line, int column) => new GreaterThanToken(lexeme, line, column),
+        ['<'] = (string lexeme, int line, int column) => new LessThanToken(lexeme, line, column),
+        ['?'] = (string lexeme, int line, int column) => new QuestionMarkToken(lexeme, line, column)
     };
 
     public Lexer(string sourceCode)
@@ -104,7 +104,7 @@ internal class Lexer
             ProcessCurrentToken();
         }
 
-        _tokens.Add(new EOF(_currentLine, _currentColumn));
+        _tokens.Add(new EOFToken(_currentLine, _currentColumn));
 
         return _tokens;
     }
@@ -219,7 +219,7 @@ internal class Lexer
         }
         else
         {
-            _tokens.Add(new Identifier(identifier, _currentLine, startColumn));
+            _tokens.Add(new IdentifierToken(identifier, _currentLine, startColumn));
         }
     }
 
@@ -253,11 +253,11 @@ internal class Lexer
 
         if (hasDot)
         {
-            _tokens.Add(new DecimalLiteral(number, _currentLine, startColumn));
+            _tokens.Add(new DecimalLiteralToken(number, _currentLine, startColumn));
         }
         else
         {
-            _tokens.Add(new IntegerLiteral(number, _currentLine, startColumn));
+            _tokens.Add(new IntegerLiteralToken(number, _currentLine, startColumn));
         }
     }
 
@@ -298,27 +298,21 @@ internal class Lexer
 
         Advance();
 
-        _tokens.Add(new StringLiteral(str, _currentLine, startColumn));
+        _tokens.Add(new StringLiteralToken(str, _currentLine, startColumn));
     }
 
     private char GetCurrentEscapedChar()
     {
         Advance();
 
-        switch (Current())
+        return Current() switch
         {
-            case '"':
-                return '"';
-            case 'n':
-                return '\n';
-            case 't':
-                return '\t';
-            case 'r':
-                return '\r';
-            case '\\':
-                return '\\';
-            default:
-                throw new UnrecognizedEscapeSequenceException("\\" + Current(), _currentLine, _currentColumn - 1);
-        }
+            '"'  => '"',
+            'n'  => '\n',
+            't'  => '\t',
+            'r'  => '\r',
+            '\\' => '\\',
+            _    => throw new UnrecognizedEscapeSequenceException("\\" + Current(), _currentLine, _currentColumn - 1),
+        };
     }
 }

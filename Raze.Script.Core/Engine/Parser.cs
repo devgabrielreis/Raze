@@ -30,7 +30,7 @@ internal class Parser
 
     public Parser(IList<Token> tokens)
     {
-        if (tokens.Count == 0 || tokens.Last() is not EOF)
+        if (tokens.Count == 0 || tokens.Last() is not EOFToken)
         {
             throw new InvalidTokenListException();
         }
@@ -59,7 +59,7 @@ internal class Parser
 
         while (!HasEnded())
         {
-            if (Current() is SemiColon)
+            if (Current() is SemiColonToken)
             {
                 Advance();
                 continue;
@@ -70,7 +70,7 @@ internal class Parser
 
             if (_program.Body.Last().RequireSemicolon)
             {
-                Expect<SemiColon, EOF>();
+                Expect<SemiColonToken, EOFToken>();
             }
         }
 
@@ -134,7 +134,7 @@ internal class Parser
 
     private bool HasEnded()
     {
-        return _currentIndex >= _tokens.Count || Current() is EOF;
+        return _currentIndex >= _tokens.Count || Current() is EOFToken;
     }
 
     private Statement ParseCurrent()
@@ -142,25 +142,25 @@ internal class Parser
         return Current() switch
         {
             VariableDeclarationToken => ParseVariableDeclaration(),
-            FunctionDeclaration      => ParseFunctionDeclaration(),
-            OpenBraces               => ParseCodeBlock(),
-            If                       => ParseIfElse(),
-            For                      => ParseForLoop(),
-            While                    => ParseWhileLoop(),
-            Break                    => new BreakStatement(Current().Line, Current().Column),
-            Continue                 => new ContinueStatement(Current().Line, Current().Column),
-            Return                   => ParseReturnStatement(),
+            FunctionDeclarationToken => ParseFunctionDeclaration(),
+            OpenBracesToken          => ParseCodeBlock(),
+            IfToken                  => ParseIfElse(),
+            ForToken                 => ParseForLoop(),
+            WhileToken               => ParseWhileLoop(),
+            BreakToken               => new BreakStatement(Current().Line, Current().Column),
+            ContinueToken            => new ContinueStatement(Current().Line, Current().Column),
+            ReturnToken              => ParseReturnStatement(),
             _                        => ParseAssignmentStatement()
         };
     }
 
     private ReturnStatement ParseReturnStatement()
     {
-        Expect<Return>();
+        Expect<ReturnToken>();
         int startLine = Current().Line;
         int startColumn = Current().Column;
         
-        if (Peek() is SemiColon || Peek() is EOF)
+        if (Peek() is SemiColonToken || Peek() is EOFToken)
         {
             return new ReturnStatement(null, startLine, startColumn);
         }
@@ -173,13 +173,13 @@ internal class Parser
 
     private CodeBlockStatement ParseCodeBlock()
     {
-        Expect<OpenBraces>();
+        Expect<OpenBracesToken>();
         var codeBlock = new CodeBlockStatement(Current().Line, Current().Column);
         Advance();
 
-        while (!HasEnded() && !(Current() is CloseBraces))
+        while (!HasEnded() && !(Current() is CloseBracesToken))
         {
-            if (Current() is SemiColon)
+            if (Current() is SemiColonToken)
             {
                 Advance();
                 continue;
@@ -191,44 +191,44 @@ internal class Parser
 
             if (codeBlock.Body.Last().RequireSemicolon)
             {
-                Expect<SemiColon>();
+                Expect<SemiColonToken>();
             }
         }
 
-        Expect<CloseBraces>();
+        Expect<CloseBracesToken>();
 
         return codeBlock;
     }
 
     private IfElseStatement ParseIfElse()
     {
-        Expect<If>();
+        Expect<IfToken>();
         int startLine = Current().Line;
         int startColumn = Current().Column;
         Advance();
 
-        Expect<OpenParenthesis>();
+        Expect<OpenParenthesisToken>();
         Advance();
 
         Expression condition = ParseOrExpression();
         Advance();
 
-        Expect<CloseParenthesis>();
+        Expect<CloseParenthesisToken>();
         Advance();
 
-        Expect<OpenBraces>();
+        Expect<OpenBracesToken>();
         CodeBlockStatement then = ParseCodeBlock();
 
         Statement? elseStmt = null;
 
-        if (Peek() is Else)
+        if (Peek() is ElseToken)
         {
             Advance(2);
 
             elseStmt = Current() switch
             {
-                OpenBraces => ParseCodeBlock(),
-                If         => ParseIfElse(),
+                OpenBracesToken => ParseCodeBlock(),
+                IfToken         => ParseIfElse(),
                 _ => throw new UnexpectedTokenException(
                     Current().GetType().Name, Current().Lexeme, Current().Line, Current().Column
                 )
@@ -240,19 +240,19 @@ internal class Parser
 
     private LoopStatement ParseForLoop()
     {
-        Expect<For>();
+        Expect<ForToken>();
 
         int startLine = Current().Line;
         int startColumn = Current().Column;
 
         Advance();
 
-        Expect<OpenParenthesis>();
+        Expect<OpenParenthesisToken>();
         Advance();
 
         List<Statement> initialization = [];
 
-        if (Current() is not SemiColon)
+        if (Current() is not SemiColonToken)
         {
             initialization.Add(
                 Current() is VariableDeclarationToken
@@ -263,29 +263,29 @@ internal class Parser
             Advance();
         }
 
-        Expect<SemiColon>();
+        Expect<SemiColonToken>();
         Advance();
 
         Expression? condition = null;
 
-        if (Current() is not SemiColon)
+        if (Current() is not SemiColonToken)
         {
             condition = ParseOrExpression();
             Advance();
         }
 
-        Expect<SemiColon>();
+        Expect<SemiColonToken>();
         Advance();
 
         Statement? update = null;
 
-        if (Current() is not CloseParenthesis)
+        if (Current() is not CloseParenthesisToken)
         {
             update = ParseAssignmentStatement();
             Advance();
         }
 
-        Expect<CloseParenthesis>();
+        Expect<CloseParenthesisToken>();
         Advance();
 
         CodeBlockStatement body = ParseCodeBlock();
@@ -295,20 +295,20 @@ internal class Parser
 
     private LoopStatement ParseWhileLoop()
     {
-        Expect<While>();
+        Expect<WhileToken>();
 
         int startLine = Current().Line;
         int startColumn = Current().Column;
 
         Advance();
 
-        Expect<OpenParenthesis>();
+        Expect<OpenParenthesisToken>();
         Advance();
 
         Expression condition = ParseOrExpression();
         Advance();
 
-        Expect<CloseParenthesis>();
+        Expect<CloseParenthesisToken>();
         Advance();
 
         CodeBlockStatement body = ParseCodeBlock();
@@ -321,7 +321,7 @@ internal class Parser
     {
         Expect<VariableDeclarationToken>();
 
-        bool isConstant = Current() is Const;
+        bool isConstant = Current() is ConstToken;
         int startLine = Current().Line;
         int startColumn = Current().Column;
         Advance();
@@ -329,11 +329,11 @@ internal class Parser
         RuntimeType type = ParseType();
         Advance();
 
-        Expect<Identifier>();
+        Expect<IdentifierToken>();
         string identifier = Current().Lexeme;
         Advance();
 
-        if (Current() is not AssignmentOperator)
+        if (Current() is not AssignmentToken)
         {
             Recede();
             return new VariableDeclarationStatement(identifier, type, null, isConstant, startLine, startColumn);
@@ -347,7 +347,7 @@ internal class Parser
 
     private FunctionDeclarationStatement ParseFunctionDeclaration()
     {
-        Expect<FunctionDeclaration>();
+        Expect<FunctionDeclarationToken>();
         int startLine = Current().Line;
         int startColumn = Current().Column;
         Advance();
@@ -355,7 +355,7 @@ internal class Parser
         var returnType = ParseType();
         Advance();
 
-        Expect<Identifier>();
+        Expect<IdentifierToken>();
         string identifier = Current().Lexeme;
         Advance();
 
@@ -371,20 +371,20 @@ internal class Parser
 
     private List<ParameterSymbol> ParseParameterList()
     {
-        Expect<OpenParenthesis>();
+        Expect<OpenParenthesisToken>();
         Advance();
 
         List<ParameterSymbol> parameterList = [];
         bool isDefaultParameterRequired = false;
 
-        while (Current() is Const || Current() is PrimitiveTypeToken)
+        while (Current() is ConstToken || Current() is PrimitiveTypeToken)
         {
             int startLine = Current().Line;
             int startColumn = Current().Column;
 
             bool isConstant = false;
 
-            if (Current() is Const)
+            if (Current() is ConstToken)
             {
                 isConstant = true;
                 Advance();
@@ -393,12 +393,12 @@ internal class Parser
             RuntimeType type = ParseType();
             Advance();
 
-            Expect<Identifier>();
+            Expect<IdentifierToken>();
             string identifier = Current().Lexeme;
             Advance();
 
             Expression? defaultValue = null;
-            if (Current() is AssignmentOperator)
+            if (Current() is AssignmentToken)
             {
                 Advance();
                 defaultValue = ParseOrExpression();
@@ -413,10 +413,10 @@ internal class Parser
 
             Advance();
 
-            if (Current() is Comma)
+            if (Current() is CommaToken)
             {
                 Advance();
-                Expect<Const, PrimitiveTypeToken>();
+                Expect<ConstToken, PrimitiveTypeToken>();
             }
 
             parameterList.Add(
@@ -431,7 +431,7 @@ internal class Parser
             );
         }
 
-        Expect<CloseParenthesis>();
+        Expect<CloseParenthesisToken>();
 
         return parameterList;
     }
@@ -442,7 +442,7 @@ internal class Parser
         PrimitiveTypeToken type = (Current() as PrimitiveTypeToken)!;
 
         var isNullable = false;
-        if (Peek() is QuestionMarkOperator)
+        if (Peek() is QuestionMarkToken)
         {
             isNullable = true;
             Advance();
@@ -450,10 +450,10 @@ internal class Parser
 
         return (type) switch
         {
-            BooleanPrimitive => new BooleanType(isNullable),
-            DecimalPrimitive => new DecimalType(isNullable),
-            IntegerPrimitive => new IntegerType(isNullable),
-            StringPrimitive => new StringType(isNullable),
+            BooleanPrimitiveToken => new BooleanType(isNullable),
+            DecimalPrimitiveToken => new DecimalType(isNullable),
+            IntegerPrimitiveToken => new IntegerType(isNullable),
+            StringPrimitiveToken => new StringType(isNullable),
             _ => throw new UnexpectedTokenException(type.GetType().Name, type.Lexeme, type.Line, type.Column)
         };
     }
@@ -462,7 +462,7 @@ internal class Parser
     {
         Expression left = ParseOrExpression();
 
-        if (Peek() is not AssignmentOperator)
+        if (Peek() is not AssignmentToken)
         {
             return left;
         }
@@ -475,39 +475,39 @@ internal class Parser
 
     private Expression ParseOrExpression()
     {
-        return ParseBinaryExpression<OrOperator>(ParseAndExpression);
+        return ParseBinaryExpression<OrToken>(ParseAndExpression);
     }
 
     private Expression ParseAndExpression()
     {
-        return ParseBinaryExpression<AndOperator>(ParseEqualityExpression);
+        return ParseBinaryExpression<AndToken>(ParseEqualityExpression);
     }
 
     private Expression ParseEqualityExpression()
     {
-        return ParseBinaryExpression<EqualityOperator>(ParseRelationalExpression);
+        return ParseBinaryExpression<EqualityOperatorToken>(ParseRelationalExpression);
     }
 
     private Expression ParseRelationalExpression()
     {
-        return ParseBinaryExpression<RelationalOperator>(ParseAdditiveExpression);
+        return ParseBinaryExpression<RelationalOperatorToken>(ParseAdditiveExpression);
     }
 
     private Expression ParseAdditiveExpression()
     {
-        return ParseBinaryExpression<AdditiveOperator>(ParseMultiplicativeExpression);
+        return ParseBinaryExpression<AdditiveOperatorToken>(ParseMultiplicativeExpression);
     }
 
     private Expression ParseMultiplicativeExpression()
     {
-        return ParseBinaryExpression<MultiplicativeOperator>(ParseCallMemberExpression);
+        return ParseBinaryExpression<MultiplicativeOperatorToken>(ParseCallMemberExpression);
     }
 
     private Expression ParseCallMemberExpression()
     {
         var member = ParseMemberExpression();
 
-        while (Peek() is OpenParenthesis)
+        while (Peek() is OpenParenthesisToken)
         {
             Advance();
             member = ParseCallExpression(member);
@@ -518,21 +518,21 @@ internal class Parser
 
     private CallExpression ParseCallExpression(Expression caller)
     {
-        Expect<OpenParenthesis>();
+        Expect<OpenParenthesisToken>();
         Advance();
 
         List<Expression> argumentList = [];
 
-        while (Current() is not CloseParenthesis)
+        while (Current() is not CloseParenthesisToken)
         {
             argumentList.Add(ParseOrExpression());
             Advance();
 
-            if (Current() is Comma)
+            if (Current() is CommaToken)
             {
                 Advance();
 
-                if (Current() is CloseParenthesis)
+                if (Current() is CloseParenthesisToken)
                 {
                     throw new UnexpectedTokenException(
                         Current().GetType().Name, Current().Lexeme, Current().Line, Current().Column
@@ -541,7 +541,7 @@ internal class Parser
             }
         }
 
-        Expect<CloseParenthesis>();
+        Expect<CloseParenthesisToken>();
 
         return new CallExpression(caller, argumentList, caller.StartLine, caller.StartColumn);
     }
@@ -555,31 +555,43 @@ internal class Parser
 
     private Expression ParsePrimaryExpression()
     {
-        switch (Current())
+        return Current() switch
         {
-            case Identifier:
-                return new IdentifierExpression(Current().Lexeme, Current().Line, Current().Column);
-            case IntegerLiteral:
-                return new IntegerLiteralExpression(Int128.Parse(Current().Lexeme), Current().Line, Current().Column);
-            case DecimalLiteral:
-                return new DecimalLiteralExpression(decimal.Parse(Current().Lexeme, CultureInfo.InvariantCulture), Current().Line, Current().Column);
-            case BooleanLiteral:
-                return new BooleanLiteralExpression(bool.Parse(Current().Lexeme), Current().Line, Current().Column);
-            case StringLiteral:
-                return new StringLiteralExpression(Current().Lexeme, Current().Line, Current().Column);
-            case NullLiteral:
-                return new NullLiteralExpression(Current().Line, Current().Column);
-            case OpenParenthesis:
-                Advance();
-                Expression expr = ParseOrExpression();
-                Advance();
-                Expect<CloseParenthesis>();
-                return expr;
-            default:
-                throw new UnexpectedTokenException(
-                    Current().GetType().Name, Current().Lexeme, Current().Line, Current().Column
-                );
-        }
+            IdentifierToken      => new IdentifierExpression(
+                Current().Lexeme, Current().Line, Current().Column
+            ),
+            IntegerLiteralToken  => new IntegerLiteralExpression(
+                Int128.Parse(Current().Lexeme), Current().Line, Current().Column
+            ),
+            DecimalLiteralToken  => new DecimalLiteralExpression(
+                decimal.Parse(Current().Lexeme, CultureInfo.InvariantCulture), Current().Line, Current().Column
+            ),
+            BooleanLiteralToken  => new BooleanLiteralExpression(
+                bool.Parse(Current().Lexeme), Current().Line, Current().Column
+            ),
+            StringLiteralToken   => new StringLiteralExpression(
+                Current().Lexeme, Current().Line, Current().Column
+            ),
+            NullLiteralToken     => new NullLiteralExpression(
+                Current().Line, Current().Column
+            ),
+            OpenParenthesisToken => ParseParenthesis(),
+            _ => throw new UnexpectedTokenException(
+                Current().GetType().Name, Current().Lexeme, Current().Line, Current().Column
+            ),
+        };
+    }
+
+    private Expression ParseParenthesis()
+    {
+        Expect<OpenParenthesisToken>();
+        Advance();
+
+        Expression expr = ParseOrExpression();
+        Advance();
+
+        Expect<CloseParenthesisToken>();
+        return expr;
     }
 
     private Expression ParseBinaryExpression<TOperator>(Func<Expression> next) where TOperator : OperatorToken

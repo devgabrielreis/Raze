@@ -17,6 +17,7 @@ public class ParameterSymbol : Symbol
     public RuntimeValue? DefaultRuntimeValue { get; private set; }
 
     public int? StartLine { get; private set; }
+
     public int? StartColumn { get; private set; }
 
     public ParameterSymbol(bool isConstant, RuntimeType type, string identifier, RuntimeValue? defaultValue)

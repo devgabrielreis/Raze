@@ -32,11 +32,7 @@ public class DecimalValue : RuntimeValue
         }
 
         throw new UnsupportedBinaryOperationException(
-            TypeName,
-            other.TypeName,
-            op.Lexeme,
-            source.StartLine,
-            source.StartColumn
+            TypeName, other.TypeName, op.Lexeme, source.StartLine, source.StartColumn
         );
     }
 
@@ -54,43 +50,25 @@ public class DecimalValue : RuntimeValue
 
     private RuntimeValue ExecuteBinaryOperationWithDecimal(OperatorToken op, DecimalValue other, BinaryExpression source)
     {
-        switch (op)
+        return op switch
         {
-            case AdditionOperator:
-                return new DecimalValue(DecValue + other.DecValue);
-            case SubtractionOperator:
-                return new DecimalValue(DecValue - other.DecValue);
-            case MultiplicationOperator:
-                return new DecimalValue(DecValue * other.DecValue);
-            case DivisionOperator:
-                if (other.DecValue == 0)
-                {
-                    throw new DivisionByZeroException(source.StartLine, source.StartColumn);
-                }
-                return new DecimalValue(DecValue / other.DecValue);
-            case ModuloOperator:
-                return new DecimalValue(DecValue % other.DecValue);
-            case EqualOperator:
-                return new BooleanValue(DecValue == other.DecValue);
-            case NotEqualOperator:
-                return new BooleanValue(DecValue != other.DecValue);
-            case GreaterThanOperator:
-                return new BooleanValue(DecValue > other.DecValue);
-            case LessThanOperator:
-                return new BooleanValue(DecValue < other.DecValue);
-            case GreaterOrEqualThanOperator:
-                return new BooleanValue(DecValue >= other.DecValue);
-            case LessOrEqualThanOperator:
-                return new BooleanValue(DecValue <= other.DecValue);
-        }
-
-        throw new UnsupportedBinaryOperationException(
-            TypeName,
-            other.TypeName,
-            op.Lexeme,
-            source.StartLine,
-            source.StartColumn
-        );
+            AdditionToken           => new DecimalValue(DecValue + other.DecValue),
+            SubtractionToken        => new DecimalValue(DecValue - other.DecValue),
+            MultiplicationToken     => new DecimalValue(DecValue * other.DecValue),
+            DivisionToken           => other.DecValue == 0
+                ? throw new DivisionByZeroException(source.StartLine, source.StartColumn)
+                : new DecimalValue(DecValue / other.DecValue),
+            ModuloToken             => new DecimalValue(DecValue % other.DecValue),
+            EqualToken              => new BooleanValue(DecValue == other.DecValue),
+            NotEqualToken           => new BooleanValue(DecValue != other.DecValue),
+            GreaterThanToken        => new BooleanValue(DecValue > other.DecValue),
+            LessThanToken           => new BooleanValue(DecValue < other.DecValue),
+            GreaterOrEqualThanToken => new BooleanValue(DecValue >= other.DecValue),
+            LessOrEqualThanToken    => new BooleanValue(DecValue <= other.DecValue),
+            _ => throw new UnsupportedBinaryOperationException(
+                TypeName, other.TypeName, op.Lexeme, source.StartLine, source.StartColumn
+            ),
+        };
     }
 
     public override object Clone()

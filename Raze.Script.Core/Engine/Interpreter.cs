@@ -32,50 +32,27 @@ internal class Interpreter
 
     public RuntimeValue Evaluate(Statement statement, Scope scope)
     {
-        switch (statement)
+        return statement switch
         {
-            case ProgramExpression program:
-                return EvaluateProgramExpression(program, scope);
-
-            case IntegerLiteralExpression expr:
-                return new IntegerValue(expr.IntValue);
-            case DecimalLiteralExpression expr:
-                return new DecimalValue(expr.DecValue);
-            case BooleanLiteralExpression expr:
-                return new BooleanValue(expr.BoolValue);
-            case StringLiteralExpression expr:
-                return new StringValue(expr.StrValue);
-            case NullLiteralExpression:
-                return new NullValue();
-
-            case IdentifierExpression expr:
-                return EvaluateIdentifierExpression(expr, scope);
-
-            case CodeBlockStatement stmt:
-                return EvaluateCodeBlock(stmt, scope);
-
-            case VariableDeclarationStatement stmt:
-                return EvaluateVariableDeclarationStatement(stmt, scope);
-
-            case AssignmentStatement stmt:
-                return EvaluateAssignmentStatement(stmt, scope);
-
-            case BinaryExpression expr:
-                return EvaluateBinaryExpression(expr, scope);
-
-            case IfElseStatement stmt:
-                return EvaluateIfElseStatement(stmt, scope);
-            case LoopStatement stmt:
-                return EvaluateLoopStatement(stmt, scope);
-
-            case BreakStatement stmt:
-                return EvaluateBreakStatement(stmt);
-            case ContinueStatement stmt:
-                return EvaluateContinueStatement(stmt);
-
-            default:
-                throw new UnsupportedStatementException(statement.GetType().Name, statement.StartLine, statement.StartColumn);
-        }
+            ProgramExpression         program => EvaluateProgramExpression(program, scope),
+            NullLiteralExpression             => new NullValue(),
+            IntegerLiteralExpression     expr => new IntegerValue(expr.IntValue),
+            DecimalLiteralExpression     expr => new DecimalValue(expr.DecValue),
+            BooleanLiteralExpression     expr => new BooleanValue(expr.BoolValue),
+            StringLiteralExpression      expr => new StringValue(expr.StrValue),
+            IdentifierExpression         expr => EvaluateIdentifierExpression(expr, scope),
+            CodeBlockStatement           stmt => EvaluateCodeBlock(stmt, scope),
+            VariableDeclarationStatement stmt => EvaluateVariableDeclarationStatement(stmt, scope),
+            AssignmentStatement          stmt => EvaluateAssignmentStatement(stmt, scope),
+            BinaryExpression             expr => EvaluateBinaryExpression(expr, scope),
+            IfElseStatement              stmt => EvaluateIfElseStatement(stmt, scope),
+            LoopStatement                stmt => EvaluateLoopStatement(stmt, scope),
+            BreakStatement               stmt => EvaluateBreakStatement(stmt),
+            ContinueStatement            stmt => EvaluateContinueStatement(stmt),
+            _ => throw new UnsupportedStatementException(
+                statement.GetType().Name, statement.StartLine, statement.StartColumn
+            )
+        };
     }
 
     private RuntimeValue EvaluateProgramExpression(ProgramExpression program, Scope scope)

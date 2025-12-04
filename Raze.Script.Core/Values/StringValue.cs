@@ -29,11 +29,7 @@ public class StringValue : RuntimeValue
         }
 
         throw new UnsupportedBinaryOperationException(
-            TypeName,
-            other.TypeName,
-            op.Lexeme,
-            source.StartLine,
-            source.StartColumn
+            TypeName, other.TypeName, op.Lexeme, source.StartLine, source.StartColumn
         );
     }
 
@@ -44,23 +40,15 @@ public class StringValue : RuntimeValue
 
     private RuntimeValue ExecuteBinaryOperationWithString(OperatorToken op, StringValue other, BinaryExpression source)
     {
-        switch (op)
+        return op switch
         {
-            case AdditionOperator:
-                return new StringValue(StrValue + other.StrValue);
-            case EqualOperator:
-                return new BooleanValue(StrValue == other.StrValue);
-            case NotEqualOperator:
-                return new BooleanValue(StrValue != other.StrValue);
-        }
-
-        throw new UnsupportedBinaryOperationException(
-            TypeName,
-            other.TypeName,
-            op.Lexeme,
-            source.StartLine,
-            source.StartColumn
-        );
+            AdditionToken => new StringValue(StrValue + other.StrValue),
+            EqualToken    => new BooleanValue(StrValue == other.StrValue),
+            NotEqualToken => new BooleanValue(StrValue != other.StrValue),
+            _ => throw new UnsupportedBinaryOperationException(
+                TypeName, other.TypeName, op.Lexeme, source.StartLine, source.StartColumn
+            ),
+        };
     }
 
     public override object Clone()
