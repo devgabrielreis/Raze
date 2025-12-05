@@ -402,6 +402,8 @@ internal class Parser
             {
                 Advance();
                 defaultValue = ParseOrExpression();
+                Advance();
+
                 isDefaultParameterRequired = true;
             }
             else if (isDefaultParameterRequired)
@@ -410,8 +412,6 @@ internal class Parser
                     "A non-default parameter cannot appear after a default parameter", startLine, startColumn
                 );
             }
-
-            Advance();
 
             if (Current() is CommaToken)
             {
