@@ -11,6 +11,11 @@ public class IntegerType : RuntimeType
     {
     }
 
+    public override bool Equals(RuntimeType? other)
+    {
+        return other is IntegerType;
+    }
+
     protected override bool AcceptNonNull(RuntimeValue value)
     {
         return value is IntegerValue;

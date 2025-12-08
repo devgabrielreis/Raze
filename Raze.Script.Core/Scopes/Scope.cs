@@ -26,7 +26,7 @@ public abstract class Scope
         DeclareVariable(name, variable, null, null);
     }
 
-    internal virtual void DeclareVariable(string name, VariableSymbol variable, VariableDeclarationStatement source)
+    internal virtual void DeclareVariable(string name, VariableSymbol variable, Statement source)
     {
         DeclareVariable(name, variable, source.StartLine, source.StartColumn);
     }

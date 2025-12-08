@@ -11,6 +11,11 @@ public class StringType : RuntimeType
     {
     }
 
+    public override bool Equals(RuntimeType? other)
+    {
+        return other is StringType;
+    }
+
     protected override bool AcceptNonNull(RuntimeValue value)
     {
         return value is StringValue;

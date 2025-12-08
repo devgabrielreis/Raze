@@ -11,6 +11,11 @@ public class DecimalType : RuntimeType
     {
     }
 
+    public override bool Equals(RuntimeType? other)
+    {
+        return other is DecimalType;
+    }
+
     protected override bool AcceptNonNull(RuntimeValue value)
     {
         return value is DecimalValue;

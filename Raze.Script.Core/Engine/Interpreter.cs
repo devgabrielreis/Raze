@@ -7,6 +7,7 @@ using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 using Raze.Script.Core.Symbols;
 using Raze.Script.Core.Tokens.Operators;
+using Raze.Script.Core.Types;
 using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Engine;
@@ -43,6 +44,7 @@ internal class Interpreter
             IdentifierExpression         expr => EvaluateIdentifierExpression(expr, scope),
             CodeBlockStatement           stmt => EvaluateCodeBlock(stmt, scope),
             VariableDeclarationStatement stmt => EvaluateVariableDeclarationStatement(stmt, scope),
+            FunctionDeclarationStatement stmt => EvaluateFunctionDeclarationStatement(stmt, scope),
             AssignmentStatement          stmt => EvaluateAssignmentStatement(stmt, scope),
             BinaryExpression             expr => EvaluateBinaryExpression(expr, scope),
             IfElseStatement              stmt => EvaluateIfElseStatement(stmt, scope),
@@ -78,6 +80,21 @@ internal class Interpreter
         );
 
         scope.DeclareVariable(statement.Identifier, variable, statement);
+        return new VoidValue();
+    }
+
+    private VoidValue EvaluateFunctionDeclarationStatement(FunctionDeclarationStatement statement, Scope scope)
+    {
+        FunctionValue function = new FunctionValue(
+            statement.ReturnType, statement.Parameters, statement.Body, scope
+        );
+
+        FunctionType type = new FunctionType(false, statement.ReturnType, statement.Parameters);
+
+        VariableSymbol variable = new VariableSymbol(function, type, true, statement.StartLine, statement.StartColumn);
+
+        scope.DeclareVariable(statement.Identifier, variable, statement);
+
         return new VoidValue();
     }
 

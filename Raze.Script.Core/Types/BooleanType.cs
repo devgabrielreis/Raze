@@ -11,6 +11,11 @@ public class BooleanType : RuntimeType
     {
     }
 
+    public override bool Equals(RuntimeType? other)
+    {
+        return other is BooleanType;
+    }
+
     protected override bool AcceptNonNull(RuntimeValue value)
     {
         return value is BooleanValue;

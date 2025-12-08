@@ -2,7 +2,7 @@
 
 namespace Raze.Script.Core.Types;
 
-public abstract class RuntimeType
+public abstract class RuntimeType : IEquatable<RuntimeType>
 {
     public bool IsNullable { get; private set; }
 
@@ -24,6 +24,8 @@ public abstract class RuntimeType
 
         return AcceptNonNull(value);
     }
+
+    public abstract bool Equals(RuntimeType? other);
 
     protected abstract bool AcceptNonNull(RuntimeValue value);
 }

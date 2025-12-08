@@ -4,7 +4,7 @@ using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Symbols;
 
-public class ParameterSymbol : Symbol
+public class ParameterSymbol : Symbol, IEquatable<ParameterSymbol>
 {
     public bool IsConstant { get; private set; }
 
@@ -45,5 +45,17 @@ public class ParameterSymbol : Symbol
         DefaultValue = defaultValue;
         StartLine = startLine;
         StartColumn = startColumn;
+    }
+
+    public bool Equals(ParameterSymbol? other)
+    {
+        return other is not null
+            && other.Type.Equals(Type)
+            && other.HasDefaultValue() == HasDefaultValue();
+    }
+
+    private bool HasDefaultValue()
+    {
+        return DefaultRuntimeValue is not null || DefaultValue is not null;
     }
 }
