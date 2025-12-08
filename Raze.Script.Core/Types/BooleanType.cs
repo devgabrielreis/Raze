@@ -4,7 +4,7 @@ namespace Raze.Script.Core.Types;
 
 public class BooleanType : RuntimeType
 {
-    protected override string BaseTypeName => "Boolean";
+    protected override string BaseTypeName => "boolean";
 
     public BooleanType(bool isNullable)
         : base(isNullable)

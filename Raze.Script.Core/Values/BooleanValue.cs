@@ -11,7 +11,7 @@ public class BooleanValue : RuntimeValue
 
     public bool BoolValue => _value;
 
-    public override string TypeName => "Boolean";
+    public override string TypeName => "boolean";
 
     private readonly bool _value;
 

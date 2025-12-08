@@ -8,7 +8,7 @@ public class VoidValue : RuntimeValue
 {
     public override object Value => this;
 
-    public override string TypeName => "Undefined";
+    public override string TypeName => "void";
 
     internal override RuntimeValue ExecuteBinaryOperation(OperatorToken op, RuntimeValue other, BinaryExpression source)
     {
@@ -19,7 +19,7 @@ public class VoidValue : RuntimeValue
 
     public override string ToString()
     {
-        return "undefined";
+        return "void";
     }
 
     public override object Clone()

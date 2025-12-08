@@ -12,7 +12,7 @@ public class StringValue : RuntimeValue
 
     public string StrValue => _value;
 
-    public override string TypeName => "String";
+    public override string TypeName => "string";
 
     private readonly string _value;
 

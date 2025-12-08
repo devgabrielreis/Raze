@@ -4,7 +4,7 @@ namespace Raze.Script.Core.Types;
 
 public class IntegerType : RuntimeType
 {
-    protected override string BaseTypeName => "Integer";
+    protected override string BaseTypeName => "integer";
 
     public IntegerType(bool isNullable)
         : base(isNullable)

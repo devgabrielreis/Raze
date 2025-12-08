@@ -6,7 +6,7 @@ public abstract class RuntimeType : IEquatable<RuntimeType>
 {
     public bool IsNullable { get; private set; }
 
-    public string TypeName => $"{(IsNullable ? "Nullable" : "")}{BaseTypeName}";
+    public string TypeName => $"{BaseTypeName}{(IsNullable ? "?" : "")}";
 
     protected abstract string BaseTypeName { get; }
 

@@ -15,7 +15,7 @@ public class DecimalValue : RuntimeValue
 
     public decimal DecValue => _value;
 
-    public override string TypeName => "Decimal";
+    public override string TypeName => "decimal";
 
     private readonly decimal _value;
 

@@ -56,7 +56,7 @@ public class VariableSymbol : Symbol
 
         if (!Type.Accept(newValue))
         {
-            throw new VariableTypeException(newValue.GetType().Name, Type.TypeName, sourceLine, sourceColumn);
+            throw new VariableTypeException(newValue.TypeName, Type.TypeName, sourceLine, sourceColumn);
         }
 
         _value = newValue.Clone() as RuntimeValue;

@@ -14,7 +14,7 @@ public class IntegerValue : RuntimeValue
 
     public Int128 IntValue => _value;
 
-    public override string TypeName => "Integer";
+    public override string TypeName => "integer";
 
     private readonly Int128 _value;
 

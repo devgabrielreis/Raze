@@ -4,7 +4,7 @@ namespace Raze.Script.Core.Types;
 
 public class DecimalType : RuntimeType
 {
-    protected override string BaseTypeName => "Decimal";
+    protected override string BaseTypeName => "decimal";
 
     public DecimalType(bool isNullable)
         : base(isNullable)

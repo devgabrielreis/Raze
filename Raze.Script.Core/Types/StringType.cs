@@ -4,7 +4,7 @@ namespace Raze.Script.Core.Types;
 
 public class StringType : RuntimeType
 {
-    protected override string BaseTypeName => "String";
+    protected override string BaseTypeName => "string";
 
     public StringType(bool isNullable)
         : base(isNullable)
