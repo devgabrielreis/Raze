@@ -21,6 +21,19 @@ public class ControlStructuresTests
         {
             RazeScript.Evaluate("break");
         });
+
+        Assert.Throws<UnexpectedStatementException>(() =>
+        {
+            RazeScript.Evaluate("""
+            def integer inner() {
+                break;
+            }
+
+            while (true) {
+                inner();
+            }
+            """);
+        });
     }
 
     [Fact]
