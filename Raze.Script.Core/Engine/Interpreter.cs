@@ -16,7 +16,8 @@ internal class Interpreter
 {
     private enum ExecutionContexts
     {
-        Loop
+        Loop,
+        Function
     }
 
     private Stack<ExecutionContexts> _contextStack;
@@ -51,6 +52,7 @@ internal class Interpreter
             LoopStatement                stmt => EvaluateLoopStatement(stmt, scope),
             BreakStatement               stmt => EvaluateBreakStatement(stmt),
             ContinueStatement            stmt => EvaluateContinueStatement(stmt),
+            ReturnStatement              stmt => EvaluateReturnStatement(stmt, scope),
             _ => throw new UnsupportedStatementException(
                 statement.GetType().Name, statement.StartLine, statement.StartColumn
             )
@@ -247,6 +249,24 @@ internal class Interpreter
         }
 
         throw new ContinueException();
+    }
+
+    public VoidValue EvaluateReturnStatement(ReturnStatement statement, Scope scope)
+    {
+        if (!_contextStack.Contains(ExecutionContexts.Function))
+        {
+            throw new UnexpectedStatementException(
+                "Cannot use return outside of a function",
+                statement.StartLine,
+                statement.StartColumn
+            );
+        }
+
+        RuntimeValue returnedValue = (statement.ReturnedValue is null)
+                                        ? new VoidValue()
+                                        : Evaluate(statement.ReturnedValue, scope);
+
+        throw new ReturnException(returnedValue);
     }
 
     private bool GetValidBooleanValue(Expression condition, Scope scope)
