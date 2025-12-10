@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.InterpreterExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.InterpreterExceptions;
 
 public class UnsupportedStatementException : InterpreterException
 {
-    public UnsupportedStatementException(string statementType, int line, int column)
-        : base($"Not supported statement found on interpreter: {statementType}", line, column, nameof(UnsupportedStatementException))
+    internal UnsupportedStatementException(string statementType, SourceInfo source)
+        : base($"Not supported statement found on interpreter: {statementType}", source, nameof(UnsupportedStatementException))
     {
     }
 }

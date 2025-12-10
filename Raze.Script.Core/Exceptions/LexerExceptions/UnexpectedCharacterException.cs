@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.LexerExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.LexerExceptions;
 
 public class UnexpectedCharacterException : LexerException
 {
-    public UnexpectedCharacterException(char c, int line, int column)
-        : base($"Unexpected character found: {c}", line, column, nameof(UnexpectedCharacterException))
+    internal UnexpectedCharacterException(char c, SourceInfo source)
+        : base($"Unexpected character found: {c}", source, nameof(UnexpectedCharacterException))
     {
     }
 }

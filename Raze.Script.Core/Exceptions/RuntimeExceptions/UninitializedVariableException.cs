@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public class UninitializedVariableException : RuntimeException
 {
-    public UninitializedVariableException(int? line, int? column)
-        : base($"Trying to access variable before its initialization", line, column, nameof(UninitializedVariableException))
+    internal UninitializedVariableException(SourceInfo source)
+        : base($"Trying to access variable before its initialization", source, nameof(UninitializedVariableException))
     {
     }
 }

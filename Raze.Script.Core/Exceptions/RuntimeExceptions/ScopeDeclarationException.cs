@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public class ScopeDeclarationException : RuntimeException
 {
-    public ScopeDeclarationException(string structureName, string scopeType, int? line, int? column)
-        : base($"Cannot declare {structureName} on {scopeType}", line, column, nameof(ScopeDeclarationException))
+    internal ScopeDeclarationException(string structureName, string scopeType, SourceInfo source)
+        : base($"Cannot declare {structureName} on {scopeType}", source, nameof(ScopeDeclarationException))
     {
     }
 }

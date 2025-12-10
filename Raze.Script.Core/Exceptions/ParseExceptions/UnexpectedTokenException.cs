@@ -1,22 +1,22 @@
-﻿namespace Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.ParseExceptions;
 
 public class UnexpectedTokenException : ParseException
 {
-    public UnexpectedTokenException(string foundToken, string lexeme, int line, int column)
+    internal UnexpectedTokenException(string foundToken, string lexeme, SourceInfo source)
         : base(
               $"Unexpected token of type {foundToken} found: {lexeme}",
-              line,
-              column,
+              source,
               nameof(UnexpectedTokenException)
           )
     {
     }
 
-    public UnexpectedTokenException(string foundToken, string expectedToken, string lexeme, int line, int column)
+    internal UnexpectedTokenException(string foundToken, string expectedToken, string lexeme, SourceInfo source)
         : base(
               $"Unexpected token found. Expected: {expectedToken}. Found: {foundToken}" + (lexeme.Equals(string.Empty) ? "" : $". Value: {lexeme}"),
-              line,
-              column,
+              source,
               nameof(UnexpectedTokenException)
           )
     {

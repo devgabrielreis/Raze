@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.LexerExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.LexerExceptions;
 
 public class UnrecognizedEscapeSequenceException : LexerException
 {
-    public UnrecognizedEscapeSequenceException(string escapeSequence, int line, int column)
-        : base(escapeSequence, line, column, nameof(UnrecognizedEscapeSequenceException))
+    internal UnrecognizedEscapeSequenceException(string escapeSequence, SourceInfo source)
+        : base(escapeSequence, source, nameof(UnrecognizedEscapeSequenceException))
     {
     }
 }

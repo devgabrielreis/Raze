@@ -1,21 +1,20 @@
-﻿namespace Raze.Script.Core.Exceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions;
 
 public abstract class RazeException : Exception
 {
-    public int? Line { get; private set; }
-    public int? Column { get; private set; }
+    public SourceInfo SourceInfo { get; private set; }
 
-    public RazeException(string error, int? line, int? column, string className)
-        : base($"{className} -> {error}." + ((line is not null && column is not null) ? $" At line {line}, column {column}." : ""))
+    internal RazeException(string error, SourceInfo source, string errorName)
+        : base($"{errorName} -> {error}.")
     {
-        Line = line;
-        Column = column;
+        SourceInfo = source;
     }
 
-    public RazeException(int? line, int? column, string className)
-        : base($"{className}." + ((line is not null && column is not null) ? $" At line {line}, column {column}." : ""))
+    internal RazeException(SourceInfo source, string errorName)
+        : base($"{errorName}.")
     {
-        Line = line;
-        Column = column;
+        SourceInfo = source;
     }
 }

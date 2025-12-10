@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.ControlExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.ControlExceptions;
 
 internal abstract class ControlException : RazeException
 {
-    public ControlException(string className)
-        : base(null, null, className)
+    internal ControlException(SourceInfo source, string errorName)
+        : base(source, errorName)
     {
     }
 }

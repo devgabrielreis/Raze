@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.ParseExceptions;
 
 public abstract class ParseException : RazeException
 {
-    public ParseException(string error, int? line, int? column, string className)
-        : base(error, line, column, className)
+    internal ParseException(string error, SourceInfo source, string errorName)
+        : base(error, source, errorName)
     {
     }
 }

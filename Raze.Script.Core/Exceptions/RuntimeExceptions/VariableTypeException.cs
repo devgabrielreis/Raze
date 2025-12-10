@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public class VariableTypeException : RuntimeException
 {
-    public VariableTypeException(string foundType, string variableType, int? line, int? column)
-        : base($"Trying to assign type {foundType} to variable of type {variableType}", line, column, nameof(VariableTypeException))
+    internal VariableTypeException(string foundType, string variableType, SourceInfo source)
+        : base($"Trying to assign type {foundType} to variable of type {variableType}", source, nameof(VariableTypeException))
     {
     }
 }

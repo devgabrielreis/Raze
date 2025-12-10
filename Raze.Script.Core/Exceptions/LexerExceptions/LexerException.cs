@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.LexerExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.LexerExceptions;
 
 public abstract class LexerException : RazeException
 {
-    public LexerException(string error, int line, int column, string className)
-        : base(error, line, column, className)
+    internal LexerException(string error, SourceInfo source, string errorName)
+        : base(error, source, errorName)
     {
     }
 }

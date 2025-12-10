@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.LexerExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.LexerExceptions;
 
 public class InvalidStringException : LexerException
 {
-    public InvalidStringException(string stringToken, int line, int column)
-        : base($"Invalid string declaration: {stringToken}", line, column, nameof(InvalidStringException))
+    internal InvalidStringException(string stringToken, SourceInfo source)
+        : base($"Invalid string declaration: {stringToken}", source, nameof(InvalidStringException))
     {
     }
 }

@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public class UndefinedIdentifierException : RuntimeException
 {
-    public UndefinedIdentifierException(string symbol, int? line, int? column)
-        : base($"Undefined identifier: {symbol}", line, column, nameof(UndefinedIdentifierException))
+    internal UndefinedIdentifierException(string symbol, SourceInfo source)
+        : base($"Undefined identifier: {symbol}", source, nameof(UndefinedIdentifierException))
     {
     }
 }

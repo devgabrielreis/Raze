@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public class InvalidAssignmentException : RuntimeException
 {
-    public InvalidAssignmentException(int? line, int? column)
-        : base(line, column, nameof(InvalidAssignmentException))
+    internal InvalidAssignmentException(SourceInfo source)
+        : base(source, nameof(InvalidAssignmentException))
     {
     }
 }

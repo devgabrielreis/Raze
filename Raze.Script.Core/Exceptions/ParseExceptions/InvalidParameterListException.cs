@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.ParseExceptions;
 
 public class InvalidParameterListException : ParseException
 {
-    public InvalidParameterListException(string message, int? line, int? column)
-        : base(message, line, column, nameof(InvalidParameterListException))
+    internal InvalidParameterListException(string message, SourceInfo source)
+        : base(message, source, nameof(InvalidParameterListException))
     {
     }
 }

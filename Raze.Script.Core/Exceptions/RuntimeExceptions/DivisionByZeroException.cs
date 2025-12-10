@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public class DivisionByZeroException : RuntimeException
 {
-    public DivisionByZeroException(int line, int column)
-        : base(line, column, nameof(DivisionByZeroException))
+    internal DivisionByZeroException(SourceInfo source)
+        : base(source, nameof(DivisionByZeroException))
     {
     }
 }

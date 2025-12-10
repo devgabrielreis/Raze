@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.ControlExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.ControlExceptions;
 
 internal class ContinueException : ControlException
 {
-    public ContinueException()
-        : base(nameof(ContinueException))
+    internal ContinueException(SourceInfo source)
+        : base(source, nameof(ContinueException))
     {
     }
 }

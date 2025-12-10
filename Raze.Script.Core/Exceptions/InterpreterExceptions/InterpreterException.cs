@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.InterpreterExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.InterpreterExceptions;
 
 public abstract class InterpreterException : RazeException
 {
-    public InterpreterException(string error, int line, int column, string className)
-        : base(error, line, column, className)
+    internal InterpreterException(string error, SourceInfo source, string errorName)
+        : base(error, source, errorName)
     {
     }
 }

@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public class UnexpectedTypeException : RuntimeException
 {
-    public UnexpectedTypeException(string foundType, string expectedType, int? line, int? column)
-        : base($"Expected: {expectedType}. Found: {foundType}", line, column, nameof(UnexpectedTypeException))
+    internal UnexpectedTypeException(string foundType, string expectedType, SourceInfo source)
+        : base($"Expected: {expectedType}. Found: {foundType}", source, nameof(UnexpectedTypeException))
     {
     }
 }

@@ -1,12 +1,13 @@
-﻿namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public class UnsupportedBinaryOperationException : RuntimeException
 {
-    public UnsupportedBinaryOperationException(string leftType, string rightType, string op, int line, int column)
+    internal UnsupportedBinaryOperationException(string leftType, string rightType, string op, SourceInfo source)
         : base(
             $"{leftType} {op} {rightType}",
-            line,
-            column,
+            source,
             nameof(UnsupportedBinaryOperationException)
         )
     {

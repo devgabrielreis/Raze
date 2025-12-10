@@ -1,14 +1,16 @@
-﻿namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public abstract class RuntimeException : RazeException
 {
-    public RuntimeException(string error, int? line, int? column, string className)
-        : base(error, line, column, className)
+    internal RuntimeException(string error, SourceInfo source, string errorName)
+        : base(error, source, errorName)
     {
     }
 
-    public RuntimeException(int? line, int? column, string className)
-        : base(line, column, className)
+    internal RuntimeException(SourceInfo source, string errorName)
+        : base(source, errorName)
     {
     }
 }

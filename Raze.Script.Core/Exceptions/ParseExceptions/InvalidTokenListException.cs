@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Exceptions.ParseExceptions;
 
 public class InvalidTokenListException : ParseException
 {
-    public InvalidTokenListException()
-        : base("Invalid token list", null, null, nameof(InvalidTokenListException))
+    internal InvalidTokenListException(SourceInfo source)
+        : base("Invalid token list", source, nameof(InvalidTokenListException))
     {
     }
 }
