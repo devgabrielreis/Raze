@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Tokens.Operators.MultiplicativeOperators;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Tokens.Operators.MultiplicativeOperators;
 
 internal class ModuloToken : MultiplicativeOperatorToken
 {
-    public ModuloToken(string lexeme, int line, int column)
-        : base(lexeme, line, column)
+    public ModuloToken(string lexeme, SourceInfo source)
+        : base(lexeme, source)
     {
     }
 }

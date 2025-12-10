@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Tokens.ControlStructures;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Tokens.ControlStructures;
 
 internal abstract class ControlStructureToken : Token
 {
-    public ControlStructureToken(string lexeme, int line, int column)
-    : base(lexeme, line, column)
+    public ControlStructureToken(string lexeme, SourceInfo source)
+    : base(lexeme, source)
     {
     }
 }

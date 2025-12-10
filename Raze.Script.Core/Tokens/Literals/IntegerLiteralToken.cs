@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Tokens.Literals;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Tokens.Literals;
 
 internal class IntegerLiteralToken : LiteralToken
 {
-    public IntegerLiteralToken(string lexeme, int line, int column)
-        : base(lexeme, line, column)
+    public IntegerLiteralToken(string lexeme, SourceInfo source)
+        : base(lexeme, source)
     {
     }
 }

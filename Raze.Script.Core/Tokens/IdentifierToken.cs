@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Tokens;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Tokens;
 
 internal class IdentifierToken : Token
 {
-    public IdentifierToken(string lexeme, int line, int column)
-        : base(lexeme, line, column)
+    public IdentifierToken(string lexeme, SourceInfo source)
+        : base(lexeme, source)
     {
     }
 }

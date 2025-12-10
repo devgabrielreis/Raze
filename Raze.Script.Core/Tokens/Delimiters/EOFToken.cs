@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Tokens.Delimiters;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Tokens.Delimiters;
 
 internal class EOFToken : DelimiterToken
 {
-    public EOFToken(int line, int column)
-        : base(string.Empty, line, column)
+    public EOFToken(SourceInfo source)
+        : base(string.Empty, source)
     {
     }
 }

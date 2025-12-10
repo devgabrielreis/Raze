@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Tokens.Operators;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Tokens.Operators;
 
 internal abstract class OperatorToken : Token
 {
-    public OperatorToken(string lexeme, int line, int column)
-        : base(lexeme, line, column)
+    public OperatorToken(string lexeme, SourceInfo source)
+        : base(lexeme, source)
     {
     }
 }

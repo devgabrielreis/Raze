@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Tokens;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Tokens;
 
 internal class FunctionDeclarationToken : Token
 {
-    public FunctionDeclarationToken(string lexeme, int line, int column)
-        : base(lexeme, line, column)
+    public FunctionDeclarationToken(string lexeme, SourceInfo source)
+        : base(lexeme, source)
     {
     }
 }

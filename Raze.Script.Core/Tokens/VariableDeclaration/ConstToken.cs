@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Tokens.VariableDeclaration;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Tokens.VariableDeclaration;
 
 internal class ConstToken : VariableDeclarationToken
 {
-    public ConstToken(string lexeme, int line, int column)
-        : base(lexeme, line, column)
+    public ConstToken(string lexeme, SourceInfo source)
+        : base(lexeme, source)
     {
     }
 }

@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Tokens.Operators.AdditiveOperators;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Tokens.Operators.AdditiveOperators;
 
 internal class SubtractionToken : AdditiveOperatorToken
 {
-    public SubtractionToken(string lexeme, int line, int column)
-        : base(lexeme, line, column)
+    public SubtractionToken(string lexeme, SourceInfo source)
+        : base(lexeme, source)
     {
     }
 }

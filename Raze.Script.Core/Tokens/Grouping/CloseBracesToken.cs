@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Tokens.Grouping;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Tokens.Grouping;
 
 internal class CloseBracesToken : GroupingToken
 {
-    public CloseBracesToken(string lexeme, int line, int column)
-        : base(lexeme, line, column)
+    public CloseBracesToken(string lexeme, SourceInfo source)
+        : base(lexeme, source)
     {
     }
 }
