@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Symbols;
+﻿using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Symbols;
 using Raze.Script.Core.Types;
 
 namespace Raze.Script.Core.Statements;
@@ -20,10 +21,9 @@ internal class FunctionDeclarationStatement : Statement
         RuntimeType returnType,
         IReadOnlyList<ParameterSymbol> parameters,
         CodeBlockStatement body,
-        int startLine,
-        int startColumn
+        SourceInfo source
     )
-        : base(startLine, startColumn)
+        : base(source)
     {
         Identifier = identifier;
         ReturnType = returnType;

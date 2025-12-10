@@ -1,4 +1,6 @@
-﻿namespace Raze.Script.Core.Statements.Expressions.LiteralExpressions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 
 internal class BooleanLiteralExpression : LiteralExpression
 {
@@ -8,8 +10,8 @@ internal class BooleanLiteralExpression : LiteralExpression
 
     private readonly bool _value;
 
-    public BooleanLiteralExpression(bool value, int startLine, int startColumn)
-        : base(startLine, startColumn)
+    public BooleanLiteralExpression(bool value, SourceInfo source)
+        : base(source)
     {
         _value = value;
     }

@@ -1,14 +1,15 @@
-﻿namespace Raze.Script.Core.Statements;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Statements;
 
 internal abstract class Statement
 {
-    public int StartLine { get; private set; }
-    public int StartColumn { get; private set; }
+    public SourceInfo SourceInfo { get; private set; }
+
     public virtual bool RequireSemicolon => true;
 
-    public Statement(int startLine, int startColumn)
+    public Statement(SourceInfo source)
     {
-        StartLine = startLine;
-        StartColumn = startColumn;
+        SourceInfo = source;
     }
 }

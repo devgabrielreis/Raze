@@ -1,9 +1,11 @@
-﻿namespace Raze.Script.Core.Statements;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Statements;
 
 internal class BreakStatement : Statement
 {
-    public BreakStatement(int startLine, int startColumn)
-        : base(startLine, startColumn)
+    public BreakStatement(SourceInfo source)
+        : base(source)
     {
     }
 }

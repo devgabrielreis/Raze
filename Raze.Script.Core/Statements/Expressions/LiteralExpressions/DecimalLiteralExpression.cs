@@ -1,4 +1,6 @@
-﻿namespace Raze.Script.Core.Statements.Expressions.LiteralExpressions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 
 internal class DecimalLiteralExpression : LiteralExpression
 {
@@ -8,8 +10,8 @@ internal class DecimalLiteralExpression : LiteralExpression
 
     private readonly decimal _value;
 
-    public DecimalLiteralExpression(decimal value, int startLine, int startColumn)
-        : base(startLine, startColumn)
+    public DecimalLiteralExpression(decimal value, SourceInfo source)
+        : base(source)
     {
         _value = value;
     }

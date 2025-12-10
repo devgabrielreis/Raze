@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Tokens.Operators;
+﻿using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Tokens.Operators;
 
 namespace Raze.Script.Core.Statements.Expressions;
 
@@ -8,8 +9,8 @@ internal class BinaryExpression : Expression
     public OperatorToken Operator { get; private set; }
     public Expression Right { get; private set; }
 
-    public BinaryExpression(Expression left, OperatorToken op, Expression right, int startLine, int startColumn)
-        : base(startLine, startColumn)
+    public BinaryExpression(Expression left, OperatorToken op, Expression right, SourceInfo source)
+        : base(source)
     {
         Left = left;
         Operator = op;

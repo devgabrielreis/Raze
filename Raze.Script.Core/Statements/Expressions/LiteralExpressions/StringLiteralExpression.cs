@@ -1,4 +1,6 @@
-﻿namespace Raze.Script.Core.Statements.Expressions.LiteralExpressions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 
 internal class StringLiteralExpression : LiteralExpression
 {
@@ -8,8 +10,8 @@ internal class StringLiteralExpression : LiteralExpression
 
     private readonly string _value;
 
-    public StringLiteralExpression(string value, int startLine, int startColumn)
-        : base(startLine, startColumn)
+    public StringLiteralExpression(string value, SourceInfo source)
+        : base(source)
     {
         _value = value;
     }

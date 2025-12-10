@@ -1,4 +1,6 @@
-﻿namespace Raze.Script.Core.Statements.Expressions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Statements.Expressions;
 
 internal class CallExpression : Expression
 {
@@ -6,8 +8,8 @@ internal class CallExpression : Expression
 
     public IReadOnlyList<Expression> ArgumentList { get; private set; }
 
-    public CallExpression(Expression caller, IReadOnlyList<Expression> argumentList, int startLine, int startColumn)
-        : base(startLine, startColumn)
+    public CallExpression(Expression caller, IReadOnlyList<Expression> argumentList, SourceInfo source)
+        : base(source)
     {
         Caller = caller;
         ArgumentList = argumentList;

@@ -1,10 +1,12 @@
-﻿namespace Raze.Script.Core.Statements.Expressions.LiteralExpressions;
+﻿using Raze.Script.Core.Metadata;
+
+namespace Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 
 internal class NullLiteralExpression : LiteralExpression
 {
     public override object? Value => null;
-    public NullLiteralExpression(int startLine, int startColumn)
-        : base(startLine, startColumn)
+    public NullLiteralExpression(SourceInfo source)
+        : base(source)
     {
     }
 }

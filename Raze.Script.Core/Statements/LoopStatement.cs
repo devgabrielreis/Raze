@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Statements.Expressions;
+﻿using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Statements.Expressions;
 
 namespace Raze.Script.Core.Statements;
 
@@ -14,8 +15,8 @@ internal class LoopStatement : Statement
 
     public override bool RequireSemicolon => false;
 
-    public LoopStatement(List<Statement> initialization, Expression? condition, Statement? update, CodeBlockStatement body, int startLine, int startColumn)
-        : base(startLine, startColumn)
+    public LoopStatement(List<Statement> initialization, Expression? condition, Statement? update, CodeBlockStatement body, SourceInfo source)
+        : base(source)
     {
         Initialization = initialization;
         Condition = condition;
