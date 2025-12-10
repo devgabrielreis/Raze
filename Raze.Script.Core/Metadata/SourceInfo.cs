@@ -2,21 +2,18 @@
 
 public class SourceInfo
 {
-    public int? StartLine { get; private set; }
-
-    public int? StartColumn { get; private set; }
+    public SourcePosition? SourcePosition { get; private set; }
 
     public string Location { get; private set; }
 
     public SourceInfo(string location)
-        : this(null, null, location)
+        : this(null, location)
     {
     }
 
-    internal SourceInfo(int? startLine, int? startColumn, string location)
+    internal SourceInfo(SourcePosition? position, string location)
     {
-        StartLine = startLine;
-        StartColumn = startColumn;
+        SourcePosition = position;
         Location = location;
     }
 }
