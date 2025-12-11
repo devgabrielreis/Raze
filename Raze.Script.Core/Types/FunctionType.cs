@@ -42,12 +42,26 @@ public class FunctionType : RuntimeType
 
     protected override bool AcceptNonNull(RuntimeValue value)
     {
-        if (value is FunctionValue functionValue)
+        if (value is FunctionValue)
         {
-            return functionValue.ReturnType.Equals(ReturnType) && functionValue.Parameters.SequenceEqual(Parameters);
+            return false;
         }
 
-        return false;
+        var functionValue = (FunctionValue)value;
+
+        if (!functionValue.ReturnType.Equals(ReturnType))
+        {
+            return false;
+        }
+
+        if (functionValue.Parameters.Count != Parameters.Count)
+        {
+            return false;
+        }
+
+        return functionValue.Parameters
+            .Zip(Parameters)
+            .All(pair => pair.First.Equivalent(pair.Second));
     }
 
     private string GetTypeName()
@@ -55,6 +69,6 @@ public class FunctionType : RuntimeType
         List<string> generics = Parameters.Select(p => p.Type.TypeName).ToList();
         generics.Add(ReturnType.TypeName);
 
-        return $"function<${string.Join(", ", generics)}>";
+        return $"function<{string.Join(", ", generics)}>";
     }
 }
