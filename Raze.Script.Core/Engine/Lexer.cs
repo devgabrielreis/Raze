@@ -1,4 +1,5 @@
 ﻿using Raze.Script.Core.Exceptions.LexerExceptions;
+using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Tokens;
 using Raze.Script.Core.Tokens.ControlStructures;
 using Raze.Script.Core.Tokens.Delimiters;
@@ -20,64 +21,66 @@ internal class Lexer
     public bool HasProcessed { get; private set; }
 
     private readonly string _sourceCode;
+    private readonly string _sourceLocation;
     private int _currentIndex = 0;
     private int _currentLine = 0;
     private int _currentColumn = 0;
     private List<Token> _tokens = [];
 
-    private static readonly Dictionary<string, Func<string, int, int, Token>> _keywords = new()
+    private static readonly Dictionary<string, Func<string, SourceInfo, Token>> _keywords = new()
     {
-        ["var"]      = (string lexeme, int line, int column) => new VarToken(lexeme, line, column),
-        ["const"]    = (string lexeme, int line, int column) => new ConstToken(lexeme, line, column),
-        ["integer"]  = (string lexeme, int line, int column) => new IntegerPrimitiveToken(lexeme, line, column),
-        ["decimal"]  = (string lexeme, int line, int column) => new DecimalPrimitiveToken(lexeme, line, column),
-        ["boolean"]  = (string lexeme, int line, int column) => new BooleanPrimitiveToken(lexeme, line, column),
-        ["string"]   = (string lexeme, int line, int column) => new StringPrimitiveToken(lexeme, line, column),
-        ["true"]     = (string lexeme, int line, int column) => new BooleanLiteralToken(lexeme, line, column),
-        ["false"]    = (string lexeme, int line, int column) => new BooleanLiteralToken(lexeme, line, column),
-        ["null"]     = (string lexeme, int line, int column) => new NullLiteralToken(lexeme, line, column),
-        ["if"]       = (string lexeme, int line, int column) => new IfToken(lexeme, line, column),
-        ["else"]     = (string lexeme, int line, int column) => new ElseToken(lexeme, line, column),
-        ["for"]      = (string lexeme, int line, int column) => new ForToken(lexeme, line, column),
-        ["while"]    = (string lexeme, int line, int column) => new WhileToken(lexeme, line, column),
-        ["break"]    = (string lexeme, int line, int column) => new BreakToken(lexeme, line, column),
-        ["continue"] = (string lexeme, int line, int column) => new ContinueToken(lexeme, line, column),
-        ["def"]      = (string lexeme, int line, int column) => new FunctionDeclarationToken(lexeme, line, column),
-        ["return"]   = (string lexeme, int line, int column) => new ReturnToken(lexeme, line, column)
+        ["var"]      = (string lexeme, SourceInfo source) => new VarToken(lexeme, source),
+        ["const"]    = (string lexeme, SourceInfo source) => new ConstToken(lexeme, source),
+        ["integer"]  = (string lexeme, SourceInfo source) => new IntegerPrimitiveToken(lexeme, source),
+        ["decimal"]  = (string lexeme, SourceInfo source) => new DecimalPrimitiveToken(lexeme, source),
+        ["boolean"]  = (string lexeme, SourceInfo source) => new BooleanPrimitiveToken(lexeme, source),
+        ["string"]   = (string lexeme, SourceInfo source) => new StringPrimitiveToken(lexeme, source),
+        ["true"]     = (string lexeme, SourceInfo source) => new BooleanLiteralToken(lexeme, source),
+        ["false"]    = (string lexeme, SourceInfo source) => new BooleanLiteralToken(lexeme, source),
+        ["null"]     = (string lexeme, SourceInfo source) => new NullLiteralToken(lexeme, source),
+        ["if"]       = (string lexeme, SourceInfo source) => new IfToken(lexeme, source),
+        ["else"]     = (string lexeme, SourceInfo source) => new ElseToken(lexeme, source),
+        ["for"]      = (string lexeme, SourceInfo source) => new ForToken(lexeme, source),
+        ["while"]    = (string lexeme, SourceInfo source) => new WhileToken(lexeme, source),
+        ["break"]    = (string lexeme, SourceInfo source) => new BreakToken(lexeme, source),
+        ["continue"] = (string lexeme, SourceInfo source) => new ContinueToken(lexeme, source),
+        ["def"]      = (string lexeme, SourceInfo source) => new FunctionDeclarationToken(lexeme, source),
+        ["return"]   = (string lexeme, SourceInfo source) => new ReturnToken(lexeme, source)
     };
 
-    private static readonly Dictionary<string, Func<string, int, int, Token>> _doubleCharTokens = new()
+    private static readonly Dictionary<string, Func<string, SourceInfo, Token>> _doubleCharTokens = new()
     {
-        ["=="] = (string lexeme, int line, int column) => new EqualToken(lexeme, line, column),
-        ["!="] = (string lexeme, int line, int column) => new NotEqualToken(lexeme, line, column),
-        [">="] = (string lexeme, int line, int column) => new GreaterOrEqualThanToken(lexeme, line, column),
-        ["<="] = (string lexeme, int line, int column) => new LessOrEqualThanToken(lexeme, line, column),
-        ["&&"] = (string lexeme, int line, int column) => new AndToken(lexeme, line, column),
-        ["||"] = (string lexeme, int line, int column) => new OrToken(lexeme, line, column)
+        ["=="] = (string lexeme, SourceInfo source) => new EqualToken(lexeme, source),
+        ["!="] = (string lexeme, SourceInfo source) => new NotEqualToken(lexeme, source),
+        [">="] = (string lexeme, SourceInfo source) => new GreaterOrEqualThanToken(lexeme, source),
+        ["<="] = (string lexeme, SourceInfo source) => new LessOrEqualThanToken(lexeme, source),
+        ["&&"] = (string lexeme, SourceInfo source) => new AndToken(lexeme, source),
+        ["||"] = (string lexeme, SourceInfo source) => new OrToken(lexeme, source)
     };
 
-    private static readonly Dictionary<char, Func<string, int, int, Token>> _singleCharTokens = new()
+    private static readonly Dictionary<char, Func<string, SourceInfo, Token>> _singleCharTokens = new()
     {
-        [';'] = (string lexeme, int line, int column) => new SemiColonToken(lexeme, line, column),
-        [','] = (string lexeme, int line, int column) => new CommaToken(lexeme, line, column),
-        ['('] = (string lexeme, int line, int column) => new OpenParenthesisToken(lexeme, line, column),
-        [')'] = (string lexeme, int line, int column) => new CloseParenthesisToken(lexeme, line, column),
-        ['{'] = (string lexeme, int line, int column) => new OpenBracesToken(lexeme, line, column),
-        ['}'] = (string lexeme, int line, int column) => new CloseBracesToken(lexeme, line, column),
-        ['='] = (string lexeme, int line, int column) => new AssignmentToken(lexeme, line, column),
-        ['+'] = (string lexeme, int line, int column) => new AdditionToken(lexeme, line, column),
-        ['-'] = (string lexeme, int line, int column) => new SubtractionToken(lexeme, line, column),
-        ['*'] = (string lexeme, int line, int column) => new MultiplicationToken(lexeme, line, column),
-        ['/'] = (string lexeme, int line, int column) => new DivisionToken(lexeme, line, column),
-        ['%'] = (string lexeme, int line, int column) => new ModuloToken(lexeme, line, column),
-        ['>'] = (string lexeme, int line, int column) => new GreaterThanToken(lexeme, line, column),
-        ['<'] = (string lexeme, int line, int column) => new LessThanToken(lexeme, line, column),
-        ['?'] = (string lexeme, int line, int column) => new QuestionMarkToken(lexeme, line, column)
+        [';'] = (string lexeme, SourceInfo source) => new SemiColonToken(lexeme, source),
+        [','] = (string lexeme, SourceInfo source) => new CommaToken(lexeme, source),
+        ['('] = (string lexeme, SourceInfo source) => new OpenParenthesisToken(lexeme, source),
+        [')'] = (string lexeme, SourceInfo source) => new CloseParenthesisToken(lexeme, source),
+        ['{'] = (string lexeme, SourceInfo source) => new OpenBracesToken(lexeme, source),
+        ['}'] = (string lexeme, SourceInfo source) => new CloseBracesToken(lexeme, source),
+        ['='] = (string lexeme, SourceInfo source) => new AssignmentToken(lexeme, source),
+        ['+'] = (string lexeme, SourceInfo source) => new AdditionToken(lexeme, source),
+        ['-'] = (string lexeme, SourceInfo source) => new SubtractionToken(lexeme, source),
+        ['*'] = (string lexeme, SourceInfo source) => new MultiplicationToken(lexeme, source),
+        ['/'] = (string lexeme, SourceInfo source) => new DivisionToken(lexeme, source),
+        ['%'] = (string lexeme, SourceInfo source) => new ModuloToken(lexeme, source),
+        ['>'] = (string lexeme, SourceInfo source) => new GreaterThanToken(lexeme, source),
+        ['<'] = (string lexeme, SourceInfo source) => new LessThanToken(lexeme, source),
+        ['?'] = (string lexeme, SourceInfo source) => new QuestionMarkToken(lexeme, source)
     };
 
-    public Lexer(string sourceCode)
+    public Lexer(string sourceCode, string sourceLocation)
     {
         _sourceCode = sourceCode;
+        _sourceLocation = sourceLocation;
     }
 
     public void Reset()
@@ -104,9 +107,20 @@ internal class Lexer
             ProcessCurrentToken();
         }
 
-        _tokens.Add(new EOFToken(_currentLine, _currentColumn));
+        _tokens.Add(new EOFToken(GetCurrentSourceInfo()));
 
         return _tokens;
+    }
+
+    private SourceInfo GetCurrentSourceInfo(int lineOffset = 0, int columnOffset = 0)
+    {
+        // de indice baseado em 0 para indice baseado em 1
+        var position = new SourcePosition(
+            _currentLine + 1 + lineOffset,
+            _currentColumn + 1 + columnOffset
+        );
+
+        return new SourceInfo(position, _sourceLocation);
     }
 
     private bool HasEnded()
@@ -157,7 +171,7 @@ internal class Lexer
 
             if (_doubleCharTokens.TryGetValue(doubleToken, out var doubleTokenFunc))
             {
-                _tokens.Add(doubleTokenFunc(doubleToken, _currentLine, _currentColumn));
+                _tokens.Add(doubleTokenFunc(doubleToken, GetCurrentSourceInfo()));
                 Advance(2);
                 return;
             }
@@ -165,7 +179,7 @@ internal class Lexer
 
         if (_singleCharTokens.TryGetValue(Current(), out var tokenFunc))
         {
-            _tokens.Add(tokenFunc(Current().ToString(), _currentLine, _currentColumn));
+            _tokens.Add(tokenFunc(Current().ToString(), GetCurrentSourceInfo()));
             Advance();
             return;
         }
@@ -199,13 +213,13 @@ internal class Lexer
             return;
         }
 
-        throw new UnexpectedCharacterException(Current(), _currentLine, _currentColumn);
+        throw new UnexpectedCharacterException(Current(), GetCurrentSourceInfo());
     }
 
     private void ProcessIdentifier()
     {
         string identifier = "";
-        var startColumn = _currentColumn;
+        var sourceStart = GetCurrentSourceInfo();
 
         while (!HasEnded() && (CharUtils.IsAsciiLetter(Current()) || CharUtils.IsNumber(Current())))
         {
@@ -215,18 +229,18 @@ internal class Lexer
 
         if (_keywords.TryGetValue(identifier, out var tokenFunc))
         {
-            _tokens.Add(tokenFunc(identifier, _currentLine, startColumn));
+            _tokens.Add(tokenFunc(identifier, sourceStart));
         }
         else
         {
-            _tokens.Add(new IdentifierToken(identifier, _currentLine, startColumn));
+            _tokens.Add(new IdentifierToken(identifier, sourceStart));
         }
     }
 
     private void ProcessNumber()
     {
         string number = "";
-        var startColumn = _currentColumn;
+        var sourceStart = GetCurrentSourceInfo();
 
         bool hasDot = false;
 
@@ -236,7 +250,7 @@ internal class Lexer
             {
                 if (hasDot)
                 {
-                    throw new UnexpectedCharacterException(Current(), _currentLine, _currentColumn);
+                    throw new UnexpectedCharacterException(Current(), GetCurrentSourceInfo());
                 }
 
                 hasDot = true;
@@ -248,35 +262,35 @@ internal class Lexer
 
         if (number.Last() == '.')
         {
-            throw new UnexpectedCharacterException('.', _currentLine, _currentColumn - 1);
+            throw new UnexpectedCharacterException('.', GetCurrentSourceInfo(0, -1));
         }
 
         if (hasDot)
         {
-            _tokens.Add(new DecimalLiteralToken(number, _currentLine, startColumn));
+            _tokens.Add(new DecimalLiteralToken(number, sourceStart));
         }
         else
         {
-            _tokens.Add(new IntegerLiteralToken(number, _currentLine, startColumn));
+            _tokens.Add(new IntegerLiteralToken(number, sourceStart));
         }
     }
 
     private void ProcessString()
     {
         string str = "";
-        var startColumn = _currentColumn;
+        var sourceStart = GetCurrentSourceInfo();
         Advance();
 
         if (HasEnded())
         {
-            throw new InvalidStringException("\"" + StringUtils.UnescapeString(str), _currentLine, startColumn);
+            throw new InvalidStringException("\"" + StringUtils.UnescapeString(str), sourceStart);
         }
 
         while (Current() != '"')
         {
             if (Current() == '\n' || Peek() is null)
             {
-                throw new InvalidStringException("\"" + StringUtils.UnescapeString(str), _currentLine, startColumn);
+                throw new InvalidStringException("\"" + StringUtils.UnescapeString(str), sourceStart);
             }
 
             if (Current() == '\\')
@@ -285,7 +299,7 @@ internal class Lexer
 
                 if (Peek() is null)
                 {
-                    throw new InvalidStringException("\"" + StringUtils.UnescapeString(str), _currentLine, startColumn);
+                    throw new InvalidStringException("\"" + StringUtils.UnescapeString(str), sourceStart);
                 }
             }
             else
@@ -298,7 +312,7 @@ internal class Lexer
 
         Advance();
 
-        _tokens.Add(new StringLiteralToken(str, _currentLine, startColumn));
+        _tokens.Add(new StringLiteralToken(str, sourceStart));
     }
 
     private char GetCurrentEscapedChar()
@@ -312,7 +326,7 @@ internal class Lexer
             't'  => '\t',
             'r'  => '\r',
             '\\' => '\\',
-            _    => throw new UnrecognizedEscapeSequenceException("\\" + Current(), _currentLine, _currentColumn - 1),
+            _    => throw new UnrecognizedEscapeSequenceException("\\" + Current(), GetCurrentSourceInfo(0, -1)),
         };
     }
 }

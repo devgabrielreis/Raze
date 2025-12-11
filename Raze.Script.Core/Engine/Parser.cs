@@ -1,4 +1,5 @@
 ﻿using Raze.Script.Core.Exceptions.ParseExceptions;
+using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
@@ -26,22 +27,23 @@ internal class Parser
 
     private readonly IList<Token> _tokens;
     private int _currentIndex = 0;
-    private ProgramExpression _program = new();
+    private ProgramExpression _program;
 
-    public Parser(IList<Token> tokens)
+    public Parser(IList<Token> tokens, string sourceLocation)
     {
         if (tokens.Count == 0 || tokens.Last() is not EOFToken)
         {
-            throw new InvalidTokenListException();
+            throw new InvalidTokenListException(new SourceInfo(sourceLocation));
         }
 
         _tokens = tokens;
+        _program = new ProgramExpression(_tokens[0].SourceInfo);
     }
 
     public void Reset()
     {
         _currentIndex = 0;
-        _program = new();
+        _program = new ProgramExpression(_tokens[0].SourceInfo);
 
         HasProcessed = false;
     }
@@ -54,8 +56,6 @@ internal class Parser
         }
 
         HasProcessed = true;
-
-        _program = new();
 
         while (!HasEnded())
         {
@@ -102,8 +102,7 @@ internal class Parser
                 Current().GetType().Name,
                 typeof(T).Name,
                 Current().Lexeme,
-                Current().Line,
-                Current().Column
+                Current().SourceInfo
             );
         }
     }
@@ -116,8 +115,7 @@ internal class Parser
                 Current().GetType().Name,
                 $"{typeof(T1).Name} or {typeof(T2).Name}",
                 Current().Lexeme,
-                Current().Line,
-                Current().Column
+                Current().SourceInfo
             );
         }
     }
@@ -147,8 +145,8 @@ internal class Parser
             IfToken                  => ParseIfElse(),
             ForToken                 => ParseForLoop(),
             WhileToken               => ParseWhileLoop(),
-            BreakToken               => new BreakStatement(Current().Line, Current().Column),
-            ContinueToken            => new ContinueStatement(Current().Line, Current().Column),
+            BreakToken               => new BreakStatement(Current().SourceInfo),
+            ContinueToken            => new ContinueStatement(Current().SourceInfo),
             ReturnToken              => ParseReturnStatement(),
             _                        => ParseAssignmentStatement()
         };
@@ -157,24 +155,23 @@ internal class Parser
     private ReturnStatement ParseReturnStatement()
     {
         Expect<ReturnToken>();
-        int startLine = Current().Line;
-        int startColumn = Current().Column;
+        var sourceStart = Current().SourceInfo;
         
         if (Peek() is SemiColonToken || Peek() is EOFToken)
         {
-            return new ReturnStatement(null, startLine, startColumn);
+            return new ReturnStatement(null, sourceStart);
         }
 
         Advance();
         var returnedValue = ParseOrExpression();
 
-        return new ReturnStatement(returnedValue, startLine, startColumn);
+        return new ReturnStatement(returnedValue, sourceStart);
     }
 
     private CodeBlockStatement ParseCodeBlock()
     {
         Expect<OpenBracesToken>();
-        var codeBlock = new CodeBlockStatement(Current().Line, Current().Column);
+        var codeBlock = new CodeBlockStatement(Current().SourceInfo);
         Advance();
 
         while (!HasEnded() && !(Current() is CloseBracesToken))
@@ -203,8 +200,7 @@ internal class Parser
     private IfElseStatement ParseIfElse()
     {
         Expect<IfToken>();
-        int startLine = Current().Line;
-        int startColumn = Current().Column;
+        var sourceStart = Current().SourceInfo;
         Advance();
 
         Expect<OpenParenthesisToken>();
@@ -230,20 +226,19 @@ internal class Parser
                 OpenBracesToken => ParseCodeBlock(),
                 IfToken         => ParseIfElse(),
                 _ => throw new UnexpectedTokenException(
-                    Current().GetType().Name, Current().Lexeme, Current().Line, Current().Column
+                    Current().GetType().Name, Current().Lexeme, Current().SourceInfo
                 )
             };
         }
 
-        return new IfElseStatement(condition, then, elseStmt, startLine, startColumn);
+        return new IfElseStatement(condition, then, elseStmt, sourceStart);
     }
 
     private LoopStatement ParseForLoop()
     {
         Expect<ForToken>();
 
-        int startLine = Current().Line;
-        int startColumn = Current().Column;
+        var sourceStart = Current().SourceInfo;
 
         Advance();
 
@@ -290,15 +285,14 @@ internal class Parser
 
         CodeBlockStatement body = ParseCodeBlock();
 
-        return new LoopStatement(initialization, condition, update, body, startLine, startColumn);
+        return new LoopStatement(initialization, condition, update, body, sourceStart);
     }
 
     private LoopStatement ParseWhileLoop()
     {
         Expect<WhileToken>();
 
-        int startLine = Current().Line;
-        int startColumn = Current().Column;
+        var sourceStart = Current().SourceInfo;
 
         Advance();
 
@@ -314,7 +308,7 @@ internal class Parser
         CodeBlockStatement body = ParseCodeBlock();
         List<Statement> initialization = [];
 
-        return new LoopStatement(initialization, condition, null, body, startLine, startColumn);
+        return new LoopStatement(initialization, condition, null, body, sourceStart);
     }
 
     private VariableDeclarationStatement ParseVariableDeclaration()
@@ -322,8 +316,7 @@ internal class Parser
         Expect<VariableDeclarationToken>();
 
         bool isConstant = Current() is ConstToken;
-        int startLine = Current().Line;
-        int startColumn = Current().Column;
+        var sourceStart = Current().SourceInfo;
         Advance();
 
         RuntimeType type = ParseType();
@@ -336,20 +329,19 @@ internal class Parser
         if (Current() is not AssignmentToken)
         {
             Recede();
-            return new VariableDeclarationStatement(identifier, type, null, isConstant, startLine, startColumn);
+            return new VariableDeclarationStatement(identifier, type, null, isConstant, sourceStart);
         }
 
         Advance();
         Expression value = ParseOrExpression();
 
-        return new VariableDeclarationStatement(identifier, type, value, isConstant, startLine, startColumn);
+        return new VariableDeclarationStatement(identifier, type, value, isConstant, sourceStart);
     }
 
     private FunctionDeclarationStatement ParseFunctionDeclaration()
     {
         Expect<FunctionDeclarationToken>();
-        int startLine = Current().Line;
-        int startColumn = Current().Column;
+        var sourcestart = Current().SourceInfo;
         Advance();
 
         var returnType = ParseType();
@@ -365,7 +357,7 @@ internal class Parser
         var functionBody = ParseCodeBlock();
 
         return new FunctionDeclarationStatement(
-            identifier, returnType, parameterList, functionBody, startLine, startColumn
+            identifier, returnType, parameterList, functionBody, sourcestart
         );
     }
 
@@ -379,8 +371,7 @@ internal class Parser
 
         while (Current() is ConstToken || Current() is PrimitiveTypeToken)
         {
-            int startLine = Current().Line;
-            int startColumn = Current().Column;
+            var sourceStart = Current().SourceInfo;
 
             bool isConstant = false;
 
@@ -409,7 +400,7 @@ internal class Parser
             else if (isDefaultParameterRequired)
             {
                 throw new InvalidParameterListException(
-                    "A non-default parameter cannot appear after a default parameter", startLine, startColumn
+                    "A non-default parameter cannot appear after a default parameter", sourceStart
                 );
             }
 
@@ -425,8 +416,7 @@ internal class Parser
                     type,
                     identifier,
                     defaultValue,
-                    startLine,
-                    startColumn
+                    sourceStart
                 )
             );
         }
@@ -454,7 +444,7 @@ internal class Parser
             DecimalPrimitiveToken => new DecimalType(isNullable),
             IntegerPrimitiveToken => new IntegerType(isNullable),
             StringPrimitiveToken => new StringType(isNullable),
-            _ => throw new UnexpectedTokenException(type.GetType().Name, type.Lexeme, type.Line, type.Column)
+            _ => throw new UnexpectedTokenException(type.GetType().Name, type.Lexeme, type.SourceInfo)
         };
     }
 
@@ -470,7 +460,7 @@ internal class Parser
         Advance(2);
         Expression value = ParseOrExpression();
         
-        return new AssignmentStatement(left, value, left.StartLine, left.StartColumn);
+        return new AssignmentStatement(left, value, left.SourceInfo);
     }
 
     private Expression ParseOrExpression()
@@ -535,7 +525,7 @@ internal class Parser
                 if (Current() is CloseParenthesisToken)
                 {
                     throw new UnexpectedTokenException(
-                        Current().GetType().Name, Current().Lexeme, Current().Line, Current().Column
+                        Current().GetType().Name, Current().Lexeme, Current().SourceInfo
                     );
                 }
             }
@@ -543,7 +533,7 @@ internal class Parser
 
         Expect<CloseParenthesisToken>();
 
-        return new CallExpression(caller, argumentList, caller.StartLine, caller.StartColumn);
+        return new CallExpression(caller, argumentList, caller.SourceInfo);
     }
 
     private Expression ParseMemberExpression()
@@ -558,26 +548,26 @@ internal class Parser
         return Current() switch
         {
             IdentifierToken      => new IdentifierExpression(
-                Current().Lexeme, Current().Line, Current().Column
+                Current().Lexeme, Current().SourceInfo
             ),
             IntegerLiteralToken  => new IntegerLiteralExpression(
-                Int128.Parse(Current().Lexeme), Current().Line, Current().Column
+                Int128.Parse(Current().Lexeme), Current().SourceInfo
             ),
             DecimalLiteralToken  => new DecimalLiteralExpression(
-                decimal.Parse(Current().Lexeme, CultureInfo.InvariantCulture), Current().Line, Current().Column
+                decimal.Parse(Current().Lexeme, CultureInfo.InvariantCulture), Current().SourceInfo
             ),
             BooleanLiteralToken  => new BooleanLiteralExpression(
-                bool.Parse(Current().Lexeme), Current().Line, Current().Column
+                bool.Parse(Current().Lexeme), Current().SourceInfo
             ),
             StringLiteralToken   => new StringLiteralExpression(
-                Current().Lexeme, Current().Line, Current().Column
+                Current().Lexeme, Current().SourceInfo
             ),
             NullLiteralToken     => new NullLiteralExpression(
-                Current().Line, Current().Column
+                Current().SourceInfo
             ),
             OpenParenthesisToken => ParseParenthesis(),
             _ => throw new UnexpectedTokenException(
-                Current().GetType().Name, Current().Lexeme, Current().Line, Current().Column
+                Current().GetType().Name, Current().Lexeme, Current().SourceInfo
             ),
         };
     }
@@ -596,7 +586,7 @@ internal class Parser
 
     private Expression ParseBinaryExpression<TOperator>(Func<Expression> next) where TOperator : OperatorToken
     {
-        Expression? left = next();
+        Expression left = next();
         Advance();
 
         while (Current() is TOperator)
@@ -607,7 +597,7 @@ internal class Parser
             Expression right = next();
             Advance();
 
-            left = new BinaryExpression(left!, op, right, left!.StartLine, left.StartColumn);
+            left = new BinaryExpression(left, op, right, left.SourceInfo);
         }
 
         // coloca o indice de volta no lugar

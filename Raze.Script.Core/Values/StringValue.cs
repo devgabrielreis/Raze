@@ -29,7 +29,7 @@ public class StringValue : RuntimeValue
         }
 
         throw new UnsupportedBinaryOperationException(
-            TypeName, other.TypeName, op.Lexeme, source.StartLine, source.StartColumn
+            TypeName, other.TypeName, op.Lexeme, source.SourceInfo
         );
     }
 
@@ -46,7 +46,7 @@ public class StringValue : RuntimeValue
             EqualToken    => new BooleanValue(StrValue == other.StrValue),
             NotEqualToken => new BooleanValue(StrValue != other.StrValue),
             _ => throw new UnsupportedBinaryOperationException(
-                TypeName, other.TypeName, op.Lexeme, source.StartLine, source.StartColumn
+                TypeName, other.TypeName, op.Lexeme, source.SourceInfo
             ),
         };
     }

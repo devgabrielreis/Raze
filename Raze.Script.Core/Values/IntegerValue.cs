@@ -31,7 +31,7 @@ public class IntegerValue : RuntimeValue
         }
 
         throw new UnsupportedBinaryOperationException(
-            TypeName, other.TypeName, op.Lexeme, source.StartLine, source.StartColumn
+            TypeName, other.TypeName, op.Lexeme, source.SourceInfo
         );
     }
 
@@ -48,7 +48,7 @@ public class IntegerValue : RuntimeValue
             SubtractionToken        => new IntegerValue(IntValue - other.IntValue),
             MultiplicationToken     => new IntegerValue(IntValue * other.IntValue),
             DivisionToken           => other.IntValue == 0
-                ? throw new DivisionByZeroException(source.StartLine, source.StartColumn)
+                ? throw new DivisionByZeroException(source.SourceInfo)
                 : new IntegerValue(IntValue / other.IntValue),
             ModuloToken             => new IntegerValue(IntValue % other.IntValue),
             EqualToken              => new BooleanValue(IntValue == other.IntValue),
@@ -58,7 +58,7 @@ public class IntegerValue : RuntimeValue
             GreaterOrEqualThanToken => new BooleanValue(IntValue >= other.IntValue),
             LessOrEqualThanToken    => new BooleanValue(IntValue <= other.IntValue),
             _ => throw new UnsupportedBinaryOperationException(
-                TypeName, other.TypeName, op.Lexeme, source.StartLine, source.StartColumn
+                TypeName, other.TypeName, op.Lexeme, source.SourceInfo
             ),
         };
     }

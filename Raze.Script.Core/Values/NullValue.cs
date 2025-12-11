@@ -13,7 +13,7 @@ public class NullValue : RuntimeValue
     internal override RuntimeValue ExecuteBinaryOperation(OperatorToken op, RuntimeValue other, BinaryExpression source)
     {
         throw new UnsupportedBinaryOperationException(
-            TypeName, other.TypeName, op.Lexeme, source.StartLine, source.StartColumn
+            TypeName, other.TypeName, op.Lexeme, source.SourceInfo
         );
     }
 

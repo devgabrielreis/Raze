@@ -1,4 +1,5 @@
 ﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Types;
 using Raze.Script.Core.Values;
 
@@ -8,7 +9,7 @@ public class VariableSymbol : Symbol
 {
     public RuntimeValue Value => IsInitialized
                                     ? _value!
-                                    : throw new UninitializedVariableException(null, null);
+                                    : throw new UninitializedVariableException(new SourceInfo("RazeInternals"));
 
     public bool IsConstant { get; private set; }
 
@@ -18,12 +19,7 @@ public class VariableSymbol : Symbol
 
     private RuntimeValue? _value;
 
-    public VariableSymbol(RuntimeValue? value, RuntimeType type, bool isConstant)
-        : this(value, type, isConstant, null, null)
-    {
-    }
-
-    internal VariableSymbol(RuntimeValue? value, RuntimeType type, bool isConstant, int? sourceLine, int? sourceColumn)
+    public VariableSymbol(RuntimeValue? value, RuntimeType type, bool isConstant, SourceInfo source)
     {
         _value = null;
         Type = type;
@@ -31,32 +27,27 @@ public class VariableSymbol : Symbol
 
         if (value != null)
         {
-            SetValue(value, sourceLine, sourceColumn);
+            SetValue(value, source);
         }
 
         IsConstant = isConstant;
 
         if (isConstant && !IsInitialized)
         {
-            throw new UninitializedConstantException(sourceLine, sourceColumn);
+            throw new UninitializedConstantException(source);
         }
     }
 
-    public void SetValue(RuntimeValue newValue)
-    {
-        SetValue(newValue, null, null);
-    }
-
-    internal void SetValue(RuntimeValue newValue, int? sourceLine, int? sourceColumn)
+    public void SetValue(RuntimeValue newValue, SourceInfo source)
     {
         if (IsConstant)
         {
-            throw new ConstantAssignmentException(sourceLine, sourceColumn);
+            throw new ConstantAssignmentException(source);
         }
 
         if (!Type.Accept(newValue))
         {
-            throw new VariableTypeException(newValue.TypeName, Type.TypeName, sourceLine, sourceColumn);
+            throw new VariableTypeException(newValue.TypeName, Type.TypeName, source);
         }
 
         _value = newValue.Clone() as RuntimeValue;

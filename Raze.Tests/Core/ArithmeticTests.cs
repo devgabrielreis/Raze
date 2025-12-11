@@ -12,7 +12,7 @@ public class ArithmeticTests
     [InlineData("(10 + 3) * 6", 78)]
     public void Evaluate_Expressions_RespectsPrecedence(string expression, int expectedValue)
     {
-        var result = RazeScript.Evaluate(expression);
+        var result = RazeScript.Evaluate(expression, "Raze.Tests");
 
         Assert.IsType<IntegerValue>(result);
 
@@ -29,7 +29,7 @@ public class ArithmeticTests
     [InlineData("(true || false) && false", false)]
     public void Evaluate_ComparisonExpressions_RespectsPrecedence(string expression, bool expectedValue)
     {
-        var result = RazeScript.Evaluate(expression);
+        var result = RazeScript.Evaluate(expression, "Raze.Tests");
 
         Assert.IsType<BooleanValue>(result);
 
@@ -44,7 +44,7 @@ public class ArithmeticTests
     {
         Assert.Throws<DivisionByZeroException>(() =>
         {
-            RazeScript.Evaluate(expression);
+            RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
 }

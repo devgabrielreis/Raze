@@ -11,16 +11,16 @@ public static class RazeScript
                                              .GetName()
                                              .Version!;
 
-    public static RuntimeValue Evaluate(string source, Scope? scope = null)
+    public static RuntimeValue Evaluate(string source, string sourceLocation, Scope? scope = null)
     {
         if (scope is null)
         {
             scope = new InterpreterScope();
         }
 
-        var tokens = new Lexer(source).Tokenize();
+        var tokens = new Lexer(source, sourceLocation).Tokenize();
 
-        var program = new Parser(tokens).Parse();
+        var program = new Parser(tokens, sourceLocation).Parse();
 
         var result = new Interpreter().Evaluate(program, scope);
 

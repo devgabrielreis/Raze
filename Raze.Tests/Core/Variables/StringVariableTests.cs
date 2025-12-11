@@ -13,9 +13,9 @@ public class StringVariableTests
     public void Evaluate_StringVariableDeclaration_ReturnsExpectedValue(string expression, string varname, string? expected)
     {
         var scope = new InterpreterScope();
-        RazeScript.Evaluate(expression, scope);
+        RazeScript.Evaluate(expression, "Raze.Tests", scope);
 
-        var result = RazeScript.Evaluate(varname, scope);
+        var result = RazeScript.Evaluate(varname, "Raze.Tests", scope);
 
         if (expected is null)
         {
@@ -37,7 +37,7 @@ public class StringVariableTests
     {
         Assert.Throws<VariableTypeException>(() =>
         {
-            var result = RazeScript.Evaluate(expression);
+            var result = RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
 }

@@ -1,8 +1,8 @@
-﻿using System.Reflection;
-using Raze.Script.Core;
+﻿using Raze.Script.Core;
 using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Scopes;
 using Raze.Script.Core.Values;
+using System.Reflection;
 
 internal class Program
 {
@@ -39,7 +39,7 @@ internal class Program
 
             try
             {
-                var result = RazeScript.Evaluate(command, scope);
+                var result = RazeScript.Evaluate(command, "Interpreter", scope);
 
                 if (result is not VoidValue)
                 {
@@ -92,13 +92,18 @@ internal class Program
     private static void PrettyPrintRazeException(RazeException ex, string source)
     {
         Console.WriteLine(ex.Message);
+        Console.WriteLine();
+        Console.WriteLine($"At \"{ex.SourceInfo.Location}\".");
         
-        if (ex.Line is not null && ex.Column is not null)
+        if (ex.SourceInfo.SourcePosition is not null)
         {
-            string errorLine = source.Split('\n')[ex.Line.Value];
+            Console.WriteLine($"Line {ex.SourceInfo.SourcePosition.Line}, column {ex.SourceInfo.SourcePosition.Column}.");
+            Console.WriteLine();
+
+            string errorLine = source.Split('\n')[ex.SourceInfo.SourcePosition.Line - 1];
             Console.WriteLine(errorLine);
 
-            for (int i = 0; i < ex.Column; i++)
+            for (int i = 0; i < ex.SourceInfo.SourcePosition.Column - 1; i++)
             {
                 Console.Write(errorLine[i] == '\t' ? '\t' : ' ');
             }

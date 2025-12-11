@@ -17,7 +17,7 @@ public class FunctionVariableTests
             myFuncVar(1);
         """;
 
-        var result = RazeScript.Evaluate(script);
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
         Assert.IsType<StringValue>(result);
         Assert.Equal("hello", (result as StringValue)!.StrValue);
     }

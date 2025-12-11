@@ -12,7 +12,7 @@ public class StringTests
     public void Evaluate_StringConcatenationExpression_ReturnsExpectedValue()
     {
         var scope = new InterpreterScope();
-        var result = RazeScript.Evaluate("\"Hello\" + \" \" + \"World!\"", scope);
+        var result = RazeScript.Evaluate("\"Hello\" + \" \" + \"World!\"", "Raze.Tests", scope);
 
         Assert.IsType<StringValue>(result);
         Assert.Equal("Hello World!", (result as StringValue)!.StrValue);
@@ -30,7 +30,7 @@ public class StringTests
     public void Evaluate_StringComparisonExpression_ReturnsExpectedValue(string expression, bool expected)
     {
         var scope = new InterpreterScope();
-        var result = RazeScript.Evaluate(expression, scope);
+        var result = RazeScript.Evaluate(expression, "Raze.Tests", scope);
 
         Assert.IsType<BooleanValue>(result);
         Assert.Equal(expected, (result as BooleanValue)!.BoolValue);
@@ -103,7 +103,7 @@ public class StringTests
     {
         Assert.Throws<UnsupportedBinaryOperationException>(() =>
         {
-            var result = RazeScript.Evaluate(expression);
+            var result = RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
 
@@ -115,7 +115,7 @@ public class StringTests
     [InlineData("\"\\\\\"", '\\')]
     public void Evaluate_EscapeCharacter_ReturnsExpectedValue(string character, char expected)
     {
-        var result = RazeScript.Evaluate(character);
+        var result = RazeScript.Evaluate(character, "Raze.Tests");
 
         Assert.IsType<StringValue>(result);
         Assert.Equal(expected.ToString(), (result as StringValue)!.StrValue);
@@ -128,7 +128,7 @@ public class StringTests
     {
         Assert.Throws<UnrecognizedEscapeSequenceException>(() =>
         {
-            RazeScript.Evaluate(expression);
+            RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
 }

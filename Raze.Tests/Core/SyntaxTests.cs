@@ -16,7 +16,7 @@ public class SyntaxTests
     {
         Assert.Throws<UnexpectedCharacterException>(() =>
         {
-            RazeScript.Evaluate(expression);
+            RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
 
@@ -29,7 +29,7 @@ public class SyntaxTests
     {
         Assert.Throws<UnexpectedTokenException>(() =>
         {
-            RazeScript.Evaluate(expression);
+            RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
 
@@ -42,7 +42,7 @@ public class SyntaxTests
     {
         Assert.Throws<InvalidStringException>(() =>
         {
-            RazeScript.Evaluate(expreesion);
+            RazeScript.Evaluate(expreesion, "Raze.Tests");
         });
     }
 
@@ -56,7 +56,7 @@ public class SyntaxTests
 
         Assert.Throws<UnexpectedTokenException>(() =>
         {
-            RazeScript.Evaluate(script);
+            RazeScript.Evaluate(script, "Raze.Tests");
         });
     }
 
@@ -69,7 +69,7 @@ public class SyntaxTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script);
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
 
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(11, (result as IntegerValue)!.IntValue);
@@ -86,7 +86,7 @@ public class SyntaxTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script);
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
 
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(11, (result as IntegerValue)!.IntValue);
@@ -103,7 +103,7 @@ public class SyntaxTests
 
         Assert.Throws<UnexpectedTokenException>(() =>
         {
-            RazeScript.Evaluate(script);
+            RazeScript.Evaluate(script, "Raze.Tests");
         });
     }
 }

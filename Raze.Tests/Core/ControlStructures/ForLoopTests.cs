@@ -17,7 +17,7 @@ public class ForLoopTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script);
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(45, (result as IntegerValue)!.IntValue);
     }
@@ -34,7 +34,7 @@ public class ForLoopTests
 
         Assert.Throws<UnexpectedTypeException>(() =>
         {
-            RazeScript.Evaluate(script);
+            RazeScript.Evaluate(script, "Raze.Tests");
         });
     }
 
@@ -50,7 +50,7 @@ public class ForLoopTests
 
         Assert.Throws<UnexpectedTypeException>(() =>
         {
-            RazeScript.Evaluate(script);
+            RazeScript.Evaluate(script, "Raze.Tests");
         });
     }
 
@@ -68,7 +68,7 @@ public class ForLoopTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script);
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(4, (result as IntegerValue)!.IntValue);
     }
@@ -87,7 +87,7 @@ public class ForLoopTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script);
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(9, (result as IntegerValue)!.IntValue);
     }
@@ -106,7 +106,7 @@ public class ForLoopTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script);
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(10, (result as IntegerValue)!.IntValue);
     }
@@ -123,7 +123,7 @@ public class ForLoopTests
         ";
         Int128 expectedResult = 5;
 
-        var result = RazeScript.Evaluate(script);
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
 
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(expectedResult, (result as IntegerValue)!.IntValue);
@@ -142,7 +142,7 @@ public class ForLoopTests
         ";
         Int128 expectedResult = 10;
 
-        var result = RazeScript.Evaluate(script);
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
 
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(expectedResult, (result as IntegerValue)!.IntValue);

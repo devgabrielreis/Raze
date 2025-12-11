@@ -17,7 +17,7 @@ public class IntegerTests
     public void Evaluate_IntegerArithmeticExpression_ReturnsExpectedValue(string expression, int expected)
     {
         var scope = new InterpreterScope();
-        var result = RazeScript.Evaluate(expression, scope);
+        var result = RazeScript.Evaluate(expression, "Raze.Tests", scope);
 
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(expected, (result as IntegerValue)!.IntValue);
@@ -43,7 +43,7 @@ public class IntegerTests
     public void Evaluate_IntegerComparisonExpression_ReturnsExpectedValue(string expression, bool expected)
     {
         var scope = new InterpreterScope();
-        var result = RazeScript.Evaluate(expression, scope);
+        var result = RazeScript.Evaluate(expression, "Raze.Tests", scope);
 
         Assert.IsType<BooleanValue>(result);
         Assert.Equal(expected, (result as BooleanValue)!.BoolValue);
@@ -108,7 +108,7 @@ public class IntegerTests
     {
         Assert.Throws<UnsupportedBinaryOperationException>(() =>
         {
-            var result = RazeScript.Evaluate(expression);
+            var result = RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
 }

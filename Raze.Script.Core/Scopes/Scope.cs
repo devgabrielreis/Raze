@@ -1,4 +1,5 @@
 ﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Symbols;
 using Raze.Script.Core.Values;
@@ -21,56 +22,36 @@ public abstract class Scope
         _variables = new();
     }
 
-    public virtual void DeclareVariable(string name, VariableSymbol variable)
-    {
-        DeclareVariable(name, variable, null, null);
-    }
-
-    internal virtual void DeclareVariable(string name, VariableSymbol variable, Statement source)
-    {
-        DeclareVariable(name, variable, source.StartLine, source.StartColumn);
-    }
-
-    protected virtual void DeclareVariable(string name, VariableSymbol variable, int? sourceLine, int? sourceColumn)
+    public virtual void DeclareVariable(string name, VariableSymbol variable, SourceInfo source)
     {
         if (!CanDeclareVariables && !variable.IsConstant)
         {
-            throw new ScopeDeclarationException("variable", this.GetType().Name, sourceLine, sourceColumn);
+            throw new ScopeDeclarationException("variable", this.GetType().Name, source);
         }
 
         if (!CanDeclareConstants && variable.IsConstant)
         {
-            throw new ScopeDeclarationException("constant", this.GetType().Name, sourceLine, sourceColumn);
+            throw new ScopeDeclarationException("constant", this.GetType().Name, source);
         }
 
         if (FindSymbol(name) is not null)
         {
-            throw new RedeclarationException($"Symbol {name} is already declared", sourceLine, sourceColumn);
+            throw new RedeclarationException($"Symbol {name} is already declared", source);
         }
 
         _variables[name] = variable;
     }
 
-    internal virtual void AssignVariable(string name, RuntimeValue value, Statement source)
-    {
-        AssignVariable(name, value, source.StartLine, source.StartColumn);
-    }
-
-    public virtual void AssignVariable(string name, RuntimeValue value)
-    {
-        AssignVariable(name, value, null, null);
-    }
-
-    protected virtual void AssignVariable(string name, RuntimeValue value, int? line, int? column)
+    public virtual void AssignVariable(string name, RuntimeValue value, SourceInfo source)
     {
         var resolvedScope = FindSymbolScope(name);
 
         if (resolvedScope is null)
         {
-            throw new UndefinedIdentifierException(name, line, column);
+            throw new UndefinedIdentifierException(name, source);
         }
 
-        resolvedScope._variables[name].SetValue(value, line, column);
+        resolvedScope._variables[name].SetValue(value, source);
     }
 
     public virtual Symbol? FindSymbol(string symbol)

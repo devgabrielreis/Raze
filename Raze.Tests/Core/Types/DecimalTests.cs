@@ -18,7 +18,7 @@ public class DecimalTests
     {
         decimal? expected = decimalStr is null ? null : decimal.Parse(decimalStr, CultureInfo.InvariantCulture);
         var scope = new InterpreterScope();
-        var result = RazeScript.Evaluate(expression, scope);
+        var result = RazeScript.Evaluate(expression, "Raze.Tests", scope);
 
         Assert.IsType<DecimalValue>(result);
         Assert.Equal(expected, (result as DecimalValue)!.DecValue);
@@ -44,7 +44,7 @@ public class DecimalTests
     public void Evaluate_DecimalComparisonExpression_ReturnsExpectedValue(string expression, bool expected)
     {
         var scope = new InterpreterScope();
-        var result = RazeScript.Evaluate(expression, scope);
+        var result = RazeScript.Evaluate(expression, "Raze.Tests", scope);
 
         Assert.IsType<BooleanValue>(result);
         Assert.Equal(expected, (result as BooleanValue)!.BoolValue);
@@ -109,7 +109,7 @@ public class DecimalTests
     {
         Assert.Throws<UnsupportedBinaryOperationException>(() =>
         {
-            var result = RazeScript.Evaluate(expression);
+            var result = RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
 
@@ -126,7 +126,7 @@ public class DecimalTests
         ";
         decimal expectedResult = 1.0M;
 
-        var result = RazeScript.Evaluate(script);
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
         Assert.Equal(expectedResult, (result as DecimalValue)!.DecValue);
     }
 }

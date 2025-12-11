@@ -13,10 +13,10 @@ public class VariableTests
     {
         var scope = new InterpreterScope();
 
-        RazeScript.Evaluate("var integer a = 10", scope);
-        RazeScript.Evaluate("var integer b = a", scope);
-        RazeScript.Evaluate("a = 20", scope);
-        var result = RazeScript.Evaluate("b", scope);
+        RazeScript.Evaluate("var integer a = 10", "Raze.Tests", scope);
+        RazeScript.Evaluate("var integer b = a", "Raze.Tests", scope);
+        RazeScript.Evaluate("a = 20", "Raze.Tests", scope);
+        var result = RazeScript.Evaluate("b", "Raze.Tests", scope);
 
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(10, (result as IntegerValue)!.IntValue);
@@ -27,11 +27,11 @@ public class VariableTests
     {
         var scope = new InterpreterScope();
 
-        RazeScript.Evaluate("const integer test = 10", scope);
+        RazeScript.Evaluate("const integer test = 10", "Raze.Tests", scope);
 
         Assert.Throws<ConstantAssignmentException>(() =>
         {
-            RazeScript.Evaluate("test = 11", scope);
+            RazeScript.Evaluate("test = 11", "Raze.Tests", scope);
         });
     }
 
@@ -40,17 +40,17 @@ public class VariableTests
     {
         var scope = new InterpreterScope();
 
-        RazeScript.Evaluate("var integer variable", scope);
-        RazeScript.Evaluate("var integer? nullableVariable", scope);
+        RazeScript.Evaluate("var integer variable", "Raze.Tests", scope);
+        RazeScript.Evaluate("var integer? nullableVariable", "Raze.Tests", scope);
 
         Assert.Throws<UninitializedVariableException>(() =>
         {
-            RazeScript.Evaluate("variable", scope);
+            RazeScript.Evaluate("variable", "Raze.Tests", scope);
         });
 
         Assert.Throws<UninitializedVariableException>(() =>
         {
-            RazeScript.Evaluate("nullableVariable", scope);
+            RazeScript.Evaluate("nullableVariable", "Raze.Tests", scope);
         });
     }
 
@@ -59,12 +59,12 @@ public class VariableTests
     {
         Assert.Throws<UninitializedConstantException>(() =>
         {
-            RazeScript.Evaluate("const integer constant");
+            RazeScript.Evaluate("const integer constant", "Raze.Tests");
         });
 
         Assert.Throws<UninitializedConstantException>(() =>
         {
-            RazeScript.Evaluate("const integer? nullableConstant");
+            RazeScript.Evaluate("const integer? nullableConstant", "Raze.Tests");
         });
     }
 
@@ -73,7 +73,7 @@ public class VariableTests
     {
         Assert.Throws<VariableTypeException>(() =>
         {
-            RazeScript.Evaluate("var integer variable = null");
+            RazeScript.Evaluate("var integer variable = null", "Raze.Tests");
         });
     }
 
@@ -82,12 +82,12 @@ public class VariableTests
     {
         Assert.Throws<UnexpectedTokenException>(() =>
         {
-            RazeScript.Evaluate("var void variable");
+            RazeScript.Evaluate("var void variable", "Raze.Tests");
         });
 
         Assert.Throws<UnexpectedTokenException>(() =>
         {
-            RazeScript.Evaluate("var void? variable");
+            RazeScript.Evaluate("var void? variable", "Raze.Tests");
         });
     }
 }

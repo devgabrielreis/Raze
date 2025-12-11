@@ -53,8 +53,9 @@ internal class Interpreter
             BreakStatement               stmt => EvaluateBreakStatement(stmt),
             ContinueStatement            stmt => EvaluateContinueStatement(stmt),
             ReturnStatement              stmt => EvaluateReturnStatement(stmt, scope),
+            RuntimeValueExpression       expr => expr.Value,
             _ => throw new UnsupportedStatementException(
-                statement.GetType().Name, statement.StartLine, statement.StartColumn
+                statement.GetType().Name, statement.SourceInfo
             )
         };
     }
@@ -77,11 +78,10 @@ internal class Interpreter
             statement.Value is null ? null : Evaluate(statement.Value, scope),
             statement.Type,
             statement.IsConstant,
-            statement.StartLine,
-            statement.StartColumn
+            statement.SourceInfo
         );
 
-        scope.DeclareVariable(statement.Identifier, variable, statement);
+        scope.DeclareVariable(statement.Identifier, variable, statement.SourceInfo);
         return new VoidValue();
     }
 
@@ -93,9 +93,9 @@ internal class Interpreter
 
         FunctionType type = new FunctionType(false, statement.ReturnType, statement.Parameters);
 
-        VariableSymbol variable = new VariableSymbol(function, type, true, statement.StartLine, statement.StartColumn);
+        VariableSymbol variable = new VariableSymbol(function, type, true, statement.SourceInfo);
 
-        scope.DeclareVariable(statement.Identifier, variable, statement);
+        scope.DeclareVariable(statement.Identifier, variable, statement.SourceInfo);
 
         return new VoidValue();
     }
@@ -105,10 +105,10 @@ internal class Interpreter
         switch (statement.Target)
         {
             case IdentifierExpression expr:
-                scope.AssignVariable(expr.Symbol, Evaluate(statement.Value, scope), statement);
+                scope.AssignVariable(expr.Symbol, Evaluate(statement.Value, scope), statement.SourceInfo);
                 break;
             default:
-                throw new InvalidAssignmentException(statement.StartLine, statement.StartColumn);
+                throw new InvalidAssignmentException(statement.SourceInfo);
         }
 
         return new VoidValue();
@@ -129,7 +129,7 @@ internal class Interpreter
 
         if (resolvedScope is null)
         {
-            throw new UndefinedIdentifierException(expression.Symbol, expression.StartLine, expression.StartColumn);
+            throw new UndefinedIdentifierException(expression.Symbol, expression.SourceInfo);
         }
  
         var result = resolvedScope.FindSymbol(expression.Symbol);
@@ -138,7 +138,7 @@ internal class Interpreter
         {
             if (!variable.IsInitialized)
             {
-                throw new UninitializedVariableException(expression.StartLine, expression.StartColumn);
+                throw new UninitializedVariableException(expression.SourceInfo);
             }
 
             return variable.Value;
@@ -229,12 +229,11 @@ internal class Interpreter
         {
             throw new UnexpectedStatementException(
                 "Cannot use break outside of a loop",
-                breakStmt.StartLine,
-                breakStmt.StartColumn
+                breakStmt.SourceInfo
             );
         }
 
-        throw new BreakException();
+        throw new BreakException(breakStmt.SourceInfo);
     }
 
     public VoidValue EvaluateContinueStatement(ContinueStatement continueStmt)
@@ -243,12 +242,11 @@ internal class Interpreter
         {
             throw new UnexpectedStatementException(
                 "Cannot use continue outside of a loop",
-                continueStmt.StartLine,
-                continueStmt.StartColumn
+                continueStmt.SourceInfo
             );
         }
 
-        throw new ContinueException();
+        throw new ContinueException(continueStmt.SourceInfo);
     }
 
     public VoidValue EvaluateReturnStatement(ReturnStatement statement, Scope scope)
@@ -257,8 +255,7 @@ internal class Interpreter
         {
             throw new UnexpectedStatementException(
                 "Cannot use return outside of a function",
-                statement.StartLine,
-                statement.StartColumn
+                statement.SourceInfo
             );
         }
 
@@ -266,7 +263,7 @@ internal class Interpreter
                                         ? new VoidValue()
                                         : Evaluate(statement.ReturnedValue, scope);
 
-        throw new ReturnException(returnedValue);
+        throw new ReturnException(returnedValue, statement.SourceInfo);
     }
 
     private bool GetValidBooleanValue(Expression condition, Scope scope)
@@ -278,8 +275,7 @@ internal class Interpreter
             throw new UnexpectedTypeException(
                 conditionResult.GetType().Name,
                 nameof(BooleanValue),
-                condition.StartLine,
-                condition.StartColumn
+                condition.SourceInfo
             );
         }
 

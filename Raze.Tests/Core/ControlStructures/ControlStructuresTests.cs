@@ -10,7 +10,7 @@ public class ControlStructuresTests
     {
         Assert.Throws<UnexpectedStatementException>(() =>
         {
-            RazeScript.Evaluate("continue");
+            RazeScript.Evaluate("continue", "Raze.Tests");
         });
     }
 
@@ -19,7 +19,7 @@ public class ControlStructuresTests
     {
         Assert.Throws<UnexpectedStatementException>(() =>
         {
-            RazeScript.Evaluate("break");
+            RazeScript.Evaluate("break", "Raze.Tests");
         });
 
         Assert.Throws<UnexpectedStatementException>(() =>
@@ -32,7 +32,7 @@ public class ControlStructuresTests
             while (true) {
                 inner();
             }
-            """);
+            """, "Raze.Tests");
         });
     }
 
@@ -41,7 +41,7 @@ public class ControlStructuresTests
     {
         Assert.Throws<UnexpectedStatementException>(() =>
         {
-            RazeScript.Evaluate("return");
+            RazeScript.Evaluate("return", "Raze.Tests");
         });
     }
 }

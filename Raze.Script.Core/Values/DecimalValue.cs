@@ -32,7 +32,7 @@ public class DecimalValue : RuntimeValue
         }
 
         throw new UnsupportedBinaryOperationException(
-            TypeName, other.TypeName, op.Lexeme, source.StartLine, source.StartColumn
+            TypeName, other.TypeName, op.Lexeme, source.SourceInfo
         );
     }
 
@@ -56,7 +56,7 @@ public class DecimalValue : RuntimeValue
             SubtractionToken        => new DecimalValue(DecValue - other.DecValue),
             MultiplicationToken     => new DecimalValue(DecValue * other.DecValue),
             DivisionToken           => other.DecValue == 0
-                ? throw new DivisionByZeroException(source.StartLine, source.StartColumn)
+                ? throw new DivisionByZeroException(source.SourceInfo)
                 : new DecimalValue(DecValue / other.DecValue),
             ModuloToken             => new DecimalValue(DecValue % other.DecValue),
             EqualToken              => new BooleanValue(DecValue == other.DecValue),
@@ -66,7 +66,7 @@ public class DecimalValue : RuntimeValue
             GreaterOrEqualThanToken => new BooleanValue(DecValue >= other.DecValue),
             LessOrEqualThanToken    => new BooleanValue(DecValue <= other.DecValue),
             _ => throw new UnsupportedBinaryOperationException(
-                TypeName, other.TypeName, op.Lexeme, source.StartLine, source.StartColumn
+                TypeName, other.TypeName, op.Lexeme, source.SourceInfo
             ),
         };
     }

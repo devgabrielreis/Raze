@@ -11,19 +11,19 @@ public class ScopeTests
     public void Evaluate_DuplicateVariableDeclaration_ThrowsException()
     {
         var scope = new InterpreterScope();
-        RazeScript.Evaluate("var integer x = 1", scope);
+        RazeScript.Evaluate("var integer x = 1", "Raze.Tests", scope);
 
         Assert.Throws<RedeclarationException>(() =>
         {
-            RazeScript.Evaluate("var integer x = 2", scope);
+            RazeScript.Evaluate("var integer x = 2", "Raze.Tests", scope);
         });
 
         var scope2 = new InterpreterScope();
-        RazeScript.Evaluate("var integer x = 1", scope2);
+        RazeScript.Evaluate("var integer x = 1", "Raze.Tests", scope2);
 
         Assert.Throws<RedeclarationException>(() =>
         {
-            RazeScript.Evaluate("const integer x = 2", scope2);
+            RazeScript.Evaluate("const integer x = 2", "Raze.Tests", scope2);
         });
     }
 
@@ -44,7 +44,7 @@ public class ScopeTests
             a;
         ";
 
-        var result = RazeScript.Evaluate(script);
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(16, (result as IntegerValue)!.IntValue);
     }
@@ -61,7 +61,7 @@ public class ScopeTests
 
         Assert.Throws<UndefinedIdentifierException>(() =>
         {
-            RazeScript.Evaluate(script);
+            RazeScript.Evaluate(script, "Raze.Tests");
         });
     }
 
@@ -76,16 +76,16 @@ public class ScopeTests
             }
         ";
 
-        RazeScript.Evaluate(script, scope);
+        RazeScript.Evaluate(script, "Raze.Tests", scope);
 
         Assert.Throws<UndefinedIdentifierException>(() =>
         {
-            RazeScript.Evaluate("test", scope);
+            RazeScript.Evaluate("test", "Raze.Tests", scope);
         });
 
         Assert.Throws<UndefinedIdentifierException>(() =>
         {
-            RazeScript.Evaluate("i", scope);
+            RazeScript.Evaluate("i", "Raze.Tests", scope);
         });
     }
 
@@ -101,11 +101,11 @@ public class ScopeTests
             }
         ";
 
-        RazeScript.Evaluate(script, scope);
+        RazeScript.Evaluate(script, "Raze.Tests", scope);
 
         Assert.Throws<UndefinedIdentifierException>(() =>
         {
-            RazeScript.Evaluate("test", scope);
+            RazeScript.Evaluate("test", "Raze.Tests", scope);
         });
     }
 
@@ -127,7 +127,7 @@ public class ScopeTests
 
         Assert.Throws<UndefinedIdentifierException>(() =>
         {
-            RazeScript.Evaluate(script);
+            RazeScript.Evaluate(script, "Raze.Tests");
         });
     }
 }

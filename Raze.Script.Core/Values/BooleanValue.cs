@@ -28,7 +28,7 @@ public class BooleanValue : RuntimeValue
         }
 
         throw new UnsupportedBinaryOperationException(
-            TypeName, other.TypeName, op.Lexeme, source.StartLine, source.StartColumn
+            TypeName, other.TypeName, op.Lexeme, source.SourceInfo
         );
     }
 
@@ -41,7 +41,7 @@ public class BooleanValue : RuntimeValue
             AndToken      => new BooleanValue(BoolValue && other.BoolValue),
             OrToken       => new BooleanValue(BoolValue || other.BoolValue),
             _ => throw new UnsupportedBinaryOperationException(
-                TypeName, other.TypeName, op.Lexeme, source.StartLine, source.StartColumn
+                TypeName, other.TypeName, op.Lexeme, source.SourceInfo
             ),
         };
     }

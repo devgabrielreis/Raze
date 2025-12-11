@@ -14,9 +14,9 @@ public class BooleanVariableTests
     public void Evaluate_BooleanVariableDeclaration_ReturnsExpectedValue(string expression, string varname, bool? expected)
     {
         var scope = new InterpreterScope();
-        RazeScript.Evaluate(expression, scope);
+        RazeScript.Evaluate(expression, "Raze.Tests", scope);
 
-        var result = RazeScript.Evaluate(varname, scope);
+        var result = RazeScript.Evaluate(varname, "Raze.Tests", scope);
 
         if (expected is null)
         {
@@ -39,7 +39,7 @@ public class BooleanVariableTests
     {
         Assert.Throws<VariableTypeException>(() =>
         {
-            var result = RazeScript.Evaluate(expression);
+            var result = RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
 }

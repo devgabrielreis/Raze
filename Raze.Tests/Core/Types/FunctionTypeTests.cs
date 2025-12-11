@@ -19,7 +19,7 @@ public class FunctionTypeTests
 
         Assert.Throws<VariableTypeException>(() =>
         {
-            RazeScript.Evaluate(script);
+            RazeScript.Evaluate(script, "Raze.Tests");
         });
     }
 
@@ -32,7 +32,7 @@ public class FunctionTypeTests
 
         Assert.Throws<UnexpectedTokenException>(() =>
         {
-            RazeScript.Evaluate(script);
+            RazeScript.Evaluate(script, "Raze.Tests");
         });
     }
 }

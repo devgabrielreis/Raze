@@ -75,7 +75,7 @@ public class NullTests
     {
         Assert.Throws<UnsupportedBinaryOperationException>(() =>
         {
-            var result = RazeScript.Evaluate(expression);
+            var result = RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
 }

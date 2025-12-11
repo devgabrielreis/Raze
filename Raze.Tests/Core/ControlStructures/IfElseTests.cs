@@ -18,7 +18,7 @@ public class IfElseTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script);
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(10, (result as IntegerValue)!.IntValue);
     }
@@ -34,7 +34,7 @@ public class IfElseTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script);
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(0, (result as IntegerValue)!.IntValue);
     }
@@ -52,7 +52,7 @@ public class IfElseTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script);
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(20, (result as IntegerValue)!.IntValue);
     }
@@ -76,7 +76,7 @@ public class IfElseTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script);
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(50, (result as IntegerValue)!.IntValue);
     }
@@ -94,7 +94,7 @@ public class IfElseTests
 
         Assert.Throws<UnexpectedTokenException>(() =>
         {
-            RazeScript.Evaluate(script);
+            RazeScript.Evaluate(script, "Raze.Tests");
         });
     }
 
@@ -111,7 +111,7 @@ public class IfElseTests
 
         Assert.Throws<UnexpectedTypeException>(() =>
         {
-            RazeScript.Evaluate(script);
+            RazeScript.Evaluate(script, "Raze.Tests");
         });
     }
 
@@ -129,7 +129,7 @@ public class IfElseTests
 
         Assert.Throws<UnexpectedTypeException>(() =>
         {
-            RazeScript.Evaluate(script);
+            RazeScript.Evaluate(script, "Raze.Tests");
         });
     }
 }

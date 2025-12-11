@@ -27,7 +27,7 @@ public class BooleanTests
     public void Evaluate_BooleanComparisonExpression_ReturnsExpectedValue(string expression, bool expected)
     {
         var scope = new InterpreterScope();
-        var result = RazeScript.Evaluate(expression, scope);
+        var result = RazeScript.Evaluate(expression, "Raze.Tests", scope);
 
         Assert.IsType<BooleanValue>(result);
         Assert.Equal(expected, (result as BooleanValue)!.BoolValue);
@@ -99,7 +99,7 @@ public class BooleanTests
     {
         Assert.Throws<UnsupportedBinaryOperationException>(() =>
         {
-            var result = RazeScript.Evaluate(expression);
+            var result = RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
 }

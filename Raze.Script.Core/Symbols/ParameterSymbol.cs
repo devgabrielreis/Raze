@@ -1,10 +1,11 @@
-﻿using Raze.Script.Core.Statements.Expressions;
+﻿using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Types;
 using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Symbols;
 
-public class ParameterSymbol : Symbol, IEquatable<ParameterSymbol>
+public class ParameterSymbol : Symbol
 {
     public bool IsConstant { get; private set; }
 
@@ -14,48 +15,40 @@ public class ParameterSymbol : Symbol, IEquatable<ParameterSymbol>
 
     internal Expression? DefaultValue { get; private set; }
 
-    public RuntimeValue? DefaultRuntimeValue { get; private set; }
+    public SourceInfo SourceInfo { get; private set; }
 
-    public int? StartLine { get; private set; }
-
-    public int? StartColumn { get; private set; }
-
-    public ParameterSymbol(bool isConstant, RuntimeType type, string identifier, RuntimeValue? defaultValue)
+    public ParameterSymbol(
+        bool isConstant, RuntimeType type, string identifier, SourceInfo source, RuntimeValue? defaultValue
+    )
+        : this(
+            isConstant,
+            type,
+            identifier,
+            (defaultValue is null ? null : new RuntimeValueExpression(defaultValue, source)),
+            source
+        )
     {
-        IsConstant = isConstant;
-        Type = type;
-        Identifier = identifier;
-        DefaultRuntimeValue = defaultValue;
-        StartLine = null;
-        StartColumn = null;
     }
 
     internal ParameterSymbol(
-        bool isConstant,
-        RuntimeType type,
-        string identifier,
-        Expression? defaultValue,
-        int startLine,
-        int startColumn
+        bool isConstant, RuntimeType type, string identifier, Expression? defaultValue, SourceInfo source
     )
     {
         IsConstant = isConstant;
         Type = type;
         Identifier = identifier;
         DefaultValue = defaultValue;
-        StartLine = startLine;
-        StartColumn = startColumn;
+        SourceInfo = source;
     }
 
-    public bool Equals(ParameterSymbol? other)
+    public bool Equivalent(ParameterSymbol other)
     {
-        return other is not null
-            && other.Type.Equals(Type)
+        return other.Type.Equals(Type)
             && other.HasDefaultValue() == HasDefaultValue();
     }
 
-    private bool HasDefaultValue()
+    public bool HasDefaultValue()
     {
-        return DefaultRuntimeValue is not null || DefaultValue is not null;
+        return DefaultValue is not null;
     }
 }
