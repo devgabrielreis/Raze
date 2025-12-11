@@ -303,4 +303,19 @@ public class FunctionTests
             RazeScript.Evaluate(script, "Raze.Tests");
         });
     }
+
+    [Fact]
+    public void Evaluate_NonFunctionCall_ThrowsInvalidCallExpressionException()
+    {
+        var script = @"
+            var integer myvar = 10;
+
+            myvar();
+        ";
+
+        Assert.Throws<InvalidCallExpressionException>(() =>
+        {
+            RazeScript.Evaluate(script, "Raze.Tests");
+        });
+    }
 }
