@@ -231,7 +231,7 @@ public class FunctionTests
     }
 
     [Fact]
-    public void Evaluate_FunctionReturningWrongType_ThrowsUnexpectedTypeException()
+    public void Evaluate_FunctionReturningWrongType_ThrowsUnexpectedReturnType()
     {
         var script = @"
             def integer myFunc() {
@@ -241,7 +241,7 @@ public class FunctionTests
             myFunc();
         ";
 
-        Assert.Throws<UnexpectedTypeException>(() =>
+        Assert.Throws<UnexpectedReturnType>(() =>
         {
             RazeScript.Evaluate(script, "Raze.Tests");
         });

@@ -1,6 +1,8 @@
 ﻿using Raze.Script.Core.Exceptions.ControlExceptions;
 using Raze.Script.Core.Exceptions.InterpreterExceptions;
+using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
+using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Scopes;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
@@ -47,6 +49,7 @@ internal class Interpreter
             VariableDeclarationStatement stmt => EvaluateVariableDeclarationStatement(stmt, scope),
             FunctionDeclarationStatement stmt => EvaluateFunctionDeclarationStatement(stmt, scope),
             AssignmentStatement          stmt => EvaluateAssignmentStatement(stmt, scope),
+            CallExpression               expr => EvaluateCallExpression(expr, scope),
             BinaryExpression             expr => EvaluateBinaryExpression(expr, scope),
             IfElseStatement              stmt => EvaluateIfElseStatement(stmt, scope),
             LoopStatement                stmt => EvaluateLoopStatement(stmt, scope),
@@ -98,6 +101,103 @@ internal class Interpreter
         scope.DeclareVariable(statement.Identifier, variable, statement.SourceInfo);
 
         return new VoidValue();
+    }
+
+    private RuntimeValue EvaluateCallExpression(CallExpression callExpression, Scope scope)
+    {
+        var value = Evaluate(callExpression.Caller, scope);
+
+        if (value is not FunctionValue function)
+        {
+            throw new InvalidCallExpressionException(
+                $"Cannot call {value.TypeName}", callExpression.SourceInfo
+            );
+        }
+
+        var parameters = function.Parameters;
+        int minExpectedArguments = parameters.Count(p => !p.HasDefaultValue());
+
+        if (callExpression.ArgumentList.Count < minExpectedArguments || callExpression.ArgumentList.Count > parameters.Count)
+        {
+            string message = minExpectedArguments == parameters.Count
+                                ? $"Function expects {parameters.Count} arguments, but {callExpression.ArgumentList.Count} were given"
+                                : $"Function expects between {minExpectedArguments} and {parameters.Count} arguments, but {callExpression.ArgumentList.Count} were given";
+
+            throw new InvalidParameterListException(
+                message, callExpression.SourceInfo
+            );
+        }
+
+        var functionScope = new LocalScope(function.Scope);
+
+        for (int i = 0; i < function.Parameters.Count; i++)
+        {
+            RuntimeValue argumentValue;
+            SourceInfo argumentSource;
+
+            if (i < callExpression.ArgumentList.Count)
+            {
+                argumentValue = Evaluate(callExpression.ArgumentList[i], scope);
+                argumentSource = callExpression.ArgumentList[i].SourceInfo;
+            }
+            else
+            {
+                argumentValue = Evaluate(function.Parameters[i].DefaultValue!, function.Scope);
+                argumentSource = function.Parameters[i].SourceInfo;
+            }
+
+            if (!function.Parameters[i].Type.Accept(argumentValue))
+            {
+                throw new InvalidParameterListException(
+                    $"Parameter {function.Parameters[i].Identifier} expects type {function.Parameters[i].Type.TypeName}, but {argumentValue.TypeName} was given",
+                    argumentSource
+                );
+            }
+
+            var variable = new VariableSymbol(argumentValue, function.Parameters[i].Type, function.Parameters[i].IsConstant, argumentSource);
+
+            functionScope.DeclareVariable(function.Parameters[i].Identifier, variable, argumentSource);
+        }
+
+        RuntimeValue returnedValue = new VoidValue();
+        SourceInfo returnedValueSource;
+
+        _contextStack.Push(ExecutionContexts.Function);
+        try
+        {
+            Evaluate(function.Body, functionScope);
+            returnedValueSource = function.Body.SourceInfo;
+        }
+        catch (ReturnException returnException)
+        {
+            returnedValue = returnException.ReturnedValue;
+            returnedValueSource = returnException.SourceInfo;
+        }
+
+        if (!function.ReturnType.Accept(returnedValue))
+        {
+            throw new UnexpectedReturnType(
+                $"Function was expected to return {function.ReturnType.TypeName} but {returnedValue.TypeName} was returned",
+                returnedValueSource
+            );
+        }
+
+        if (!_contextStack.Contains(ExecutionContexts.Function))
+        {
+            throw new Exception("Corrupted context stack");
+        }
+
+        while (true)
+        {
+            var removedContext = _contextStack.Pop();
+
+            if (removedContext == ExecutionContexts.Function)
+            {
+                break;
+            }
+        }
+
+        return returnedValue;
     }
 
     private VoidValue EvaluateAssignmentStatement(AssignmentStatement statement, Scope scope)
