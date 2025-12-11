@@ -78,14 +78,14 @@ public class VariableTests
     }
 
     [Fact]
-    public void Evaluate_DeclaringVoidTypeVariable_ThrowsUnexpectedTokenException()
+    public void Evaluate_DeclaringVoidTypeVariable_ThrowsInvalidSymbolDeclarationException()
     {
-        Assert.Throws<UnexpectedTokenException>(() =>
+        Assert.Throws<InvalidSymbolDeclarationException>(() =>
         {
             RazeScript.Evaluate("var void variable", "Raze.Tests");
         });
 
-        Assert.Throws<UnexpectedTokenException>(() =>
+        Assert.Throws<InvalidSymbolDeclarationException>(() =>
         {
             RazeScript.Evaluate("var void? variable", "Raze.Tests");
         });

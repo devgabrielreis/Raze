@@ -266,4 +266,41 @@ public class FunctionTests
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(1, (result as IntegerValue)!.IntValue);
     }
+
+    [Fact]
+    public void Evaluate_Function_CanBeRecursive()
+    {
+        var script = @"
+            def integer fibonacci(integer n) {
+                if (n <= 1) {
+                    return n;
+                }
+
+                return fibonacci(n - 1) + fibonacci(n - 2);
+            }
+
+            fibonacci(6);
+        ";
+
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(8, (result as IntegerValue)!.IntValue);
+    }
+
+    [Fact]
+    public void Evaluate_VoidParameter_ThrowsInvalidSymbolDeclarationException()
+    {
+        var script = @"
+            def void myFunc(void param) {
+                return;
+            }
+
+            myFunc();
+        ";
+
+        Assert.Throws<InvalidSymbolDeclarationException>(() =>
+        {
+            RazeScript.Evaluate(script, "Raze.Tests");
+        });
+    }
 }
