@@ -42,7 +42,7 @@ public class FunctionType : RuntimeType
 
     protected override bool AcceptNonNull(RuntimeValue value)
     {
-        if (value is FunctionValue)
+        if (value is not FunctionValue)
         {
             return false;
         }
