@@ -27,6 +27,7 @@ internal class Program
         Console.WriteLine();
 
         InterpreterScope scope = new();
+        var sources = new Dictionary<string, string>();
 
         while (true)
         {
@@ -37,9 +38,12 @@ internal class Program
                 break;
             }
 
+            var sourceName = $"interpreter-source-{sources.Count}";
+            sources[sourceName] = command;
+
             try
             {
-                var result = RazeScript.Evaluate(command, "Interpreter", scope);
+                var result = RazeScript.Evaluate(command, sourceName, scope);
 
                 if (result is not VoidValue)
                 {
@@ -48,7 +52,7 @@ internal class Program
             }
             catch (RazeException razeEx)
             {
-                PrettyPrintRazeException(razeEx, command);
+                PrettyPrintRazeException(razeEx, sources);
             }
         }
     }
@@ -89,10 +93,16 @@ internal class Program
         return level;
     }
 
-    private static void PrettyPrintRazeException(RazeException ex, string source)
+    private static void PrettyPrintRazeException(RazeException ex, IReadOnlyDictionary<string, string> sources)
     {
         Console.WriteLine(ex.Message);
         Console.WriteLine();
+
+        if (!sources.TryGetValue(ex.SourceInfo.Location, out string? source))
+        {
+            return;
+        }
+
         Console.WriteLine($"At \"{ex.SourceInfo.Location}\".");
         
         if (ex.SourceInfo.SourcePosition is not null)
