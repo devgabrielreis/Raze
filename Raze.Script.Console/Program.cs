@@ -95,7 +95,9 @@ internal class Program
 
     private static void PrettyPrintRazeException(RazeException ex, IReadOnlyDictionary<string, string> sources)
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(ex.Message);
+        Console.ResetColor();
         Console.WriteLine();
 
         if (!sources.TryGetValue(ex.SourceInfo.Location, out string? source))
@@ -118,7 +120,9 @@ internal class Program
                 Console.Write(errorLine[i] == '\t' ? '\t' : ' ');
             }
 
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine('^');
+            Console.ResetColor();
         }
         else
         {
