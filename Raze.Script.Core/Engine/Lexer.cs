@@ -197,7 +197,7 @@ internal class Lexer
 
     private void ProcessMultiCharacterToken()
     {
-        if (CharUtils.IsAsciiLetter(Current()))
+        if (CurrentIsValidIdentifierChar(isFirstChar: true))
         {
             ProcessIdentifier();
             return;
@@ -223,7 +223,7 @@ internal class Lexer
         string identifier = "";
         var sourceStart = GetCurrentSourceInfo();
 
-        while (!HasEnded() && (CharUtils.IsAsciiLetter(Current()) || CharUtils.IsNumber(Current())))
+        while (!HasEnded() && CurrentIsValidIdentifierChar(isFirstChar: identifier.Length == 0))
         {
             identifier += Current();
             Advance();
@@ -237,6 +237,21 @@ internal class Lexer
         {
             _tokens.Add(new IdentifierToken(identifier, sourceStart));
         }
+    }
+
+    private bool CurrentIsValidIdentifierChar(bool isFirstChar)
+    {
+        if (HasEnded())
+        {
+            return false;
+        }
+
+        if (CharUtils.IsAsciiLetter(Current()) || Current() == '_')
+        {
+            return true;
+        }
+
+        return CharUtils.IsNumber(Current()) && !isFirstChar;
     }
 
     private void ProcessNumber()

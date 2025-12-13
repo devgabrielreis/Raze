@@ -106,4 +106,24 @@ public class SyntaxTests
             RazeScript.Evaluate(script, "Raze.Tests");
         });
     }
+
+    [Theory]
+    [InlineData("_myvar")]
+    [InlineData("my_var")]
+    [InlineData("myvar_")]
+    [InlineData("_")]
+    [InlineData("___")]
+    public void Evaluate_Identifiers_CanHaveUnderscores(string identifier)
+    {
+        var script = $@"
+            var integer {identifier} = 10;
+            {identifier} = {identifier} + 1;
+            {identifier}
+        ";
+
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
+
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(11, (result as IntegerValue)!.IntValue);
+    }
 }
