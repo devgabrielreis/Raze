@@ -24,15 +24,16 @@ public class FunctionTypeTests
     }
 
     [Fact]
-    public void Evaluate_FunctionTypeWithoutGenerics_ThrowsUnexpectedTokenException()
+    public void Evaluate_FunctionTypeWithoutGenerics_ThrowsInvalidTypeDeclarationException()
     {
-        var script = @"
-            var function myVar;
-        ";
-
-        Assert.Throws<UnexpectedTokenException>(() =>
+        Assert.Throws<InvalidTypeDeclarationException>(() =>
         {
-            RazeScript.Evaluate(script, "Raze.Tests");
+            RazeScript.Evaluate("var function myVar", "Raze.Tests");
+        });
+
+        Assert.Throws<InvalidTypeDeclarationException>(() =>
+        {
+            RazeScript.Evaluate("var function<> myVar", "Raze.Tests");
         });
     }
 }
