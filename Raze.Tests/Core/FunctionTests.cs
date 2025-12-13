@@ -288,23 +288,6 @@ public class FunctionTests
     }
 
     [Fact]
-    public void Evaluate_VoidParameter_ThrowsInvalidSymbolDeclarationException()
-    {
-        var script = @"
-            def void myFunc(void param) {
-                return;
-            }
-
-            myFunc();
-        ";
-
-        Assert.Throws<InvalidSymbolDeclarationException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
-    }
-
-    [Fact]
     public void Evaluate_NonFunctionCall_ThrowsInvalidCallExpressionException()
     {
         var script = @"

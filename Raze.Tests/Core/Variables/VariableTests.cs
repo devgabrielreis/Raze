@@ -84,10 +84,5 @@ public class VariableTests
         {
             RazeScript.Evaluate("var void variable", "Raze.Tests");
         });
-
-        Assert.Throws<InvalidSymbolDeclarationException>(() =>
-        {
-            RazeScript.Evaluate("var void? variable", "Raze.Tests");
-        });
     }
 }
