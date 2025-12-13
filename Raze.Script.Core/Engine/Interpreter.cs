@@ -94,7 +94,13 @@ internal class Interpreter
             statement.ReturnType, statement.Parameters, statement.Body, scope
         );
 
-        FunctionType type = new FunctionType(false, statement.ReturnType, statement.Parameters);
+        List<RuntimeType> parameterTypes = statement.Parameters.Select(p => p.Type).ToList();
+
+        FunctionType type = new FunctionType(
+            false,
+            statement.ReturnType,
+            parameterTypes
+        );
 
         VariableSymbol variable = new VariableSymbol(function, type, true, statement.SourceInfo);
 

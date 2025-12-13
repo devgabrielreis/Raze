@@ -13,7 +13,8 @@ public class BooleanType : RuntimeType
 
     public override bool Equals(RuntimeType? other)
     {
-        return other is BooleanType;
+        return other is BooleanType
+            && other.IsNullable == IsNullable;
     }
 
     protected override bool AcceptNonNull(RuntimeValue value)

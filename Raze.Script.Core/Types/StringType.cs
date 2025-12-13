@@ -13,7 +13,8 @@ public class StringType : RuntimeType
 
     public override bool Equals(RuntimeType? other)
     {
-        return other is StringType;
+        return other is StringType
+            && other.IsNullable == IsNullable;
     }
 
     protected override bool AcceptNonNull(RuntimeValue value)

@@ -9,13 +9,13 @@ public class FunctionType : RuntimeType
 
     internal RuntimeType ReturnType { get; private set; }
 
-    internal IReadOnlyList<ParameterSymbol> Parameters { get; private set; }
+    internal IReadOnlyList<RuntimeType> ParameterTypes { get; private set; }
 
-    public FunctionType(bool isNullable, RuntimeType returnType, IReadOnlyList<ParameterSymbol> parameters)
+    public FunctionType(bool isNullable, RuntimeType returnType, IReadOnlyList<RuntimeType> parameterTypes)
         : base(isNullable)
     {
         ReturnType = returnType;
-        Parameters = parameters;
+        ParameterTypes = parameterTypes;
     }
 
     public override bool Equals(RuntimeType? other)
@@ -37,7 +37,7 @@ public class FunctionType : RuntimeType
             return false;
         }
 
-        return otherAsFunc.Parameters.SequenceEqual(Parameters);
+        return otherAsFunc.ParameterTypes.SequenceEqual(ParameterTypes);
     }
 
     protected override bool AcceptNonNull(RuntimeValue value)
@@ -54,19 +54,19 @@ public class FunctionType : RuntimeType
             return false;
         }
 
-        if (functionValue.Parameters.Count != Parameters.Count)
+        if (functionValue.Parameters.Count != ParameterTypes.Count)
         {
             return false;
         }
 
         return functionValue.Parameters
-            .Zip(Parameters)
-            .All(pair => pair.First.Equivalent(pair.Second));
+            .Zip(ParameterTypes)
+            .All(pair => pair.First.Type.Equals(pair.Second));
     }
 
     private string GetTypeName()
     {
-        List<string> generics = Parameters.Select(p => p.Type.TypeName).ToList();
+        List<string> generics = ParameterTypes.Select(p => p.TypeName).ToList();
         generics.Add(ReturnType.TypeName);
 
         return $"function<{string.Join(", ", generics)}>";

@@ -13,7 +13,8 @@ public class DecimalType : RuntimeType
 
     public override bool Equals(RuntimeType? other)
     {
-        return other is DecimalType;
+        return other is DecimalType
+            && other.IsNullable == IsNullable;
     }
 
     protected override bool AcceptNonNull(RuntimeValue value)

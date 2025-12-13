@@ -13,7 +13,8 @@ public class IntegerType : RuntimeType
 
     public override bool Equals(RuntimeType? other)
     {
-        return other is IntegerType;
+        return other is IntegerType
+            && other.IsNullable == IsNullable;
     }
 
     protected override bool AcceptNonNull(RuntimeValue value)

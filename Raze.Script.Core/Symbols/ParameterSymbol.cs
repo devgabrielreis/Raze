@@ -47,12 +47,6 @@ public class ParameterSymbol : Symbol
         SourceInfo = source;
     }
 
-    public bool Equivalent(ParameterSymbol other)
-    {
-        return other.Type.Equals(Type)
-            && other.HasDefaultValue() == HasDefaultValue();
-    }
-
     public bool HasDefaultValue()
     {
         return DefaultValue is not null;

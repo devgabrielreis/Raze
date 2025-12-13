@@ -443,6 +443,23 @@ internal class Parser
             Advance();
         }
 
+        if (Peek() is LessThanToken)
+        {
+            Advance();
+            return type switch
+            {
+                FunctionPrimitiveToken => ParseFunctionType(isNullable, type.SourceInfo),
+                _ => throw new InvalidTypeDeclarationException("This type cannot have generics", Peek()!.SourceInfo)
+            };
+        }
+        else if (type is FunctionPrimitiveToken)
+        {
+            throw new InvalidTypeDeclarationException(
+                "Function type requires at least one generic",
+                type.SourceInfo
+            );
+        }
+
         return (type) switch
         {
             BooleanPrimitiveToken => new BooleanType(isNullable),
@@ -452,6 +469,48 @@ internal class Parser
             VoidPrimitiveToken    => new VoidType(),
             _ => throw new UnexpectedTokenException(type.GetType().Name, type.Lexeme, type.SourceInfo)
         };
+    }
+
+    private FunctionType ParseFunctionType(bool isNullable, SourceInfo declarationStart)
+    {
+        Expect<LessThanToken>();
+        var generics = ParseGenerics();
+
+        if (generics.Count == 0)
+        {
+            throw new InvalidTypeDeclarationException("Function type requires at least one generic", declarationStart);
+        }
+
+        var returnType = generics[generics.Count - 1];
+        generics.RemoveAt(generics.Count - 1);
+
+        return new FunctionType(isNullable, returnType, generics);
+    }
+
+    private List<RuntimeType> ParseGenerics()
+    {
+        Expect<LessThanToken>();
+        Advance();
+
+        Expect<PrimitiveTypeToken, GreaterThanToken>();
+
+        List<RuntimeType> generics = [];
+        while (Current() is not GreaterThanToken)
+        {
+            Expect<PrimitiveTypeToken, CommaToken>();
+
+            if (Current() is CommaToken)
+            {
+                Advance();
+                Expect<PrimitiveTypeToken>();
+                continue;
+            }
+
+            generics.Add(ParseType());
+            Advance();
+        }
+
+        return generics;
     }
 
     private Statement ParseAssignmentStatement()

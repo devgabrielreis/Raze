@@ -13,7 +13,8 @@ public class VoidType : RuntimeType
 
     public override bool Equals(RuntimeType? other)
     {
-        return other is VoidType;
+        return other is VoidType
+            && other.IsNullable == IsNullable;
     }
 
     protected override bool AcceptNonNull(RuntimeValue value)
