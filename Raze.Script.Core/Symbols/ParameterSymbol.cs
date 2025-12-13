@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Metadata;
+﻿using Raze.Script.Core.Exceptions.ParseExceptions;
+using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Types;
 using Raze.Script.Core.Values;
@@ -34,6 +35,11 @@ public class ParameterSymbol : Symbol
         bool isConstant, RuntimeType type, string identifier, Expression? defaultValue, SourceInfo source
     )
     {
+        if (type is VoidType)
+        {
+            throw new InvalidSymbolDeclarationException("Parameter cannot have void type", source);
+        }
+
         IsConstant = isConstant;
         Type = type;
         Identifier = identifier;

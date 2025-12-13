@@ -434,6 +434,11 @@ internal class Parser
         var isNullable = false;
         if (Peek() is QuestionMarkToken)
         {
+            if (type is VoidPrimitiveToken)
+            {
+                throw new InvalidTypeDeclarationException("void cannot be nullable", Peek()!.SourceInfo);
+            }
+
             isNullable = true;
             Advance();
         }
@@ -443,7 +448,8 @@ internal class Parser
             BooleanPrimitiveToken => new BooleanType(isNullable),
             DecimalPrimitiveToken => new DecimalType(isNullable),
             IntegerPrimitiveToken => new IntegerType(isNullable),
-            StringPrimitiveToken => new StringType(isNullable),
+            StringPrimitiveToken  => new StringType(isNullable),
+            VoidPrimitiveToken    => new VoidType(),
             _ => throw new UnexpectedTokenException(type.GetType().Name, type.Lexeme, type.SourceInfo)
         };
     }

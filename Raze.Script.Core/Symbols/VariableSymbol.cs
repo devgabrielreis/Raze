@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Exceptions.ParseExceptions;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Types;
 using Raze.Script.Core.Values;
@@ -21,6 +22,11 @@ public class VariableSymbol : Symbol
 
     public VariableSymbol(RuntimeValue? value, RuntimeType type, bool isConstant, SourceInfo source)
     {
+        if (type is VoidType)
+        {
+            throw new InvalidSymbolDeclarationException("Variable cannot have void type", source);
+        }
+
         _value = null;
         Type = type;
         IsConstant = false;

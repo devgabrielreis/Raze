@@ -35,6 +35,7 @@ internal class Lexer
         ["decimal"]  = (string lexeme, SourceInfo source) => new DecimalPrimitiveToken(lexeme, source),
         ["boolean"]  = (string lexeme, SourceInfo source) => new BooleanPrimitiveToken(lexeme, source),
         ["string"]   = (string lexeme, SourceInfo source) => new StringPrimitiveToken(lexeme, source),
+        ["void"]     = (string lexeme, SourceInfo source) => new VoidPrimitiveToken(lexeme, source),
         ["true"]     = (string lexeme, SourceInfo source) => new BooleanLiteralToken(lexeme, source),
         ["false"]    = (string lexeme, SourceInfo source) => new BooleanLiteralToken(lexeme, source),
         ["null"]     = (string lexeme, SourceInfo source) => new NullLiteralToken(lexeme, source),
