@@ -4,12 +4,13 @@ namespace Raze.Script.Core.Statements;
 
 internal class CodeBlockStatement : Statement
 {
-    public IList<Statement> Body { get; set; }
+    public IReadOnlyList<Statement> Body { get; private set; }
+
     public override bool RequireSemicolon => false;
 
-    public CodeBlockStatement(SourceInfo source)
+    public CodeBlockStatement(IReadOnlyList<Statement> body, SourceInfo source)
         : base(source)
     {
-        Body = [];
+        Body = body;
     }
 }
