@@ -28,7 +28,7 @@ internal class Parser
 
     private int _currentIndex = 0;
 
-    public Parser(IList<Token> tokens, string sourceLocation)
+    private Parser(IList<Token> tokens, string sourceLocation)
     {
         if (tokens.Count == 0 || tokens.Last() is not EOFToken)
         {
@@ -39,11 +39,15 @@ internal class Parser
         _sourceLocation = sourceLocation;
     }
 
-    public ProgramExpression Parse()
+    public static ProgramExpression Parse(IList<Token> tokens, string sourceLocation)
     {
-        var programBody = new List<Statement>();
+        var parser = new Parser(tokens, sourceLocation);
+        return parser.ParseInternal();
+    }
 
-        Reset();
+    private ProgramExpression ParseInternal()
+    {
+        var programBody = new List<Statement>();;
 
         while (!HasEnded())
         {
@@ -68,26 +72,9 @@ internal class Parser
         return new ProgramExpression(programBody, source);
     }
 
-    private void Reset()
-    {
-        _currentIndex = 0;
-    }
-
     private Token Current()
     {
         return _tokens[_currentIndex];
-    }
-
-    private Token? Peek(int howMuch = 1)
-    {
-        int target = _currentIndex + howMuch;
-
-        if (target >= _tokens.Count)
-        {
-            return null;
-        }
-
-        return _tokens[target];
     }
 
     private void Expect<T>() where T : Token

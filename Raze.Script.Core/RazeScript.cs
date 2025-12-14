@@ -1,5 +1,6 @@
 ﻿using Raze.Script.Core.Engine;
 using Raze.Script.Core.Scopes;
+using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Values;
 using System.Reflection;
 
@@ -18,12 +19,18 @@ public static class RazeScript
             scope = new InterpreterScope();
         }
 
-        var tokens = new Lexer(source, sourceLocation).Tokenize();
-
-        var program = new Parser(tokens, sourceLocation).Parse();
+        var program = BuildProgramExpression(source, sourceLocation);
 
         var result = new Interpreter().Evaluate(program, scope);
 
         return result;
+    }
+
+    private static ProgramExpression BuildProgramExpression(string source, string sourceLocation)
+    {
+        var tokens = Lexer.Tokenize(source, sourceLocation);
+        var program = Parser.Parse(tokens, sourceLocation);
+
+        return program;
     }
 }

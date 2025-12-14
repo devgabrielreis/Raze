@@ -78,17 +78,21 @@ internal class Lexer
         ['?'] = (string lexeme, SourceInfo source) => new QuestionMarkToken(lexeme, source)
     };
 
-    public Lexer(string sourceCode, string sourceLocation)
+    private Lexer(string sourceCode, string sourceLocation)
     {
         _sourceCode = sourceCode;
         _sourceLocation = sourceLocation;
     }
 
-    public IList<Token> Tokenize()
+    public static IList<Token> Tokenize(string sourceCode, string sourceLocation)
+    {
+        var lexer = new Lexer(sourceCode, sourceLocation);
+        return lexer.TokenizeInternal();
+    }
+
+    private IList<Token> TokenizeInternal()
     {
         List<Token> tokens = [];
-
-        Reset();
 
         while (!HasEnded())
         {
@@ -104,13 +108,6 @@ internal class Lexer
         tokens.Add(new EOFToken(GetCurrentSourceInfo()));
 
         return tokens;
-    }
-
-    private void Reset()
-    {
-        _currentIndex = 0;
-        _currentLine = 0;
-        _currentColumn = 0;
     }
 
     private SourceInfo GetCurrentSourceInfo(int lineOffset = 0, int columnOffset = 0)
