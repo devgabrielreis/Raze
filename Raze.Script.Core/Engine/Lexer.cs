@@ -13,19 +13,18 @@ using Raze.Script.Core.Tokens.Operators.RelationalOperators;
 using Raze.Script.Core.Tokens.Primitives;
 using Raze.Script.Core.Tokens.VariableDeclaration;
 using Raze.Shared.Utils;
+using System.Text;
 
 namespace Raze.Script.Core.Engine;
 
 internal class Lexer
 {
-    public bool HasProcessed { get; private set; }
-
     private readonly string _sourceCode;
     private readonly string _sourceLocation;
+
     private int _currentIndex = 0;
     private int _currentLine = 0;
     private int _currentColumn = 0;
-    private List<Token> _tokens = [];
 
     private static readonly Dictionary<string, Func<string, SourceInfo, Token>> _keywords = new()
     {
@@ -85,33 +84,33 @@ internal class Lexer
         _sourceLocation = sourceLocation;
     }
 
-    public void Reset()
+    public IList<Token> Tokenize()
+    {
+        List<Token> tokens = [];
+
+        Reset();
+
+        while (!HasEnded())
+        {
+            if (CharUtils.IsWhiteSpace(Current()))
+            {
+                Advance();
+                continue;
+            }
+
+            tokens.Add(ProcessCurrentToken());
+        }
+
+        tokens.Add(new EOFToken(GetCurrentSourceInfo()));
+
+        return tokens;
+    }
+
+    private void Reset()
     {
         _currentIndex = 0;
         _currentLine = 0;
         _currentColumn = 0;
-        _tokens.Clear();
-
-        HasProcessed = false;
-    }
-
-    public IList<Token> Tokenize()
-    {
-        if (HasProcessed)
-        {
-            return _tokens;
-        }
-
-        HasProcessed = true;
-
-        while (!HasEnded())
-        {
-            ProcessCurrentToken();
-        }
-
-        _tokens.Add(new EOFToken(GetCurrentSourceInfo()));
-
-        return _tokens;
     }
 
     private SourceInfo GetCurrentSourceInfo(int lineOffset = 0, int columnOffset = 0)
@@ -165,7 +164,7 @@ internal class Lexer
         }
     }
 
-    private void ProcessCurrentToken()
+    private Token ProcessCurrentToken()
     {
         if (Peek() is char next)
         {
@@ -173,90 +172,64 @@ internal class Lexer
 
             if (_doubleCharTokens.TryGetValue(doubleToken, out var doubleTokenFunc))
             {
-                _tokens.Add(doubleTokenFunc(doubleToken, GetCurrentSourceInfo()));
+                var source = GetCurrentSourceInfo();
                 Advance(2);
-                return;
+                return doubleTokenFunc(doubleToken, source);
             }
         }
 
         if (_singleCharTokens.TryGetValue(Current(), out var tokenFunc))
         {
-            _tokens.Add(tokenFunc(Current().ToString(), GetCurrentSourceInfo()));
+            Token token = tokenFunc(Current().ToString(), GetCurrentSourceInfo());
             Advance();
-            return;
+
+            return token;
         }
 
-        if (CharUtils.IsWhiteSpace(Current()))
-        {
-            Advance();
-            return;
-        }
-
-        ProcessMultiCharacterToken();
+        return ProcessMultiCharacterToken();
     }
 
-    private void ProcessMultiCharacterToken()
+    private Token ProcessMultiCharacterToken()
     {
         if (CurrentIsValidIdentifierChar(isFirstChar: true))
         {
-            ProcessIdentifier();
-            return;
+            return ProcessIdentifier();
         }
 
         if (CharUtils.IsNumber(Current()) || Current() == '.')
         {
-            ProcessNumber();
-            return;
+            return ProcessNumber();
         }
 
         if (Current() == '"')
         {
-            ProcessString();
-            return;
+            return ProcessString();
         }
 
         throw new UnexpectedCharacterException(Current(), GetCurrentSourceInfo());
     }
 
-    private void ProcessIdentifier()
+    private Token ProcessIdentifier()
     {
-        string identifier = "";
+        var identifierBuilder = new StringBuilder(25);
         var sourceStart = GetCurrentSourceInfo();
 
-        while (!HasEnded() && CurrentIsValidIdentifierChar(isFirstChar: identifier.Length == 0))
+        while (!HasEnded() && CurrentIsValidIdentifierChar(isFirstChar: identifierBuilder.Length == 0))
         {
-            identifier += Current();
+            identifierBuilder.Append(Current());
             Advance();
         }
 
-        if (_keywords.TryGetValue(identifier, out var tokenFunc))
-        {
-            _tokens.Add(tokenFunc(identifier, sourceStart));
-        }
-        else
-        {
-            _tokens.Add(new IdentifierToken(identifier, sourceStart));
-        }
+        var identifier = identifierBuilder.ToString();
+
+        return _keywords.TryGetValue(identifier, out var tokenFunc)
+                ? tokenFunc(identifier, sourceStart)
+                : new IdentifierToken(identifier, sourceStart);
     }
 
-    private bool CurrentIsValidIdentifierChar(bool isFirstChar)
+    private LiteralToken ProcessNumber()
     {
-        if (HasEnded())
-        {
-            return false;
-        }
-
-        if (CharUtils.IsAsciiLetter(Current()) || Current() == '_')
-        {
-            return true;
-        }
-
-        return CharUtils.IsNumber(Current()) && !isFirstChar;
-    }
-
-    private void ProcessNumber()
-    {
-        string number = "";
+        var numberBuilder = new StringBuilder(10);
         var sourceStart = GetCurrentSourceInfo();
 
         bool hasDot = false;
@@ -273,55 +246,52 @@ internal class Lexer
                 hasDot = true;
             }
 
-            number += Current().ToString();
+            numberBuilder.Append(Current());
             Advance();
         }
+
+        var number = numberBuilder.ToString();
 
         if (number.Last() == '.')
         {
             throw new UnexpectedCharacterException('.', GetCurrentSourceInfo(0, -1));
         }
 
-        if (hasDot)
-        {
-            _tokens.Add(new DecimalLiteralToken(number, sourceStart));
-        }
-        else
-        {
-            _tokens.Add(new IntegerLiteralToken(number, sourceStart));
-        }
+        return hasDot
+                ? new DecimalLiteralToken(number, sourceStart)
+                : new IntegerLiteralToken(number, sourceStart);
     }
 
-    private void ProcessString()
+    private StringLiteralToken ProcessString()
     {
-        string str = "";
+        var strBuilder = new StringBuilder(50);
         var sourceStart = GetCurrentSourceInfo();
         Advance();
 
         if (HasEnded())
         {
-            throw new InvalidStringException("\"" + StringUtils.UnescapeString(str), sourceStart);
+            throw new InvalidStringException("\"" + StringUtils.UnescapeString(strBuilder.ToString()), sourceStart);
         }
 
         while (Current() != '"')
         {
             if (Current() == '\n' || Peek() is null)
             {
-                throw new InvalidStringException("\"" + StringUtils.UnescapeString(str), sourceStart);
+                throw new InvalidStringException("\"" + StringUtils.UnescapeString(strBuilder.ToString()), sourceStart);
             }
 
             if (Current() == '\\')
             {
-                str += GetCurrentEscapedChar();
+                strBuilder.Append(GetCurrentEscapedChar());
 
                 if (Peek() is null)
                 {
-                    throw new InvalidStringException("\"" + StringUtils.UnescapeString(str), sourceStart);
+                    throw new InvalidStringException("\"" + StringUtils.UnescapeString(strBuilder.ToString()), sourceStart);
                 }
             }
             else
             {
-                str += Current();
+                strBuilder.Append(Current());
             }
 
             Advance();
@@ -329,7 +299,22 @@ internal class Lexer
 
         Advance();
 
-        _tokens.Add(new StringLiteralToken(str, sourceStart));
+        return new StringLiteralToken(strBuilder.ToString(), sourceStart);
+    }
+
+    private bool CurrentIsValidIdentifierChar(bool isFirstChar)
+    {
+        if (HasEnded())
+        {
+            return false;
+        }
+
+        if (CharUtils.IsAsciiLetter(Current()) || Current() == '_')
+        {
+            return true;
+        }
+
+        return CharUtils.IsNumber(Current()) && !isFirstChar;
     }
 
     private char GetCurrentEscapedChar()
