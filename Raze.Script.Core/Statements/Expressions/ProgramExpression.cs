@@ -4,12 +4,13 @@ namespace Raze.Script.Core.Statements.Expressions;
 
 internal class ProgramExpression : Expression
 {
-    public IList<Statement> Body { get; set; }
+    public IReadOnlyList<Statement> Body { get; private set; }
+
     public override bool RequireSemicolon => false;
 
-    public ProgramExpression(SourceInfo source)
+    public ProgramExpression(IReadOnlyList<Statement> body, SourceInfo source)
         : base(source)
     {
-        Body = [];
+        Body = body;
     }
 }

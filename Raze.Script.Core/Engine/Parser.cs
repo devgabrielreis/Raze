@@ -23,13 +23,12 @@ namespace Raze.Script.Core.Engine;
 
 internal class Parser
 {
-    public bool HasProcessed { get; private set; } = false;
-
     private readonly IList<Token> _tokens;
-    private int _currentIndex = 0;
-    private ProgramExpression _program;
+    private readonly string _sourceLocation;
 
-    public Parser(IList<Token> tokens, string sourceLocation)
+    private int _currentIndex = 0;
+
+    private Parser(IList<Token> tokens, string sourceLocation)
     {
         if (tokens.Count == 0 || tokens.Last() is not EOFToken)
         {
@@ -37,25 +36,18 @@ internal class Parser
         }
 
         _tokens = tokens;
-        _program = new ProgramExpression(_tokens[0].SourceInfo);
+        _sourceLocation = sourceLocation;
     }
 
-    public void Reset()
+    public static ProgramExpression Parse(IList<Token> tokens, string sourceLocation)
     {
-        _currentIndex = 0;
-        _program = new ProgramExpression(_tokens[0].SourceInfo);
-
-        HasProcessed = false;
+        var parser = new Parser(tokens, sourceLocation);
+        return parser.ParseInternal();
     }
 
-    public ProgramExpression Parse()
+    private ProgramExpression ParseInternal()
     {
-        if (HasProcessed)
-        {
-            return _program;
-        }
-
-        HasProcessed = true;
+        var programBody = new List<Statement>();;
 
         while (!HasEnded())
         {
@@ -65,33 +57,24 @@ internal class Parser
                 continue;
             }
 
-            _program.Body.Add(ParseCurrent());
-            Advance();
+            programBody.Add(ParseCurrent());
 
-            if (_program.Body.Last().RequireSemicolon)
+            if (programBody.Last().RequireSemicolon)
             {
                 Expect<SemiColonToken, EOFToken>();
             }
         }
 
-        return _program;
+        var source = programBody.Any()
+                        ? programBody.First().SourceInfo
+                        : new SourceInfo(_sourceLocation);
+
+        return new ProgramExpression(programBody, source);
     }
 
     private Token Current()
     {
         return _tokens[_currentIndex];
-    }
-
-    private Token? Peek(int howMuch = 1)
-    {
-        int target = _currentIndex + howMuch;
-
-        if (target >= _tokens.Count)
-        {
-            return null;
-        }
-
-        return _tokens[target];
     }
 
     private void Expect<T>() where T : Token
@@ -125,11 +108,6 @@ internal class Parser
         _currentIndex += howMuch;
     }
 
-    private void Recede()
-    {
-        _currentIndex--;
-    }
-
     private bool HasEnded()
     {
         return _currentIndex >= _tokens.Count || Current() is EOFToken;
@@ -145,25 +123,43 @@ internal class Parser
             IfToken                  => ParseIfElse(),
             ForToken                 => ParseForLoop(),
             WhileToken               => ParseWhileLoop(),
-            BreakToken               => new BreakStatement(Current().SourceInfo),
-            ContinueToken            => new ContinueStatement(Current().SourceInfo),
+            BreakToken               => ParseBreakStatement(),
+            ContinueToken            => ParseContinueStatement(),
             ReturnToken              => ParseReturnStatement(),
             _                        => ParseAssignmentStatement()
         };
+    }
+
+    private BreakStatement ParseBreakStatement()
+    {
+        Expect<BreakToken>();
+        var source = Current().SourceInfo;
+        Advance();
+
+        return new BreakStatement(source);
+    }
+
+    private ContinueStatement ParseContinueStatement()
+    {
+        Expect<ContinueToken>();
+        var source = Current().SourceInfo;
+        Advance();
+
+        return new ContinueStatement(source);
     }
 
     private ReturnStatement ParseReturnStatement()
     {
         Expect<ReturnToken>();
         var sourceStart = Current().SourceInfo;
+        Advance();
         
-        if (Peek() is SemiColonToken || Peek() is EOFToken)
+        if (Current() is SemiColonToken || Current() is EOFToken)
         {
             return new ReturnStatement(null, sourceStart);
         }
 
-        Advance();
-        var returnedValue = ParseOrExpression();
+        var returnedValue = ParseOperatorExpression();
 
         return new ReturnStatement(returnedValue, sourceStart);
     }
@@ -171,8 +167,10 @@ internal class Parser
     private CodeBlockStatement ParseCodeBlock()
     {
         Expect<OpenBracesToken>();
-        var codeBlock = new CodeBlockStatement(Current().SourceInfo);
+        var sourceStart = Current().SourceInfo;
         Advance();
+
+        var codeBlockBody = new List<Statement>();
 
         while (!HasEnded() && !(Current() is CloseBracesToken))
         {
@@ -182,19 +180,18 @@ internal class Parser
                 continue;
             }
 
-            codeBlock.Body.Add(ParseCurrent());
+            codeBlockBody.Add(ParseCurrent());
 
-            Advance();
-
-            if (codeBlock.Body.Last().RequireSemicolon)
+            if (codeBlockBody.Last().RequireSemicolon)
             {
                 Expect<SemiColonToken>();
             }
         }
 
         Expect<CloseBracesToken>();
+        Advance();
 
-        return codeBlock;
+        return new CodeBlockStatement(codeBlockBody, sourceStart);
     }
 
     private IfElseStatement ParseIfElse()
@@ -206,8 +203,7 @@ internal class Parser
         Expect<OpenParenthesisToken>();
         Advance();
 
-        Expression condition = ParseOrExpression();
-        Advance();
+        Expression condition = ParseOperatorExpression();
 
         Expect<CloseParenthesisToken>();
         Advance();
@@ -217,9 +213,9 @@ internal class Parser
 
         Statement? elseStmt = null;
 
-        if (Peek() is ElseToken)
+        if (Current() is ElseToken)
         {
-            Advance(2);
+            Advance();
 
             elseStmt = Current() switch
             {
@@ -237,9 +233,7 @@ internal class Parser
     private LoopStatement ParseForLoop()
     {
         Expect<ForToken>();
-
         var sourceStart = Current().SourceInfo;
-
         Advance();
 
         Expect<OpenParenthesisToken>();
@@ -254,8 +248,6 @@ internal class Parser
                     ? ParseVariableDeclaration()
                     : ParseAssignmentStatement()
             );
-
-            Advance();
         }
 
         Expect<SemiColonToken>();
@@ -265,8 +257,7 @@ internal class Parser
 
         if (Current() is not SemiColonToken)
         {
-            condition = ParseOrExpression();
-            Advance();
+            condition = ParseOperatorExpression();
         }
 
         Expect<SemiColonToken>();
@@ -277,7 +268,6 @@ internal class Parser
         if (Current() is not CloseParenthesisToken)
         {
             update = ParseAssignmentStatement();
-            Advance();
         }
 
         Expect<CloseParenthesisToken>();
@@ -291,36 +281,30 @@ internal class Parser
     private LoopStatement ParseWhileLoop()
     {
         Expect<WhileToken>();
-
         var sourceStart = Current().SourceInfo;
-
         Advance();
 
         Expect<OpenParenthesisToken>();
         Advance();
 
-        Expression condition = ParseOrExpression();
-        Advance();
+        Expression condition = ParseOperatorExpression();
 
         Expect<CloseParenthesisToken>();
         Advance();
 
         CodeBlockStatement body = ParseCodeBlock();
-        List<Statement> initialization = [];
 
-        return new LoopStatement(initialization, condition, null, body, sourceStart);
+        return new LoopStatement([], condition, null, body, sourceStart);
     }
 
     private VariableDeclarationStatement ParseVariableDeclaration()
     {
         Expect<VariableDeclarationToken>();
-
         bool isConstant = Current() is ConstToken;
         var sourceStart = Current().SourceInfo;
         Advance();
 
         RuntimeType type = ParseType();
-        Advance();
 
         Expect<IdentifierToken>();
         string identifier = Current().Lexeme;
@@ -328,12 +312,11 @@ internal class Parser
 
         if (Current() is not AssignmentToken)
         {
-            Recede();
             return new VariableDeclarationStatement(identifier, type, null, isConstant, sourceStart);
         }
 
         Advance();
-        Expression value = ParseOrExpression();
+        Expression value = ParseOperatorExpression();
 
         return new VariableDeclarationStatement(identifier, type, value, isConstant, sourceStart);
     }
@@ -345,14 +328,12 @@ internal class Parser
         Advance();
 
         var returnType = ParseType();
-        Advance();
 
         Expect<IdentifierToken>();
         string identifier = Current().Lexeme;
         Advance();
 
         var parameterList = ParseParameterList();
-        Advance();
 
         var functionBody = ParseCodeBlock();
 
@@ -382,7 +363,6 @@ internal class Parser
             }
 
             RuntimeType type = ParseType();
-            Advance();
 
             Expect<IdentifierToken>();
             string identifier = Current().Lexeme;
@@ -392,8 +372,7 @@ internal class Parser
             if (Current() is AssignmentToken)
             {
                 Advance();
-                defaultValue = ParseOrExpression();
-                Advance();
+                defaultValue = ParseOperatorExpression();
 
                 isDefaultParameterRequired = true;
             }
@@ -422,6 +401,7 @@ internal class Parser
         }
 
         Expect<CloseParenthesisToken>();
+        Advance();
 
         return parameterList;
     }
@@ -430,26 +410,26 @@ internal class Parser
     {
         Expect<PrimitiveTypeToken>();
         PrimitiveTypeToken type = (Current() as PrimitiveTypeToken)!;
+        Advance();
 
         var isNullable = false;
-        if (Peek() is QuestionMarkToken)
+        if (Current() is QuestionMarkToken)
         {
             if (type is VoidPrimitiveToken)
             {
-                throw new InvalidTypeDeclarationException("void cannot be nullable", Peek()!.SourceInfo);
+                throw new InvalidTypeDeclarationException("void cannot be nullable", Current()!.SourceInfo);
             }
 
             isNullable = true;
             Advance();
         }
 
-        if (Peek() is LessThanToken)
+        if (Current() is LessThanToken)
         {
-            Advance();
             return type switch
             {
                 FunctionPrimitiveToken => ParseFunctionType(isNullable, type.SourceInfo),
-                _ => throw new InvalidTypeDeclarationException("This type cannot have generics", Peek()!.SourceInfo)
+                _ => throw new InvalidTypeDeclarationException("This type cannot have generics", Current()!.SourceInfo)
             };
         }
         else if (type is FunctionPrimitiveToken)
@@ -507,25 +487,31 @@ internal class Parser
             }
 
             generics.Add(ParseType());
-            Advance();
         }
+
+        Advance();
 
         return generics;
     }
 
     private Statement ParseAssignmentStatement()
     {
-        Expression left = ParseOrExpression();
+        Expression left = ParseOperatorExpression();
 
-        if (Peek() is not AssignmentToken)
+        if (Current() is not AssignmentToken)
         {
             return left;
         }
 
-        Advance(2);
-        Expression value = ParseOrExpression();
+        Advance();
+        Expression value = ParseOperatorExpression();
         
         return new AssignmentStatement(left, value, left.SourceInfo);
+    }
+
+    private Expression ParseOperatorExpression()
+    {
+        return ParseOrExpression();
     }
 
     private Expression ParseOrExpression()
@@ -562,9 +548,8 @@ internal class Parser
     {
         var member = ParseMemberExpression();
 
-        while (Peek() is OpenParenthesisToken)
+        while (Current() is OpenParenthesisToken)
         {
-            Advance();
             member = ParseCallExpression(member);
         }
 
@@ -580,8 +565,7 @@ internal class Parser
 
         while (Current() is not CloseParenthesisToken)
         {
-            argumentList.Add(ParseOrExpression());
-            Advance();
+            argumentList.Add(ParseOperatorExpression());
 
             if (Current() is CommaToken)
             {
@@ -597,6 +581,7 @@ internal class Parser
         }
 
         Expect<CloseParenthesisToken>();
+        Advance();
 
         return new CallExpression(caller, argumentList, caller.SourceInfo);
     }
@@ -610,31 +595,49 @@ internal class Parser
 
     private Expression ParsePrimaryExpression()
     {
-        return Current() switch
+        switch (Current())
         {
-            IdentifierToken      => new IdentifierExpression(
-                Current().Lexeme, Current().SourceInfo
-            ),
-            IntegerLiteralToken  => new IntegerLiteralExpression(
-                Int128.Parse(Current().Lexeme), Current().SourceInfo
-            ),
-            DecimalLiteralToken  => new DecimalLiteralExpression(
-                decimal.Parse(Current().Lexeme, CultureInfo.InvariantCulture), Current().SourceInfo
-            ),
-            BooleanLiteralToken  => new BooleanLiteralExpression(
-                bool.Parse(Current().Lexeme), Current().SourceInfo
-            ),
-            StringLiteralToken   => new StringLiteralExpression(
-                Current().Lexeme, Current().SourceInfo
-            ),
-            NullLiteralToken     => new NullLiteralExpression(
-                Current().SourceInfo
-            ),
-            OpenParenthesisToken => ParseParenthesis(),
-            _ => throw new UnexpectedTokenException(
-                Current().GetType().Name, Current().Lexeme, Current().SourceInfo
-            ),
-        };
+            case IdentifierToken:
+                var identifierExpression = new IdentifierExpression(Current().Lexeme, Current().SourceInfo);
+                Advance();
+                return identifierExpression;
+
+            case IntegerLiteralToken:
+                var integerValue = Int128.Parse(Current().Lexeme);
+                var integerLiteralExpression = new IntegerLiteralExpression(integerValue, Current().SourceInfo);
+                Advance();
+                return integerLiteralExpression;
+
+            case DecimalLiteralToken:
+                var decimalValue = decimal.Parse(Current().Lexeme, CultureInfo.InvariantCulture);
+                var decimalLiteralExpression = new DecimalLiteralExpression(decimalValue, Current().SourceInfo);
+                Advance();
+                return decimalLiteralExpression;
+
+            case BooleanLiteralToken:
+                var boolValue = bool.Parse(Current().Lexeme);
+                var booleanLiteralExpression = new BooleanLiteralExpression(boolValue, Current().SourceInfo);
+                Advance();
+                return booleanLiteralExpression;
+
+            case StringLiteralToken:
+                var stringLiteralExpression = new StringLiteralExpression(Current().Lexeme, Current().SourceInfo);
+                Advance();
+                return stringLiteralExpression;
+
+            case NullLiteralToken:
+                var nullLiteralExpression = new NullLiteralExpression(Current().SourceInfo);
+                Advance();
+                return nullLiteralExpression;
+
+            case OpenParenthesisToken:
+                return ParseParenthesis();
+
+            default:
+                throw new UnexpectedTokenException(
+                    Current().GetType().Name, Current().Lexeme, Current().SourceInfo
+                );
+        }
     }
 
     private Expression ParseParenthesis()
@@ -642,17 +645,17 @@ internal class Parser
         Expect<OpenParenthesisToken>();
         Advance();
 
-        Expression expr = ParseOrExpression();
-        Advance();
+        Expression expr = ParseOperatorExpression();
 
         Expect<CloseParenthesisToken>();
+        Advance();
+
         return expr;
     }
 
     private Expression ParseBinaryExpression<TOperator>(Func<Expression> next) where TOperator : OperatorToken
     {
         Expression left = next();
-        Advance();
 
         while (Current() is TOperator)
         {
@@ -660,13 +663,9 @@ internal class Parser
             Advance();
 
             Expression right = next();
-            Advance();
 
             left = new BinaryExpression(left, op, right, left.SourceInfo);
         }
-
-        // coloca o indice de volta no lugar
-        Recede();
 
         return left;
     }
