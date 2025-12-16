@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Metadata;
+﻿using Raze.Script.Core.Engine;
+using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Statements.Expressions;
 
 namespace Raze.Script.Core.Statements;
@@ -22,5 +23,10 @@ internal class LoopStatement : Statement
         Condition = condition;
         Update = update;
         Body = body;
+    }
+
+    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    {
+        return visitor.VisitLoopStatement(this, state);
     }
 }

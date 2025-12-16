@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Metadata;
+﻿using Raze.Script.Core.Engine;
+using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Types;
 
@@ -18,5 +19,10 @@ internal class VariableDeclarationStatement : Statement
         Value = value;
         Type = type;
         IsConstant = isConstant;
+    }
+
+    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    {
+        return visitor.VisitVariableDeclarationStatement(this, state);
     }
 }

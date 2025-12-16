@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Metadata;
+﻿using Raze.Script.Core.Engine;
+using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Statements.Expressions;
 
 namespace Raze.Script.Core.Statements;
@@ -16,5 +17,10 @@ internal class IfElseStatement : Statement
         Condition = condition;
         Then = then;
         Else = elseStmt;
+    }
+
+    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    {
+        return visitor.VisitIfElseStatement(this, state);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Metadata;
+﻿using Raze.Script.Core.Engine;
+using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Statements.Expressions;
@@ -11,5 +12,10 @@ internal class RuntimeValueExpression : Expression
         : base(source)
     {
         Value = value;
+    }
+
+    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    {
+        return visitor.VisitRuntimeValueExpression(this, state);
     }
 }

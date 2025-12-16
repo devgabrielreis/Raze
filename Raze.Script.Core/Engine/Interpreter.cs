@@ -14,7 +14,7 @@ using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Engine;
 
-internal class Interpreter
+internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 {
     private enum ExecutionContexts
     {
@@ -36,34 +36,10 @@ internal class Interpreter
 
     public RuntimeValue Evaluate(Statement statement, Scope scope)
     {
-        return statement switch
-        {
-            ProgramExpression         program => EvaluateProgramExpression(program, scope),
-            NullLiteralExpression             => new NullValue(),
-            IntegerLiteralExpression     expr => new IntegerValue(expr.IntValue),
-            DecimalLiteralExpression     expr => new DecimalValue(expr.DecValue),
-            BooleanLiteralExpression     expr => new BooleanValue(expr.BoolValue),
-            StringLiteralExpression      expr => new StringValue(expr.StrValue),
-            IdentifierExpression         expr => EvaluateIdentifierExpression(expr, scope),
-            CodeBlockStatement           stmt => EvaluateCodeBlock(stmt, scope),
-            VariableDeclarationStatement stmt => EvaluateVariableDeclarationStatement(stmt, scope),
-            FunctionDeclarationStatement stmt => EvaluateFunctionDeclarationStatement(stmt, scope),
-            AssignmentStatement          stmt => EvaluateAssignmentStatement(stmt, scope),
-            CallExpression               expr => EvaluateCallExpression(expr, scope),
-            BinaryExpression             expr => EvaluateBinaryExpression(expr, scope),
-            IfElseStatement              stmt => EvaluateIfElseStatement(stmt, scope),
-            LoopStatement                stmt => EvaluateLoopStatement(stmt, scope),
-            BreakStatement               stmt => EvaluateBreakStatement(stmt),
-            ContinueStatement            stmt => EvaluateContinueStatement(stmt),
-            ReturnStatement              stmt => EvaluateReturnStatement(stmt, scope),
-            RuntimeValueExpression       expr => expr.Value,
-            _ => throw new UnsupportedStatementException(
-                statement.GetType().Name, statement.SourceInfo
-            )
-        };
+        return statement.AcceptVisitor(this, scope);
     }
 
-    private RuntimeValue EvaluateProgramExpression(ProgramExpression program, Scope scope)
+    public RuntimeValue VisitProgramExpression(ProgramExpression program, Scope scope)
     {
         RuntimeValue lastValue = new VoidValue();
 
@@ -75,7 +51,7 @@ internal class Interpreter
         return lastValue;
     }
 
-    private VoidValue EvaluateVariableDeclarationStatement(VariableDeclarationStatement statement, Scope scope)
+    public RuntimeValue VisitVariableDeclarationStatement(VariableDeclarationStatement statement, Scope scope)
     {
         VariableSymbol variable = new VariableSymbol(
             statement.Value is null ? null : Evaluate(statement.Value, scope),
@@ -88,7 +64,7 @@ internal class Interpreter
         return new VoidValue();
     }
 
-    private VoidValue EvaluateFunctionDeclarationStatement(FunctionDeclarationStatement statement, Scope scope)
+    public RuntimeValue VisitFunctionDeclarationStatement(FunctionDeclarationStatement statement, Scope scope)
     {
         FunctionValue function = new FunctionValue(
             statement.ReturnType, statement.Parameters, statement.Body, scope
@@ -109,7 +85,7 @@ internal class Interpreter
         return new VoidValue();
     }
 
-    private RuntimeValue EvaluateCallExpression(CallExpression callExpression, Scope scope)
+    public RuntimeValue VisitCallExpression(CallExpression callExpression, Scope scope)
     {
         var value = Evaluate(callExpression.Caller, scope);
 
@@ -206,7 +182,7 @@ internal class Interpreter
         return returnedValue;
     }
 
-    private VoidValue EvaluateAssignmentStatement(AssignmentStatement statement, Scope scope)
+    public RuntimeValue VisitAssignmentStatement(AssignmentStatement statement, Scope scope)
     {
         switch (statement.Target)
         {
@@ -220,7 +196,7 @@ internal class Interpreter
         return new VoidValue();
     }
 
-    private RuntimeValue EvaluateBinaryExpression(BinaryExpression expression, Scope scope)
+    public RuntimeValue VisitBinaryExpression(BinaryExpression expression, Scope scope)
     {
         RuntimeValue leftHand = Evaluate(expression.Left, scope);
         OperatorToken op = expression.Operator;
@@ -229,7 +205,7 @@ internal class Interpreter
         return leftHand.ExecuteBinaryOperation(op, rightHand, expression);
     }
 
-    private static RuntimeValue EvaluateIdentifierExpression(IdentifierExpression expression, Scope scope)
+    public RuntimeValue VisitIdentifierExpression(IdentifierExpression expression, Scope scope)
     {
         var resolvedScope = scope.FindSymbolScope(expression.Symbol);
 
@@ -253,7 +229,7 @@ internal class Interpreter
         throw new Exception("nao implementado ainda");
     }
 
-    private VoidValue EvaluateCodeBlock(CodeBlockStatement codeBlock, Scope scope)
+    public RuntimeValue VisitCodeBlockStatement(CodeBlockStatement codeBlock, Scope scope)
     {
         var codeBlockScope = new LocalScope(scope);
 
@@ -265,7 +241,7 @@ internal class Interpreter
         return new VoidValue();
     }
 
-    private VoidValue EvaluateIfElseStatement(IfElseStatement ifElse, Scope scope)
+    public RuntimeValue VisitIfElseStatement(IfElseStatement ifElse, Scope scope)
     {
         if (GetValidBooleanValue(ifElse.Condition, scope))
         {
@@ -279,7 +255,7 @@ internal class Interpreter
         return new VoidValue();
     }
 
-    public VoidValue EvaluateLoopStatement(LoopStatement loopStmt, Scope scope)
+    public RuntimeValue VisitLoopStatement(LoopStatement loopStmt, Scope scope)
     {
         var outerLoopScope = new LocalScope(scope);
 
@@ -303,7 +279,7 @@ internal class Interpreter
             try
             {
                 var currentIterationScope = new LocalScope(outerLoopScope);
-                EvaluateCodeBlock(loopStmt.Body, currentIterationScope);
+                Evaluate(loopStmt.Body, currentIterationScope);
             }
             catch (BreakException)
             {
@@ -329,7 +305,7 @@ internal class Interpreter
         return new VoidValue();
     }
 
-    public VoidValue EvaluateBreakStatement(BreakStatement breakStmt)
+    public RuntimeValue VisitBreakStatement(BreakStatement breakStmt, Scope scope)
     {
         if (_contextStack.Count == 0 || _contextStack.Peek() != ExecutionContexts.Loop)
         {
@@ -342,7 +318,7 @@ internal class Interpreter
         throw new BreakException(breakStmt.SourceInfo);
     }
 
-    public VoidValue EvaluateContinueStatement(ContinueStatement continueStmt)
+    public RuntimeValue VisitContinueStatement(ContinueStatement continueStmt, Scope scope)
     {
         if (_contextStack.Count == 0 || _contextStack.Peek() != ExecutionContexts.Loop)
         {
@@ -355,7 +331,7 @@ internal class Interpreter
         throw new ContinueException(continueStmt.SourceInfo);
     }
 
-    public VoidValue EvaluateReturnStatement(ReturnStatement statement, Scope scope)
+    public RuntimeValue VisitReturnStatement(ReturnStatement statement, Scope scope)
     {
         if (!_contextStack.Contains(ExecutionContexts.Function))
         {
@@ -370,6 +346,36 @@ internal class Interpreter
                                         : Evaluate(statement.ReturnedValue, scope);
 
         throw new ReturnException(returnedValue, statement.SourceInfo);
+    }
+
+    public RuntimeValue VisitRuntimeValueExpression(RuntimeValueExpression expression, Scope state)
+    {
+        return expression.Value;
+    }
+
+    public RuntimeValue VisitBooleanLiteralExpression(BooleanLiteralExpression expression, Scope state)
+    {
+        return new BooleanValue(expression.BoolValue);
+    }
+
+    public RuntimeValue VisitDecimalLiteralExpression(DecimalLiteralExpression expression, Scope state)
+    {
+        return new DecimalValue(expression.DecValue);
+    }
+
+    public RuntimeValue VisitIntegerLiteralExpression(IntegerLiteralExpression expression, Scope state)
+    {
+        return new IntegerValue(expression.IntValue);
+    }
+
+    public RuntimeValue VisitNullLiteralExpression(NullLiteralExpression expression, Scope state)
+    {
+        return new NullValue();
+    }
+
+    public RuntimeValue VisitStringLiteralExpression(StringLiteralExpression expression, Scope state)
+    {
+        return new StringValue(expression.StrValue);
     }
 
     private bool GetValidBooleanValue(Expression condition, Scope scope)

@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Metadata;
+﻿using Raze.Script.Core.Engine;
+using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Symbols;
 using Raze.Script.Core.Types;
 
@@ -29,5 +30,10 @@ internal class FunctionDeclarationStatement : Statement
         ReturnType = returnType;
         Parameters = parameters;
         Body = body;
+    }
+
+    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    {
+        return visitor.VisitFunctionDeclarationStatement(this, state);
     }
 }
