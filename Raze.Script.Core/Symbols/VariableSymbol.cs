@@ -51,7 +51,7 @@ public class VariableSymbol : Symbol
             throw new ConstantAssignmentException(source);
         }
 
-        if (!Type.Accept(newValue))
+        if (!Type.AcceptValue(newValue))
         {
             throw new VariableTypeException(newValue.TypeName, Type.TypeName, source);
         }

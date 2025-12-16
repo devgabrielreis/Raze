@@ -15,17 +15,17 @@ public abstract class RuntimeType : IEquatable<RuntimeType>
         IsNullable = isNullable;
     }
 
-    public bool Accept(RuntimeValue value)
+    public bool AcceptValue(RuntimeValue value)
     {
         if (value is NullValue)
         {
             return IsNullable;
         }
 
-        return AcceptNonNull(value);
+        return AcceptNonNullValue(value);
     }
 
     public abstract bool Equals(RuntimeType? other);
 
-    protected abstract bool AcceptNonNull(RuntimeValue value);
+    protected abstract bool AcceptNonNullValue(RuntimeValue value);
 }

@@ -40,7 +40,7 @@ public class FunctionType : RuntimeType
         return otherAsFunc.ParameterTypes.SequenceEqual(ParameterTypes);
     }
 
-    protected override bool AcceptNonNull(RuntimeValue value)
+    protected override bool AcceptNonNullValue(RuntimeValue value)
     {
         if (value is not FunctionValue)
         {

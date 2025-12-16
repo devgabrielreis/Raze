@@ -152,7 +152,7 @@ internal class Interpreter
                 argumentSource = function.Parameters[i].SourceInfo;
             }
 
-            if (!function.Parameters[i].Type.Accept(argumentValue))
+            if (!function.Parameters[i].Type.AcceptValue(argumentValue))
             {
                 throw new InvalidParameterListException(
                     $"Parameter {function.Parameters[i].Identifier} expects type {function.Parameters[i].Type.TypeName}, but {argumentValue.TypeName} was given",
@@ -180,7 +180,7 @@ internal class Interpreter
             returnedValueSource = returnException.SourceInfo;
         }
 
-        if (!function.ReturnType.Accept(returnedValue))
+        if (!function.ReturnType.AcceptValue(returnedValue))
         {
             throw new UnexpectedReturnType(
                 $"Function was expected to return {function.ReturnType.TypeName} but {returnedValue.TypeName} was returned",

@@ -17,7 +17,7 @@ public class StringType : RuntimeType
             && other.IsNullable == IsNullable;
     }
 
-    protected override bool AcceptNonNull(RuntimeValue value)
+    protected override bool AcceptNonNullValue(RuntimeValue value)
     {
         return value is StringValue;
     }
