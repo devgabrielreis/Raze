@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Constants;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Tokens.Operators;
 using Raze.Script.Core.Tokens.Operators.AdditiveOperators;
@@ -12,7 +13,7 @@ public class StringValue : RuntimeValue
 
     public string StrValue => _value;
 
-    public override string TypeName => "string";
+    public override string TypeName => TypeNames.STRING_TYPE_NAME;
 
     private readonly string _value;
 

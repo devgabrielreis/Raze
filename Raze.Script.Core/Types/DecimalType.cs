@@ -1,10 +1,11 @@
-﻿using Raze.Script.Core.Values;
+﻿using Raze.Script.Core.Constants;
+using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Types;
 
 public class DecimalType : RuntimeType
 {
-    protected override string BaseTypeName => "decimal";
+    protected override string BaseTypeName => TypeNames.DECIMAL_TYPE_NAME;
 
     public DecimalType(bool isNullable)
         : base(isNullable)

@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.LexerExceptions;
+﻿using Raze.Script.Core.Constants;
+using Raze.Script.Core.Exceptions.LexerExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Tokens;
 using Raze.Script.Core.Tokens.ControlStructures;
@@ -30,15 +31,8 @@ internal class Lexer
     {
         ["var"]      = (string lexeme, SourceInfo source) => new VarToken(lexeme, source),
         ["const"]    = (string lexeme, SourceInfo source) => new ConstToken(lexeme, source),
-        ["integer"]  = (string lexeme, SourceInfo source) => new IntegerPrimitiveToken(lexeme, source),
-        ["decimal"]  = (string lexeme, SourceInfo source) => new DecimalPrimitiveToken(lexeme, source),
-        ["boolean"]  = (string lexeme, SourceInfo source) => new BooleanPrimitiveToken(lexeme, source),
-        ["string"]   = (string lexeme, SourceInfo source) => new StringPrimitiveToken(lexeme, source),
-        ["function"] = (string lexeme, SourceInfo source) => new FunctionPrimitiveToken(lexeme, source),
-        ["void"]     = (string lexeme, SourceInfo source) => new VoidPrimitiveToken(lexeme, source),
         ["true"]     = (string lexeme, SourceInfo source) => new BooleanLiteralToken(lexeme, source),
         ["false"]    = (string lexeme, SourceInfo source) => new BooleanLiteralToken(lexeme, source),
-        ["null"]     = (string lexeme, SourceInfo source) => new NullLiteralToken(lexeme, source),
         ["if"]       = (string lexeme, SourceInfo source) => new IfToken(lexeme, source),
         ["else"]     = (string lexeme, SourceInfo source) => new ElseToken(lexeme, source),
         ["for"]      = (string lexeme, SourceInfo source) => new ForToken(lexeme, source),
@@ -46,7 +40,14 @@ internal class Lexer
         ["break"]    = (string lexeme, SourceInfo source) => new BreakToken(lexeme, source),
         ["continue"] = (string lexeme, SourceInfo source) => new ContinueToken(lexeme, source),
         ["def"]      = (string lexeme, SourceInfo source) => new FunctionDeclarationToken(lexeme, source),
-        ["return"]   = (string lexeme, SourceInfo source) => new ReturnToken(lexeme, source)
+        ["return"]   = (string lexeme, SourceInfo source) => new ReturnToken(lexeme, source),
+        [TypeNames.INTEGER_TYPE_NAME]  = (string lexeme, SourceInfo source) => new IntegerPrimitiveToken(lexeme, source),
+        [TypeNames.DECIMAL_TYPE_NAME]  = (string lexeme, SourceInfo source) => new DecimalPrimitiveToken(lexeme, source),
+        [TypeNames.BOOLEAN_TYPE_NAME]  = (string lexeme, SourceInfo source) => new BooleanPrimitiveToken(lexeme, source),
+        [TypeNames.STRING_TYPE_NAME]   = (string lexeme, SourceInfo source) => new StringPrimitiveToken(lexeme, source),
+        [TypeNames.FUNCTION_TYPE_NAME] = (string lexeme, SourceInfo source) => new FunctionPrimitiveToken(lexeme, source),
+        [TypeNames.NULL_TYPE_NAME]     = (string lexeme, SourceInfo source) => new NullLiteralToken(lexeme, source),
+        [TypeNames.VOID_TYPE_NAME]     = (string lexeme, SourceInfo source) => new VoidPrimitiveToken(lexeme, source)
     };
 
     private static readonly Dictionary<string, Func<string, SourceInfo, Token>> _doubleCharTokens = new()

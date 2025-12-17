@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Constants;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Scopes;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
@@ -52,6 +53,6 @@ public class FunctionValue : RuntimeValue
         List<string> generics = Parameters.Select(p => p.Type.TypeName).ToList();
         generics.Add(ReturnType.TypeName);
 
-        return $"function<{string.Join(", ", generics)}>";
+        return $"{TypeNames.FUNCTION_TYPE_NAME}<{string.Join(", ", generics)}>";
     }
 }

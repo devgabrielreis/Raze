@@ -1,4 +1,4 @@
-﻿using Raze.Script.Core.Symbols;
+﻿using Raze.Script.Core.Constants;
 using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Types;
@@ -69,6 +69,6 @@ public class FunctionType : RuntimeType
         List<string> generics = ParameterTypes.Select(p => p.TypeName).ToList();
         generics.Add(ReturnType.TypeName);
 
-        return $"function<{string.Join(", ", generics)}>";
+        return $"{TypeNames.FUNCTION_TYPE_NAME}<{string.Join(", ", generics)}>";
     }
 }

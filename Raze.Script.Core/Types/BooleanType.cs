@@ -1,10 +1,11 @@
-﻿using Raze.Script.Core.Values;
+﻿using Raze.Script.Core.Constants;
+using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Types;
 
 public class BooleanType : RuntimeType
 {
-    protected override string BaseTypeName => "boolean";
+    protected override string BaseTypeName => TypeNames.BOOLEAN_TYPE_NAME;
 
     public BooleanType(bool isNullable)
         : base(isNullable)

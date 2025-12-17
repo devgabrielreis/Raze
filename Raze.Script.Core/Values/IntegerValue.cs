@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Constants;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Tokens.Operators;
 using Raze.Script.Core.Tokens.Operators.AdditiveOperators;
@@ -14,7 +15,7 @@ public class IntegerValue : RuntimeValue
 
     public Int128 IntValue => _value;
 
-    public override string TypeName => "integer";
+    public override string TypeName => TypeNames.INTEGER_TYPE_NAME;
 
     private readonly Int128 _value;
 

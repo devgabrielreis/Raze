@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Constants;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Tokens.Operators;
 using Raze.Script.Core.Tokens.Operators.AdditiveOperators;
@@ -15,7 +16,7 @@ public class DecimalValue : RuntimeValue
 
     public decimal DecValue => _value;
 
-    public override string TypeName => "decimal";
+    public override string TypeName => TypeNames.DECIMAL_TYPE_NAME;
 
     private readonly decimal _value;
 

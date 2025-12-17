@@ -1,10 +1,11 @@
-﻿using Raze.Script.Core.Values;
+﻿using Raze.Script.Core.Constants;
+using Raze.Script.Core.Values;
 
 namespace Raze.Script.Core.Types;
 
 public class VoidType : RuntimeType
 {
-    protected override string BaseTypeName => "void";
+    protected override string BaseTypeName => TypeNames.VOID_TYPE_NAME;
 
     public VoidType()
         : base(false)

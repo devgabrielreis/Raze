@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Constants;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Tokens.Operators;
 
@@ -8,7 +9,7 @@ public class VoidValue : RuntimeValue
 {
     public override object Value => this;
 
-    public override string TypeName => "void";
+    public override string TypeName => TypeNames.VOID_TYPE_NAME;
 
     internal override RuntimeValue ExecuteBinaryOperation(OperatorToken op, RuntimeValue other, BinaryExpression source)
     {
@@ -19,7 +20,7 @@ public class VoidValue : RuntimeValue
 
     public override string ToString()
     {
-        return "void";
+        return TypeName;
     }
 
     public override object Clone()
