@@ -1,5 +1,4 @@
 ﻿using Raze.Script.Core.Exceptions.ControlExceptions;
-using Raze.Script.Core.Exceptions.InterpreterExceptions;
 using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
@@ -16,22 +15,11 @@ namespace Raze.Script.Core.Engine;
 
 internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 {
-    private enum ExecutionContexts
-    {
-        Loop,
-        Function
-    }
-
-    private Stack<ExecutionContexts> _contextStack;
+    private Runtime.ExecutionContext _executionContext;
 
     public Interpreter()
     {
-        _contextStack = new Stack<ExecutionContexts>();
-    }
-
-    public void Reset()
-    {
-        _contextStack.Clear();
+        _executionContext = new Runtime.ExecutionContext();
     }
 
     public RuntimeValue Evaluate(Statement statement, Scope scope)
@@ -144,7 +132,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         RuntimeValue returnedValue = new VoidValue();
         SourceInfo returnedValueSource;
 
-        _contextStack.Push(ExecutionContexts.Function);
+        _executionContext.EnterFunction();
         try
         {
             Evaluate(function.Body, functionScope);
@@ -155,6 +143,11 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             returnedValue = returnException.ReturnedValue;
             returnedValueSource = returnException.SourceInfo;
         }
+        catch
+        {
+            _executionContext.ExitFunction(callExpression.SourceInfo);
+            throw;
+        }
 
         if (!function.ReturnType.AcceptValue(returnedValue))
         {
@@ -164,20 +157,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             );
         }
 
-        if (!_contextStack.Contains(ExecutionContexts.Function))
-        {
-            throw new Exception("Corrupted context stack");
-        }
-
-        while (true)
-        {
-            var removedContext = _contextStack.Pop();
-
-            if (removedContext == ExecutionContexts.Function)
-            {
-                break;
-            }
-        }
+        _executionContext.ExitFunction(returnedValueSource);
 
         return returnedValue;
     }
@@ -264,7 +244,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             Evaluate(stmt, outerLoopScope);
         }
 
-        _contextStack.Push(ExecutionContexts.Loop);
+        _executionContext.EnterLoop();
 
         while (true)
         {
@@ -288,6 +268,11 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             catch (ContinueException)
             {
             }
+            catch
+            {
+                _executionContext.ExitLoop(loopStmt.SourceInfo);
+                throw;
+            }
 
             if (loopStmt.Update is not null)
             {
@@ -295,19 +280,14 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             }
         }
 
-        if (_contextStack.Count == 0 || _contextStack.Peek() != ExecutionContexts.Loop)
-        {
-            throw new Exception("Corrupted context stack");
-        }
-
-        _contextStack.Pop();
+        _executionContext.ExitLoop(loopStmt.SourceInfo);
 
         return new VoidValue();
     }
 
     public RuntimeValue VisitBreakStatement(BreakStatement breakStmt, Scope scope)
     {
-        if (_contextStack.Count == 0 || _contextStack.Peek() != ExecutionContexts.Loop)
+        if (!_executionContext.IsInLoop())
         {
             throw new UnexpectedStatementException(
                 "Cannot use break outside of a loop",
@@ -320,7 +300,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
     public RuntimeValue VisitContinueStatement(ContinueStatement continueStmt, Scope scope)
     {
-        if (_contextStack.Count == 0 || _contextStack.Peek() != ExecutionContexts.Loop)
+        if (!_executionContext.IsInLoop())
         {
             throw new UnexpectedStatementException(
                 "Cannot use continue outside of a loop",
@@ -333,7 +313,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
     public RuntimeValue VisitReturnStatement(ReturnStatement statement, Scope scope)
     {
-        if (!_contextStack.Contains(ExecutionContexts.Function))
+        if (!_executionContext.IsInFunction())
         {
             throw new UnexpectedStatementException(
                 "Cannot use return outside of a function",
