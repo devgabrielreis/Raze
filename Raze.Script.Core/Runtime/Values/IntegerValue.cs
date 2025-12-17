@@ -7,7 +7,7 @@ using Raze.Script.Core.Tokens.Operators.EqualityOperators;
 using Raze.Script.Core.Tokens.Operators.MultiplicativeOperators;
 using Raze.Script.Core.Tokens.Operators.RelationalOperators;
 
-namespace Raze.Script.Core.Values;
+namespace Raze.Script.Core.Runtime.Values;
 
 public class IntegerValue : RuntimeValue
 {

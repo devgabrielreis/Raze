@@ -8,7 +8,7 @@ using Raze.Script.Core.Tokens.Operators.MultiplicativeOperators;
 using Raze.Script.Core.Tokens.Operators.RelationalOperators;
 using System.Globalization;
 
-namespace Raze.Script.Core.Values;
+namespace Raze.Script.Core.Runtime.Values;
 
 public class DecimalValue : RuntimeValue
 {

@@ -1,4 +1,4 @@
-﻿namespace Raze.Script.Core.Scopes;
+﻿namespace Raze.Script.Core.Runtime.Scopes;
 
 internal class LocalScope : Scope
 {

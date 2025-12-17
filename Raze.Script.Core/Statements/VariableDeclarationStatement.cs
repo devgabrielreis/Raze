@@ -1,7 +1,7 @@
 ﻿using Raze.Script.Core.Engine;
 using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Runtime.Types;
 using Raze.Script.Core.Statements.Expressions;
-using Raze.Script.Core.Types;
 
 namespace Raze.Script.Core.Statements;
 

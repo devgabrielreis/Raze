@@ -1,9 +1,10 @@
 ﻿using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Runtime.Symbols;
+using Raze.Script.Core.Runtime.Types;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
-using Raze.Script.Core.Symbols;
 using Raze.Script.Core.Tokens;
 using Raze.Script.Core.Tokens.ControlStructures;
 using Raze.Script.Core.Tokens.Delimiters;
@@ -16,7 +17,6 @@ using Raze.Script.Core.Tokens.Operators.MultiplicativeOperators;
 using Raze.Script.Core.Tokens.Operators.RelationalOperators;
 using Raze.Script.Core.Tokens.Primitives;
 using Raze.Script.Core.Tokens.VariableDeclaration;
-using Raze.Script.Core.Types;
 using System.Globalization;
 
 namespace Raze.Script.Core.Engine;

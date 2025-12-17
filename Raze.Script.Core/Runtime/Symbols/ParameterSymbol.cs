@@ -1,10 +1,10 @@
 ﻿using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Runtime.Types;
+using Raze.Script.Core.Runtime.Values;
 using Raze.Script.Core.Statements.Expressions;
-using Raze.Script.Core.Types;
-using Raze.Script.Core.Values;
 
-namespace Raze.Script.Core.Symbols;
+namespace Raze.Script.Core.Runtime.Symbols;
 
 public class ParameterSymbol : Symbol
 {

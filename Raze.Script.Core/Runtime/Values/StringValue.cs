@@ -5,7 +5,7 @@ using Raze.Script.Core.Tokens.Operators;
 using Raze.Script.Core.Tokens.Operators.AdditiveOperators;
 using Raze.Script.Core.Tokens.Operators.EqualityOperators;
 
-namespace Raze.Script.Core.Values;
+namespace Raze.Script.Core.Runtime.Values;
 
 public class StringValue : RuntimeValue
 {

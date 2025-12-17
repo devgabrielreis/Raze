@@ -1,6 +1,6 @@
-﻿using Raze.Script.Core.Values;
+﻿using Raze.Script.Core.Runtime.Values;
 
-namespace Raze.Script.Core.Types;
+namespace Raze.Script.Core.Runtime.Types;
 
 public abstract class RuntimeType : IEquatable<RuntimeType>
 {

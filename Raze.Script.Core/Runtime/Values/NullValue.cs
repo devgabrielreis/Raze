@@ -3,13 +3,13 @@ using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Tokens.Operators;
 
-namespace Raze.Script.Core.Values;
+namespace Raze.Script.Core.Runtime.Values;
 
-public class VoidValue : RuntimeValue
+public class NullValue : RuntimeValue
 {
     public override object Value => this;
 
-    public override string TypeName => TypeNames.VOID_TYPE_NAME;
+    public override string TypeName => TypeNames.NULL_TYPE_NAME;
 
     internal override RuntimeValue ExecuteBinaryOperation(OperatorToken op, RuntimeValue other, BinaryExpression source)
     {
@@ -25,6 +25,6 @@ public class VoidValue : RuntimeValue
 
     public override object Clone()
     {
-        return new VoidValue();
+        return new NullValue();
     }
 }

@@ -1,10 +1,9 @@
 ﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
-using Raze.Script.Core.Statements;
-using Raze.Script.Core.Symbols;
-using Raze.Script.Core.Values;
+using Raze.Script.Core.Runtime.Symbols;
+using Raze.Script.Core.Runtime.Values;
 
-namespace Raze.Script.Core.Scopes;
+namespace Raze.Script.Core.Runtime.Scopes;
 
 public abstract class Scope
 {

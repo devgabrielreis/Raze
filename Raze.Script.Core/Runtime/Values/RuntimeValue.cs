@@ -1,7 +1,7 @@
 ﻿using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Tokens.Operators;
 
-namespace Raze.Script.Core.Values;
+namespace Raze.Script.Core.Runtime.Values;
 
 public abstract class RuntimeValue : ICloneable
 {

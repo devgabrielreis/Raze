@@ -1,10 +1,10 @@
 ﻿using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
-using Raze.Script.Core.Types;
-using Raze.Script.Core.Values;
+using Raze.Script.Core.Runtime.Types;
+using Raze.Script.Core.Runtime.Values;
 
-namespace Raze.Script.Core.Symbols;
+namespace Raze.Script.Core.Runtime.Symbols;
 
 public class VariableSymbol : Symbol
 {

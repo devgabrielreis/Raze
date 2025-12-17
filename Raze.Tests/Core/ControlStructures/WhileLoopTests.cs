@@ -1,7 +1,7 @@
 ﻿using Raze.Script.Core;
 using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Values;
+using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Tests.Core.ControlStructures;
 

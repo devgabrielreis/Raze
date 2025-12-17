@@ -4,7 +4,7 @@ using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Tokens.Operators;
 using Raze.Script.Core.Tokens.Operators.EqualityOperators;
 
-namespace Raze.Script.Core.Values;
+namespace Raze.Script.Core.Runtime.Values;
 
 public class BooleanValue : RuntimeValue
 {

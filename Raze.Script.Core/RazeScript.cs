@@ -1,7 +1,7 @@
 ﻿using Raze.Script.Core.Engine;
-using Raze.Script.Core.Scopes;
+using Raze.Script.Core.Runtime.Scopes;
+using Raze.Script.Core.Runtime.Values;
 using Raze.Script.Core.Statements.Expressions;
-using Raze.Script.Core.Values;
 using System.Reflection;
 
 namespace Raze.Script.Core;

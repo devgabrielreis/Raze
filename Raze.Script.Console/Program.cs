@@ -1,7 +1,7 @@
 ﻿using Raze.Script.Core;
 using Raze.Script.Core.Exceptions;
-using Raze.Script.Core.Scopes;
-using Raze.Script.Core.Values;
+using Raze.Script.Core.Runtime.Scopes;
+using Raze.Script.Core.Runtime.Values;
 using System.Reflection;
 
 internal class Program
