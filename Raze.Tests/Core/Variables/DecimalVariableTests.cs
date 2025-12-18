@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
 using Raze.Script.Core;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Scopes;
-using Raze.Script.Core.Values;
+using Raze.Script.Core.Runtime.Scopes;
+using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Tests.Core.Variables;
 

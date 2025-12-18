@@ -1,6 +1,6 @@
 ﻿using Raze.Script.Core;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Values;
+using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Tests.Core;
 
@@ -40,6 +40,8 @@ public class ArithmeticTests
     [InlineData("100 / 0")]
     [InlineData("100.0 / 0.0")]
     [InlineData("100 / ((100 * 2 - 199) - 1)")]
+    [InlineData("100 % 0")]
+    [InlineData("100.0 % 0.0")]
     public void Evaluate_DivisionByZero_ThrowsDivisionByZeroException(string expression)
     {
         Assert.Throws<DivisionByZeroException>(() =>

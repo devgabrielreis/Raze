@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Metadata;
+﻿using Raze.Script.Core.Engine;
+using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements.Expressions;
 
@@ -10,5 +11,10 @@ internal class IdentifierExpression : Expression
         : base(source)
     {
         Symbol = symbol;
+    }
+
+    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    {
+        return visitor.VisitIdentifierExpression(this, state);
     }
 }

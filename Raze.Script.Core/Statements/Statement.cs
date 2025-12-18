@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Metadata;
+﻿using Raze.Script.Core.Engine;
+using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements;
 
@@ -12,4 +13,6 @@ internal abstract class Statement
     {
         SourceInfo = source;
     }
+
+    internal abstract TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state);
 }

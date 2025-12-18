@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Metadata;
+﻿using Raze.Script.Core.Engine;
+using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Tokens.Operators;
 
 namespace Raze.Script.Core.Statements.Expressions;
@@ -15,5 +16,10 @@ internal class BinaryExpression : Expression
         Left = left;
         Operator = op;
         Right = right;
+    }
+
+    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    {
+        return visitor.VisitBinaryExpression(this, state);
     }
 }

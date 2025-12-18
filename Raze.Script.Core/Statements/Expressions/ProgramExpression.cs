@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Metadata;
+﻿using Raze.Script.Core.Engine;
+using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements.Expressions;
 
@@ -12,5 +13,10 @@ internal class ProgramExpression : Expression
         : base(source)
     {
         Body = body;
+    }
+
+    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    {
+        return visitor.VisitProgramExpression(this, state);
     }
 }
