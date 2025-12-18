@@ -1,9 +1,4 @@
 ﻿using Raze.Script.Core.Constants;
-using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Statements.Expressions;
-using Raze.Script.Core.Tokens.Operators;
-using Raze.Script.Core.Tokens.Operators.AdditiveOperators;
-using Raze.Script.Core.Tokens.Operators.EqualityOperators;
 
 namespace Raze.Script.Core.Runtime.Values;
 
@@ -22,34 +17,9 @@ public class StringValue : RuntimeValue
         _value = value;
     }
 
-    internal override RuntimeValue ExecuteBinaryOperation(OperatorToken op, RuntimeValue other, BinaryExpression source)
-    {
-        if (other is StringValue otherStr)
-        {
-            return ExecuteBinaryOperationWithString(op, otherStr, source);
-        }
-
-        throw new UnsupportedBinaryOperationException(
-            TypeName, other.TypeName, op.Lexeme, source.SourceInfo
-        );
-    }
-
     public override string ToString()
     {
         return '"' + _value + '"';
-    }
-
-    private RuntimeValue ExecuteBinaryOperationWithString(OperatorToken op, StringValue other, BinaryExpression source)
-    {
-        return op switch
-        {
-            AdditionToken => new StringValue(StrValue + other.StrValue),
-            EqualToken    => new BooleanValue(StrValue == other.StrValue),
-            NotEqualToken => new BooleanValue(StrValue != other.StrValue),
-            _ => throw new UnsupportedBinaryOperationException(
-                TypeName, other.TypeName, op.Lexeme, source.SourceInfo
-            ),
-        };
     }
 
     public override object Clone()

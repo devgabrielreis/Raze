@@ -2,6 +2,7 @@
 using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Runtime.Operations;
 using Raze.Script.Core.Runtime.Scopes;
 using Raze.Script.Core.Runtime.Symbols;
 using Raze.Script.Core.Runtime.Types;
@@ -16,10 +17,17 @@ namespace Raze.Script.Core.Engine;
 internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 {
     private Runtime.ExecutionContext _executionContext;
+    private OperationDispatcher _operationDispatcher;
 
     public Interpreter()
     {
         _executionContext = new Runtime.ExecutionContext();
+
+        _operationDispatcher = new OperationDispatcher();
+        _operationDispatcher.RegisterFrom<IntegerOperationRegistrar>();
+        _operationDispatcher.RegisterFrom<DecimalOperationRegistrar>();
+        _operationDispatcher.RegisterFrom<StringOperationRegistrar>();
+        _operationDispatcher.RegisterFrom<BooleanOperationRegistrar>();
     }
 
     public RuntimeValue Evaluate(Statement statement, Scope scope)
@@ -182,7 +190,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         OperatorToken op = expression.Operator;
         RuntimeValue rightHand = Evaluate(expression.Right, scope);
 
-        return leftHand.ExecuteBinaryOperation(op, rightHand, expression);
+        return _operationDispatcher.ExecuteBinaryOperation(leftHand, op, rightHand, expression.SourceInfo);
     }
 
     public RuntimeValue VisitIdentifierExpression(IdentifierExpression expression, Scope scope)

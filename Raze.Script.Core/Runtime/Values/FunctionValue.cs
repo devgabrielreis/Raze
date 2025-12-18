@@ -1,11 +1,8 @@
 ﻿using Raze.Script.Core.Constants;
-using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Runtime.Scopes;
 using Raze.Script.Core.Runtime.Symbols;
 using Raze.Script.Core.Runtime.Types;
 using Raze.Script.Core.Statements;
-using Raze.Script.Core.Statements.Expressions;
-using Raze.Script.Core.Tokens.Operators;
 
 namespace Raze.Script.Core.Runtime.Values;
 
@@ -29,13 +26,6 @@ public class FunctionValue : RuntimeValue
         Parameters = parameters;
         Body = body;
         Scope = scope;
-    }
-
-    internal override RuntimeValue ExecuteBinaryOperation(OperatorToken op, RuntimeValue other, BinaryExpression source)
-    {
-        throw new UnsupportedBinaryOperationException(
-            TypeName, other.TypeName, op.Lexeme, source.SourceInfo
-        );
     }
 
     public override string ToString()
