@@ -85,4 +85,35 @@ public class VariableTests
             RazeScript.Evaluate("var void variable", "Raze.Tests");
         });
     }
+
+    [Fact]
+    public void Evaluate_NullCheckerOperator_ReturnsExpectedValue()
+    {
+        var script = @"
+            var decimal? my_var = 10.0;
+            my_var??
+        ";
+
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
+        Assert.IsType<BooleanValue>(result);
+        Assert.False(((BooleanValue)result).BoolValue);
+
+        script = @"
+            var integer? my_var = null;
+            my_var??
+        ";
+
+        result = RazeScript.Evaluate(script, "Raze.Tests");
+        Assert.IsType<BooleanValue>(result);
+        Assert.True(((BooleanValue)result).BoolValue);
+
+        script = @"
+            var boolean my_var = true;
+            my_var??
+        ";
+
+        result = RazeScript.Evaluate(script, "Raze.Tests");
+        Assert.IsType<BooleanValue>(result);
+        Assert.False(((BooleanValue)result).BoolValue);
+    }
 }

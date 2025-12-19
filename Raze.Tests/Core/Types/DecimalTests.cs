@@ -129,4 +129,28 @@ public class DecimalTests
         var result = RazeScript.Evaluate(script, "Raze.Tests");
         Assert.Equal(expectedResult, (result as DecimalValue)!.DecValue);
     }
+
+    [Theory]
+    [InlineData("+10.1", "10.1")]
+    [InlineData("-10.2", "-10.2")]
+    [InlineData("10.3++", "11.3")]
+    [InlineData("10.4--", "9.4")]
+    public void Evaluate_DecimalUnaryOperation_ReturnsExpectedValue(string expression, string expectedStr)
+    {
+        var scope = new InterpreterScope();
+        var result = RazeScript.Evaluate(expression, "Raze.Tests", scope);
+
+        Assert.IsType<DecimalValue>(result);
+        Assert.Equal(expectedStr, (result as DecimalValue)!.ToString());
+    }
+
+    [Theory]
+    [InlineData("!10.0")]
+    public void Evaluate_InvalidDecimalUnaryOperations_ThrowUnsupportedUnaryOperationException(string expression)
+    {
+        Assert.Throws<UnsupportedUnaryOperationException>(() =>
+        {
+            var result = RazeScript.Evaluate(expression, "Raze.Tests");
+        });
+    }
 }

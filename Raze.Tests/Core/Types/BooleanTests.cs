@@ -102,4 +102,29 @@ public class BooleanTests
             var result = RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
+
+    [Theory]
+    [InlineData("!true", false)]
+    [InlineData("!false", true)]
+    public void Evaluate_BooleanUnaryOperation_ReturnsExpectedValue(string expression, bool expected)
+    {
+        var scope = new InterpreterScope();
+        var result = RazeScript.Evaluate(expression, "Raze.Tests", scope);
+
+        Assert.IsType<BooleanValue>(result);
+        Assert.Equal(expected, (result as BooleanValue)!.BoolValue);
+    }
+
+    [Theory]
+    [InlineData("true++")]
+    [InlineData("true--")]
+    [InlineData("-true")]
+    [InlineData("+true")]
+    public void Evaluate_InvalidBooleanUnaryOperations_ThrowUnsupportedUnaryOperationException(string expression)
+    {
+        Assert.Throws<UnsupportedUnaryOperationException>(() =>
+        {
+            var result = RazeScript.Evaluate(expression, "Raze.Tests");
+        });
+    }
 }

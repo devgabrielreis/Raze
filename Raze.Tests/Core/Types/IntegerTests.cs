@@ -110,4 +110,28 @@ public class IntegerTests
             var result = RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
+
+    [Theory]
+    [InlineData("+10", "10")]
+    [InlineData("-10", "-10")]
+    [InlineData("10++", "11")]
+    [InlineData("10--", "9")]
+    public void Evaluate_IntegerUnaryOperation_ReturnsExpectedValue(string expression, string expectedStr)
+    {
+        var scope = new InterpreterScope();
+        var result = RazeScript.Evaluate(expression, "Raze.Tests", scope);
+
+        Assert.IsType<DecimalValue>(result);
+        Assert.Equal(expectedStr, (result as DecimalValue)!.ToString());
+    }
+
+    [Theory]
+    [InlineData("!10")]
+    public void Evaluate_InvalidIntegerUnaryOperations_ThrowUnsupportedUnaryOperationException(string expression)
+    {
+        Assert.Throws<UnsupportedUnaryOperationException>(() =>
+        {
+            var result = RazeScript.Evaluate(expression, "Raze.Tests");
+        });
+    }
 }

@@ -131,4 +131,18 @@ public class StringTests
             RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
+
+    [Theory]
+    [InlineData("\"teste\"++")]
+    [InlineData("\"teste\"--")]
+    [InlineData("-\"teste\"")]
+    [InlineData("+\"teste\"")]
+    [InlineData("!\"teste\"")]
+    public void Evaluate_InvalidStringUnaryOperations_ThrowUnsupportedUnaryOperationException(string expression)
+    {
+        Assert.Throws<UnsupportedUnaryOperationException>(() =>
+        {
+            var result = RazeScript.Evaluate(expression, "Raze.Tests");
+        });
+    }
 }
