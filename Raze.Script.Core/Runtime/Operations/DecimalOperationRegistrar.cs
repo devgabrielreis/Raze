@@ -2,6 +2,7 @@
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Values;
+using Raze.Script.Core.Tokens.Operators;
 using Raze.Script.Core.Tokens.Operators.AdditiveOperators;
 using Raze.Script.Core.Tokens.Operators.EqualityOperators;
 using Raze.Script.Core.Tokens.Operators.MultiplicativeOperators;
@@ -69,6 +70,39 @@ internal class DecimalOperationRegistrar : IOperationRegistrar
         );
     }
 
+    public static void RegisterUnaryOperations(OperationDispatcher dispatcher)
+    {
+        dispatcher.RegisterUnaryOperation(
+            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(AdditionToken), IsPostfix: false),
+            UnaryPlus
+        );
+
+        dispatcher.RegisterUnaryOperation(
+            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(SubtractionToken), IsPostfix: false),
+            UnaryMinus
+        );
+
+        dispatcher.RegisterUnaryOperation(
+            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(IncrementToken), IsPostfix: true),
+            Increment
+        );
+
+        dispatcher.RegisterUnaryOperation(
+            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(IncrementToken), IsPostfix: false),
+            Increment
+        );
+
+        dispatcher.RegisterUnaryOperation(
+            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(DecrementToken), IsPostfix: true),
+            Decrement
+        );
+
+        dispatcher.RegisterUnaryOperation(
+            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(DecrementToken), IsPostfix: false),
+            Decrement
+        );
+    }
+
     private static RuntimeValue AddDecimal(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
         return new DecimalValue(((DecimalValue)left).DecValue + ((DecimalValue)right).DecValue);
@@ -132,5 +166,36 @@ internal class DecimalOperationRegistrar : IOperationRegistrar
     private static RuntimeValue GreaterOrEqualDecimal(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
         return new BooleanValue(((DecimalValue)left).DecValue >= ((DecimalValue)right).DecValue);
+    }
+
+    private static RuntimeValue UnaryPlus(RuntimeValue operand, SourceInfo source)
+    {
+        var value = ((DecimalValue)operand).DecValue;
+
+        return new DecimalValue(value);
+    }
+
+    private static RuntimeValue UnaryMinus(RuntimeValue operand, SourceInfo source)
+    {
+        var value = ((DecimalValue)operand).DecValue;
+        value = -value;
+
+        return new DecimalValue(value);
+    }
+
+    private static RuntimeValue Increment(RuntimeValue operand, SourceInfo source)
+    {
+        var value = ((DecimalValue)operand).DecValue;
+        value = value + 1.0m;
+
+        return new DecimalValue(value);
+    }
+
+    private static RuntimeValue Decrement(RuntimeValue operand, SourceInfo source)
+    {
+        var value = ((DecimalValue)operand).DecValue;
+        value = value - 1.0m;
+
+        return new DecimalValue(value);
     }
 }

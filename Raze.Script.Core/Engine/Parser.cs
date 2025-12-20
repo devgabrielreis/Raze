@@ -541,19 +541,82 @@ internal class Parser
 
     private Expression ParseMultiplicativeExpression()
     {
-        return ParseBinaryExpression<MultiplicativeOperatorToken>(ParseCallMemberExpression);
+        return ParseBinaryExpression<MultiplicativeOperatorToken>(ParseUnaryExpression);
     }
 
-    private Expression ParseCallMemberExpression()
+    private Expression ParseUnaryExpression()
     {
-        var member = ParseMemberExpression();
-
-        while (Current() is OpenParenthesisToken)
+        if (Current() is NotToken
+            || Current() is AdditionToken
+            || Current() is SubtractionToken)
         {
-            member = ParseCallExpression(member);
+            var op = (OperatorToken)Current();
+            Advance();
+
+            var operand = ParseUnaryExpression();
+
+            return new UnarySimpleExpression(operand, op, isPostfix: false, op.SourceInfo);
         }
 
-        return member;
+        if (Current() is IncrementToken
+            || Current() is DecrementToken)
+        {
+            var op = (OperatorToken)Current();
+            Advance();
+
+            var operand = ParseUnaryExpression();
+
+            if (operand is not IdentifierExpression)
+            {
+                throw new InvalidOperandException(
+                    $"The {op.Lexeme} operator can only be applied to identifiers",
+                    op.SourceInfo
+                );
+            }
+
+            return new UnaryMutationExpression((IdentifierExpression)operand, op, isPostfix: false, op.SourceInfo);
+        }
+
+        return ParsePostfixExpression();
+    }
+
+    private Expression ParsePostfixExpression()
+    {
+        var expr = ParseMemberExpression();
+
+        while (true)
+        {
+            if (Current() is OpenParenthesisToken)
+            {
+                expr = ParseCallExpression(expr);
+                continue;
+            }
+
+            if (Current() is IncrementToken
+                || Current() is DecrementToken
+                || Current() is NullCheckerToken)
+            {
+                var op = (OperatorToken)Current();
+                Advance();
+
+                if (expr is not IdentifierExpression)
+                {
+                    throw new InvalidOperandException(
+                        $"The {op.Lexeme} operator can only be applied to identifiers",
+                        op.SourceInfo
+                    );
+                }
+
+                expr = op is NullCheckerToken
+                    ? new NullCheckerExpression((IdentifierExpression)expr, expr.SourceInfo)
+                    : new UnaryMutationExpression((IdentifierExpression)expr, op, isPostfix: true, expr.SourceInfo);
+                continue;
+            }
+
+            break;
+        }
+
+        return expr;
     }
 
     private CallExpression ParseCallExpression(Expression caller)

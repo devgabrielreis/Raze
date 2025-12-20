@@ -31,6 +31,14 @@ internal class BooleanOperationRegistrar : IOperationRegistrar
         );
     }
 
+    public static void RegisterUnaryOperations(OperationDispatcher dispatcher)
+    {
+        dispatcher.RegisterUnaryOperation(
+            new UnaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, typeof(NotToken), IsPostfix: false),
+            Not
+        );
+    }
+
     private static RuntimeValue EqualBoolean(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
         return new BooleanValue(((BooleanValue)left).BoolValue == ((BooleanValue)right).BoolValue);
@@ -49,5 +57,13 @@ internal class BooleanOperationRegistrar : IOperationRegistrar
     private static RuntimeValue OrBoolean(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
         return new BooleanValue(((BooleanValue)left).BoolValue || ((BooleanValue)right).BoolValue);
+    }
+
+    private static RuntimeValue Not(RuntimeValue operand, SourceInfo source)
+    {
+        bool value = (((BooleanValue)operand).BoolValue);
+        value = !value;
+
+        return new BooleanValue(value);
     }
 }

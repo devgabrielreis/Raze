@@ -57,7 +57,10 @@ internal class Lexer
         [">="] = (string lexeme, SourceInfo source) => new GreaterOrEqualThanToken(lexeme, source),
         ["<="] = (string lexeme, SourceInfo source) => new LessOrEqualThanToken(lexeme, source),
         ["&&"] = (string lexeme, SourceInfo source) => new AndToken(lexeme, source),
-        ["||"] = (string lexeme, SourceInfo source) => new OrToken(lexeme, source)
+        ["||"] = (string lexeme, SourceInfo source) => new OrToken(lexeme, source),
+        ["++"] = (string lexeme, SourceInfo source) => new IncrementToken(lexeme, source),
+        ["--"] = (string lexeme, SourceInfo source) => new DecrementToken(lexeme, source),
+        ["??"] = (string lexeme, SourceInfo source) => new NullCheckerToken(lexeme, source),
     };
 
     private static readonly Dictionary<char, Func<string, SourceInfo, Token>> _singleCharTokens = new()
@@ -76,7 +79,8 @@ internal class Lexer
         ['%'] = (string lexeme, SourceInfo source) => new ModuloToken(lexeme, source),
         ['>'] = (string lexeme, SourceInfo source) => new GreaterThanToken(lexeme, source),
         ['<'] = (string lexeme, SourceInfo source) => new LessThanToken(lexeme, source),
-        ['?'] = (string lexeme, SourceInfo source) => new QuestionMarkToken(lexeme, source)
+        ['?'] = (string lexeme, SourceInfo source) => new QuestionMarkToken(lexeme, source),
+        ['!'] = (string lexeme, SourceInfo source) => new NotToken(lexeme, source)
     };
 
     private Lexer(string sourceCode, string sourceLocation)

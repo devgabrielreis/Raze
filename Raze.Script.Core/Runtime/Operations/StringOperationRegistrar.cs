@@ -26,6 +26,10 @@ internal class StringOperationRegistrar : IOperationRegistrar
         );
     }
 
+    public static void RegisterUnaryOperations(OperationDispatcher dispatcher)
+    {
+    }
+
     private static RuntimeValue AddString(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
         return new StringValue(((StringValue)left).StrValue + ((StringValue)right).StrValue);

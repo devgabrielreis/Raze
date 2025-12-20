@@ -34,6 +34,12 @@ internal interface IStatementVisitor<TState, TResult>
 
     public TResult VisitBinaryExpression(BinaryExpression expression, TState state);
 
+    public TResult VisitUnarySimpleExpression(UnarySimpleExpression expression, TState state);
+
+    public TResult VisitUnaryMutationExpression(UnaryMutationExpression expression, TState state);
+
+    public TResult VisitNullCheckerExpression(NullCheckerExpression expression, TState state);
+
     public TResult VisitBooleanLiteralExpression(BooleanLiteralExpression expression, TState state);
 
     public TResult VisitDecimalLiteralExpression(DecimalLiteralExpression expression, TState state);

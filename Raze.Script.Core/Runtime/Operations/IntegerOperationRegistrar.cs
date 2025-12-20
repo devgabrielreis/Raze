@@ -2,6 +2,7 @@
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Values;
+using Raze.Script.Core.Tokens.Operators;
 using Raze.Script.Core.Tokens.Operators.AdditiveOperators;
 using Raze.Script.Core.Tokens.Operators.EqualityOperators;
 using Raze.Script.Core.Tokens.Operators.MultiplicativeOperators;
@@ -69,6 +70,39 @@ internal class IntegerOperationRegistrar : IOperationRegistrar
         );
     }
 
+    public static void RegisterUnaryOperations(OperationDispatcher dispatcher)
+    {
+        dispatcher.RegisterUnaryOperation(
+            new UnaryOperationKey(TypeNames.INTEGER_TYPE_NAME, typeof(AdditionToken), IsPostfix: false),
+            UnaryPlus
+        );
+
+        dispatcher.RegisterUnaryOperation(
+            new UnaryOperationKey(TypeNames.INTEGER_TYPE_NAME, typeof(SubtractionToken), IsPostfix: false),
+            UnaryMinus
+        );
+
+        dispatcher.RegisterUnaryOperation(
+            new UnaryOperationKey(TypeNames.INTEGER_TYPE_NAME, typeof(IncrementToken), IsPostfix: true),
+            Increment
+        );
+
+        dispatcher.RegisterUnaryOperation(
+            new UnaryOperationKey(TypeNames.INTEGER_TYPE_NAME, typeof(IncrementToken), IsPostfix: false),
+            Increment
+        );
+
+        dispatcher.RegisterUnaryOperation(
+            new UnaryOperationKey(TypeNames.INTEGER_TYPE_NAME, typeof(DecrementToken), IsPostfix: true),
+            Decrement
+        );
+
+        dispatcher.RegisterUnaryOperation(
+            new UnaryOperationKey(TypeNames.INTEGER_TYPE_NAME, typeof(DecrementToken), IsPostfix: false),
+            Decrement
+        );
+    }
+
     private static RuntimeValue AddInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
         return new IntegerValue(((IntegerValue)left).IntValue + ((IntegerValue)right).IntValue);
@@ -132,5 +166,36 @@ internal class IntegerOperationRegistrar : IOperationRegistrar
     private static RuntimeValue GreaterOrEqualInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
         return new BooleanValue(((IntegerValue)left).IntValue >= ((IntegerValue)right).IntValue);
+    }
+
+    private static RuntimeValue UnaryPlus(RuntimeValue operand, SourceInfo source)
+    {
+        var value = ((IntegerValue)operand).IntValue;
+
+        return new IntegerValue(value);
+    }
+
+    private static RuntimeValue UnaryMinus(RuntimeValue operand, SourceInfo source)
+    {
+        var value = ((IntegerValue)operand).IntValue;
+        value = -value;
+
+        return new IntegerValue(value);
+    }
+
+    private static RuntimeValue Increment(RuntimeValue operand, SourceInfo source)
+    {
+        var value = ((IntegerValue)operand).IntValue;
+        value = value + 1;
+
+        return new IntegerValue(value);
+    }
+
+    private static RuntimeValue Decrement(RuntimeValue operand, SourceInfo source)
+    {
+        var value = ((IntegerValue)operand).IntValue;
+        value = value - 1;
+
+        return new IntegerValue(value);
     }
 }

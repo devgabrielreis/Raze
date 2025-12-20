@@ -3,4 +3,6 @@
 internal interface IOperationRegistrar
 {
     static abstract void RegisterBinaryOperations(OperationDispatcher dispatcher);
+
+    static abstract void RegisterUnaryOperations(OperationDispatcher dispatcher);
 }
