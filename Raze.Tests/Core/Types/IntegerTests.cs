@@ -114,15 +114,13 @@ public class IntegerTests
     [Theory]
     [InlineData("+10", "10")]
     [InlineData("-10", "-10")]
-    [InlineData("10++", "11")]
-    [InlineData("10--", "9")]
     public void Evaluate_IntegerUnaryOperation_ReturnsExpectedValue(string expression, string expectedStr)
     {
         var scope = new InterpreterScope();
         var result = RazeScript.Evaluate(expression, "Raze.Tests", scope);
 
-        Assert.IsType<DecimalValue>(result);
-        Assert.Equal(expectedStr, (result as DecimalValue)!.ToString());
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(expectedStr, (result as IntegerValue)!.ToString());
     }
 
     [Theory]

@@ -116,8 +116,6 @@ public class BooleanTests
     }
 
     [Theory]
-    [InlineData("true++")]
-    [InlineData("true--")]
     [InlineData("-true")]
     [InlineData("+true")]
     public void Evaluate_InvalidBooleanUnaryOperations_ThrowUnsupportedUnaryOperationException(string expression)

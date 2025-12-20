@@ -42,4 +42,22 @@ public class BooleanVariableTests
             var result = RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
+
+    [Theory]
+    [InlineData("++", false)]
+    [InlineData("--", false)]
+    [InlineData("++", true)]
+    [InlineData("--", true)]
+    public void Evaluate_UnsupportedUnaryMutationExpression_ThrowsUnsupportedUnaryOperationException(string op, bool isPostfix)
+    {
+        var script = $@"
+            var boolean test = false;
+            {(isPostfix ? $"test{op}" : $"{op}test")}
+        ";
+
+        Assert.Throws<UnsupportedUnaryOperationException>(() =>
+        {
+            RazeScript.Evaluate(script, "Raze.Tests");
+        });
+    }
 }

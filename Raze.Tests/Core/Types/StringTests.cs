@@ -133,8 +133,6 @@ public class StringTests
     }
 
     [Theory]
-    [InlineData("\"teste\"++")]
-    [InlineData("\"teste\"--")]
     [InlineData("-\"teste\"")]
     [InlineData("+\"teste\"")]
     [InlineData("!\"teste\"")]

@@ -80,8 +80,6 @@ public class NullTests
     }
 
     [Theory]
-    [InlineData("null++")]
-    [InlineData("null--")]
     [InlineData("-null")]
     [InlineData("+null")]
     [InlineData("!null")]
