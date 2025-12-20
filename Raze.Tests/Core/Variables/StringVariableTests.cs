@@ -40,4 +40,22 @@ public class StringVariableTests
             var result = RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
+
+    [Theory]
+    [InlineData("++", false)]
+    [InlineData("--", false)]
+    [InlineData("++", true)]
+    [InlineData("--", true)]
+    public void Evaluate_UnsupportedUnaryMutationExpression_ThrowsUnsupportedUnaryOperationException(string op, bool isPostfix)
+    {
+        var script = $"""
+            var string test = "test";
+            {(isPostfix ? $"test{op}" : $"{op}test")}
+        """;
+
+        Assert.Throws<UnsupportedUnaryOperationException>(() =>
+        {
+            RazeScript.Evaluate(script, "Raze.Tests");
+        });
+    }
 }

@@ -10,6 +10,8 @@ public class ArithmeticTests
     [InlineData("10 + 3 * 6", 28)]
     [InlineData("10 + (3 * 6)", 28)]
     [InlineData("(10 + 3) * 6", 78)]
+    [InlineData("(10 + -3)", 7)]
+    [InlineData("(10 + +3)", 13)]
     public void Evaluate_Expressions_RespectsPrecedence(string expression, int expectedValue)
     {
         var result = RazeScript.Evaluate(expression, "Raze.Tests");

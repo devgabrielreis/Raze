@@ -193,28 +193,41 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         return _operationDispatcher.ExecuteBinaryOperation(leftHand, op, rightHand, expression.SourceInfo);
     }
 
+    public RuntimeValue VisitUnarySimpleExpression(UnarySimpleExpression expression, Scope scope)
+    {
+        RuntimeValue operand = Evaluate(expression.Operand, scope);
+        OperatorToken op = expression.Operator;
+        bool isPostfix = expression.IsPostfix;
+
+        return _operationDispatcher.ExecuteUnaryOperation(operand, op, isPostfix, expression.SourceInfo);
+    }
+
+    public RuntimeValue VisitUnaryMutationExpression(UnaryMutationExpression expression, Scope scope)
+    {
+        var variable = GetVariable(expression.Operand, scope);
+
+        var valueBefore = variable.Value;
+        var valueAfter = _operationDispatcher.ExecuteUnaryOperation(
+            valueBefore, expression.Operator, expression.IsPostfix, expression.SourceInfo
+        );
+
+        variable.SetValue(valueAfter, expression.SourceInfo);
+
+        return expression.IsPostfix ? valueBefore : valueAfter;
+    }
+
+    public RuntimeValue VisitNullCheckerExpression(NullCheckerExpression expression, Scope scope)
+    {
+        var runtimeValue = Evaluate(expression.Operand, scope);
+
+        return new BooleanValue(runtimeValue is NullValue);
+    }
+
     public RuntimeValue VisitIdentifierExpression(IdentifierExpression expression, Scope scope)
     {
-        var resolvedScope = scope.FindSymbolScope(expression.Symbol);
+        var variable = GetVariable(expression, scope);
 
-        if (resolvedScope is null)
-        {
-            throw new UndefinedIdentifierException(expression.Symbol, expression.SourceInfo);
-        }
- 
-        var result = resolvedScope.FindSymbol(expression.Symbol);
-
-        if (result is VariableSymbol variable)
-        {
-            if (!variable.IsInitialized)
-            {
-                throw new UninitializedVariableException(expression.SourceInfo);
-            }
-
-            return variable.Value;
-        }
-
-        throw new Exception("nao implementado ainda");
+        return variable.Value;
     }
 
     public RuntimeValue VisitCodeBlockStatement(CodeBlockStatement codeBlock, Scope scope)
@@ -380,5 +393,29 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         }
 
         return (conditionResult as BooleanValue)!.BoolValue;
+    }
+
+    private static VariableSymbol GetVariable(IdentifierExpression expression, Scope scope)
+    {
+        var resolvedScope = scope.FindSymbolScope(expression.Symbol);
+
+        if (resolvedScope is null)
+        {
+            throw new UndefinedIdentifierException(expression.Symbol, expression.SourceInfo);
+        }
+
+        var result = resolvedScope.FindSymbol(expression.Symbol);
+
+        if (result is VariableSymbol variable)
+        {
+            if (!variable.IsInitialized)
+            {
+                throw new UninitializedVariableException(expression.SourceInfo);
+            }
+
+            return variable;
+        }
+
+        throw new Exception("nao implementado ainda");
     }
 }

@@ -78,4 +78,16 @@ public class NullTests
             var result = RazeScript.Evaluate(expression, "Raze.Tests");
         });
     }
+
+    [Theory]
+    [InlineData("-null")]
+    [InlineData("+null")]
+    [InlineData("!null")]
+    public void Evaluate_InvalidNullUnaryOperations_ThrowUnsupportedUnaryOperationException(string expression)
+    {
+        Assert.Throws<UnsupportedUnaryOperationException>(() =>
+        {
+            var result = RazeScript.Evaluate(expression, "Raze.Tests");
+        });
+    }
 }

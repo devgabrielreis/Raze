@@ -126,4 +126,29 @@ public class SyntaxTests
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(11, (result as IntegerValue)!.IntValue);
     }
+
+    [Theory]
+    [InlineData("10++")]
+    [InlineData("10.0--")]
+    [InlineData("--1")]
+    [InlineData("++1.0")]
+    public void Evaluate_UnaryMutationExpressionNotOnVariable_ThrowsInvalidOperandException(string expression)
+    {
+        Assert.Throws<InvalidOperandException>(() =>
+        {
+            RazeScript.Evaluate(expression, "Raze.Tests");
+        });
+    }
+
+    [Theory]
+    [InlineData("null??")]
+    [InlineData("10.0??")]
+    [InlineData("false??")]
+    public void Evaluate_NullCheckerNotOnVariable_ThrowsInvalidOperandException(string expression)
+    {
+        Assert.Throws<InvalidOperandException>(() =>
+        {
+            RazeScript.Evaluate(expression, "Raze.Tests");
+        });
+    }
 }

@@ -31,23 +31,51 @@ internal class BooleanOperationRegistrar : IOperationRegistrar
         );
     }
 
+    public static void RegisterUnaryOperations(OperationDispatcher dispatcher)
+    {
+        dispatcher.RegisterUnaryOperation(
+            new UnaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, typeof(NotToken), IsPostfix: false),
+            Not
+        );
+    }
+
     private static RuntimeValue EqualBoolean(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((BooleanValue)left).BoolValue == ((BooleanValue)right).BoolValue);
+        var leftValue = ((BooleanValue)left).BoolValue;
+        var rightValue = ((BooleanValue)right).BoolValue;
+
+        return new BooleanValue(leftValue == rightValue);
     }
 
     private static RuntimeValue NotEqualBoolean(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((BooleanValue)left).BoolValue != ((BooleanValue)right).BoolValue);
+        var leftValue = ((BooleanValue)left).BoolValue;
+        var rightValue = ((BooleanValue)right).BoolValue;
+
+        return new BooleanValue(leftValue != rightValue);
     }
 
     private static RuntimeValue AndBoolean(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((BooleanValue)left).BoolValue && ((BooleanValue)right).BoolValue);
+        var leftValue = ((BooleanValue)left).BoolValue;
+        var rightValue = ((BooleanValue)right).BoolValue;
+
+        return new BooleanValue(leftValue && rightValue);
     }
 
     private static RuntimeValue OrBoolean(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((BooleanValue)left).BoolValue || ((BooleanValue)right).BoolValue);
+        var leftValue = ((BooleanValue)left).BoolValue;
+        var rightValue = ((BooleanValue)right).BoolValue;
+
+        return new BooleanValue(leftValue || rightValue);
+    }
+
+    private static RuntimeValue Not(RuntimeValue operand, SourceInfo source)
+    {
+        bool value = (((BooleanValue)operand).BoolValue);
+        value = !value;
+
+        return new BooleanValue(value);
     }
 }
