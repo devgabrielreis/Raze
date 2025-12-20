@@ -110,62 +110,92 @@ internal class IntegerOperationRegistrar : IOperationRegistrar
 
     private static RuntimeValue SubtractInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new IntegerValue(((IntegerValue)left).IntValue - ((IntegerValue)right).IntValue);
+        var leftValue = ((IntegerValue)left).IntValue;
+        var rightValue = ((IntegerValue)right).IntValue;
+
+        return new IntegerValue(leftValue - rightValue);
     }
 
     private static RuntimeValue MultiplyInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new IntegerValue(((IntegerValue)left).IntValue * ((IntegerValue)right).IntValue);
+        var leftValue = ((IntegerValue)left).IntValue;
+        var rightValue = ((IntegerValue)right).IntValue;
+
+        return new IntegerValue(leftValue * rightValue);
     }
 
     private static RuntimeValue DivideInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        if (((IntegerValue)right).IntValue == 0)
+        var leftValue = ((IntegerValue)left).IntValue;
+        var rightValue = ((IntegerValue)right).IntValue;
+
+        if (rightValue == 0)
         {
             throw new DivisionByZeroException(source);
         }
 
-        return new IntegerValue(((IntegerValue)left).IntValue / ((IntegerValue)right).IntValue);
+        return new IntegerValue(leftValue / rightValue);
     }
 
     private static RuntimeValue ModuloInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        if (((IntegerValue)right).IntValue == 0)
+        var leftValue = ((IntegerValue)left).IntValue;
+        var rightValue = ((IntegerValue)right).IntValue;
+
+        if (rightValue == 0)
         {
             throw new DivisionByZeroException(source);
         }
 
-        return new IntegerValue(((IntegerValue)left).IntValue % ((IntegerValue)right).IntValue);
+        return new IntegerValue(leftValue % rightValue);
     }
 
     private static RuntimeValue EqualInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((IntegerValue)left).IntValue == ((IntegerValue)right).IntValue);
+        var leftValue = ((IntegerValue)left).IntValue;
+        var rightValue = ((IntegerValue)right).IntValue;
+
+        return new BooleanValue(leftValue == rightValue);
     }
 
     private static RuntimeValue NotEqualInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((IntegerValue)left).IntValue != ((IntegerValue)right).IntValue);
+        var leftValue = ((IntegerValue)left).IntValue;
+        var rightValue = ((IntegerValue)right).IntValue;
+
+        return new BooleanValue(leftValue != rightValue);
     }
 
     private static RuntimeValue LessThanInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((IntegerValue)left).IntValue < ((IntegerValue)right).IntValue);
+        var leftValue = ((IntegerValue)left).IntValue;
+        var rightValue = ((IntegerValue)right).IntValue;
+
+        return new BooleanValue(leftValue < rightValue);
     }
 
     private static RuntimeValue GreaterThanInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((IntegerValue)left).IntValue > ((IntegerValue)right).IntValue);
+        var leftValue = ((IntegerValue)left).IntValue;
+        var rightValue = ((IntegerValue)right).IntValue;
+
+        return new BooleanValue(leftValue > rightValue);
     }
 
     private static RuntimeValue LessOrEqualInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((IntegerValue)left).IntValue <= ((IntegerValue)right).IntValue);
+        var leftValue = ((IntegerValue)left).IntValue;
+        var rightValue = ((IntegerValue)right).IntValue;
+
+        return new BooleanValue(leftValue <= rightValue);
     }
 
     private static RuntimeValue GreaterOrEqualInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((IntegerValue)left).IntValue >= ((IntegerValue)right).IntValue);
+        var leftValue = ((IntegerValue)left).IntValue;
+        var rightValue = ((IntegerValue)right).IntValue;
+
+        return new BooleanValue(leftValue >= rightValue);
     }
 
     private static RuntimeValue UnaryPlus(RuntimeValue operand, SourceInfo source)
@@ -186,7 +216,7 @@ internal class IntegerOperationRegistrar : IOperationRegistrar
     private static RuntimeValue Increment(RuntimeValue operand, SourceInfo source)
     {
         var value = ((IntegerValue)operand).IntValue;
-        value = value + 1;
+        value++;
 
         return new IntegerValue(value);
     }
@@ -194,7 +224,7 @@ internal class IntegerOperationRegistrar : IOperationRegistrar
     private static RuntimeValue Decrement(RuntimeValue operand, SourceInfo source)
     {
         var value = ((IntegerValue)operand).IntValue;
-        value = value - 1;
+        value--;
 
         return new IntegerValue(value);
     }

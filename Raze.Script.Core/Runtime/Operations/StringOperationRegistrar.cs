@@ -32,16 +32,25 @@ internal class StringOperationRegistrar : IOperationRegistrar
 
     private static RuntimeValue AddString(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new StringValue(((StringValue)left).StrValue + ((StringValue)right).StrValue);
+        var leftValue = ((StringValue)left).StrValue;
+        var rightValue = ((StringValue)right).StrValue;
+
+        return new StringValue(leftValue + rightValue);
     }
 
     private static RuntimeValue EqualString(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((StringValue)left).StrValue == ((StringValue)right).StrValue);
+        var leftValue = ((StringValue)left).StrValue;
+        var rightValue = ((StringValue)right).StrValue;
+
+        return new BooleanValue(leftValue == rightValue);
     }
 
     private static RuntimeValue NotEqualString(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((StringValue)left).StrValue != ((StringValue)right).StrValue);
+        var leftValue = ((StringValue)left).StrValue;
+        var rightValue = ((StringValue)right).StrValue;
+
+        return new BooleanValue(leftValue != rightValue);
     }
 }

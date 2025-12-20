@@ -105,67 +105,100 @@ internal class DecimalOperationRegistrar : IOperationRegistrar
 
     private static RuntimeValue AddDecimal(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new DecimalValue(((DecimalValue)left).DecValue + ((DecimalValue)right).DecValue);
+        var leftValue = ((DecimalValue)left).DecValue;
+        var rightValue = ((DecimalValue)right).DecValue;
+
+        return new DecimalValue(leftValue + rightValue);
     }
 
     private static RuntimeValue SubtractDecimal(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new DecimalValue(((DecimalValue)left).DecValue - ((DecimalValue)right).DecValue);
+        var leftValue = ((DecimalValue)left).DecValue;
+        var rightValue = ((DecimalValue)right).DecValue;
+
+        return new DecimalValue(leftValue - rightValue);
     }
 
     private static RuntimeValue MultiplyDecimal(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new DecimalValue(((DecimalValue)left).DecValue * ((DecimalValue)right).DecValue);
+        var leftValue = ((DecimalValue)left).DecValue;
+        var rightValue = ((DecimalValue)right).DecValue;
+
+        return new DecimalValue(leftValue * rightValue);
     }
 
     private static RuntimeValue DivideDecimal(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        if (((DecimalValue)right).DecValue == 0)
+        var leftValue = ((DecimalValue)left).DecValue;
+        var rightValue = ((DecimalValue)right).DecValue;
+
+        if (rightValue == 0.0m)
         {
             throw new DivisionByZeroException(source);
         }
 
-        return new DecimalValue(((DecimalValue)left).DecValue / ((DecimalValue)right).DecValue);
+        return new DecimalValue(leftValue / rightValue);
     }
 
     private static RuntimeValue ModuloDecimal(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        if (((DecimalValue)right).DecValue == 0)
+        var leftValue = ((DecimalValue)left).DecValue;
+        var rightValue = ((DecimalValue)right).DecValue;
+
+        if (rightValue == 0.0m)
         {
             throw new DivisionByZeroException(source);
         }
 
-        return new DecimalValue(((DecimalValue)left).DecValue % ((DecimalValue)right).DecValue);
+        return new DecimalValue(leftValue % rightValue);
     }
 
     private static RuntimeValue EqualDecimal(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((DecimalValue)left).DecValue == ((DecimalValue)right).DecValue);
+        var leftValue = ((DecimalValue)left).DecValue;
+        var rightValue = ((DecimalValue)right).DecValue;
+
+        return new BooleanValue(leftValue == rightValue);
     }
 
     private static RuntimeValue NotEqualDecimal(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((DecimalValue)left).DecValue != ((DecimalValue)right).DecValue);
+        var leftValue = ((DecimalValue)left).DecValue;
+        var rightValue = ((DecimalValue)right).DecValue;
+
+        return new BooleanValue(leftValue != rightValue);
     }
 
     private static RuntimeValue LessThanDecimal(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((DecimalValue)left).DecValue < ((DecimalValue)right).DecValue);
+        var leftValue = ((DecimalValue)left).DecValue;
+        var rightValue = ((DecimalValue)right).DecValue;
+
+        return new BooleanValue(leftValue < rightValue);
     }
 
     private static RuntimeValue GreaterThanDecimal(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((DecimalValue)left).DecValue > ((DecimalValue)right).DecValue);
+        var leftValue = ((DecimalValue)left).DecValue;
+        var rightValue = ((DecimalValue)right).DecValue;
+
+        return new BooleanValue(leftValue > rightValue);
     }
 
     private static RuntimeValue LessOrEqualDecimal(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((DecimalValue)left).DecValue <= ((DecimalValue)right).DecValue);
+        var leftValue = ((DecimalValue)left).DecValue;
+        var rightValue = ((DecimalValue)right).DecValue;
+
+        return new BooleanValue(leftValue <= rightValue);
     }
 
     private static RuntimeValue GreaterOrEqualDecimal(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((DecimalValue)left).DecValue >= ((DecimalValue)right).DecValue);
+        var leftValue = ((DecimalValue)left).DecValue;
+        var rightValue = ((DecimalValue)right).DecValue;
+
+        return new BooleanValue(leftValue >= rightValue);
     }
 
     private static RuntimeValue UnaryPlus(RuntimeValue operand, SourceInfo source)
@@ -186,7 +219,7 @@ internal class DecimalOperationRegistrar : IOperationRegistrar
     private static RuntimeValue Increment(RuntimeValue operand, SourceInfo source)
     {
         var value = ((DecimalValue)operand).DecValue;
-        value = value + 1.0m;
+        value++;
 
         return new DecimalValue(value);
     }
@@ -194,7 +227,7 @@ internal class DecimalOperationRegistrar : IOperationRegistrar
     private static RuntimeValue Decrement(RuntimeValue operand, SourceInfo source)
     {
         var value = ((DecimalValue)operand).DecValue;
-        value = value - 1.0m;
+        value--;
 
         return new DecimalValue(value);
     }

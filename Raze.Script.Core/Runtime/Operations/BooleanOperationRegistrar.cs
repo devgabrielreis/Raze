@@ -41,22 +41,34 @@ internal class BooleanOperationRegistrar : IOperationRegistrar
 
     private static RuntimeValue EqualBoolean(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((BooleanValue)left).BoolValue == ((BooleanValue)right).BoolValue);
+        var leftValue = ((BooleanValue)left).BoolValue;
+        var rightValue = ((BooleanValue)right).BoolValue;
+
+        return new BooleanValue(leftValue == rightValue);
     }
 
     private static RuntimeValue NotEqualBoolean(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((BooleanValue)left).BoolValue != ((BooleanValue)right).BoolValue);
+        var leftValue = ((BooleanValue)left).BoolValue;
+        var rightValue = ((BooleanValue)right).BoolValue;
+
+        return new BooleanValue(leftValue != rightValue);
     }
 
     private static RuntimeValue AndBoolean(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((BooleanValue)left).BoolValue && ((BooleanValue)right).BoolValue);
+        var leftValue = ((BooleanValue)left).BoolValue;
+        var rightValue = ((BooleanValue)right).BoolValue;
+
+        return new BooleanValue(leftValue && rightValue);
     }
 
     private static RuntimeValue OrBoolean(RuntimeValue left, RuntimeValue right, SourceInfo source)
     {
-        return new BooleanValue(((BooleanValue)left).BoolValue || ((BooleanValue)right).BoolValue);
+        var leftValue = ((BooleanValue)left).BoolValue;
+        var rightValue = ((BooleanValue)right).BoolValue;
+
+        return new BooleanValue(leftValue || rightValue);
     }
 
     private static RuntimeValue Not(RuntimeValue operand, SourceInfo source)
