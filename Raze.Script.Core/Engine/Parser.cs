@@ -487,6 +487,8 @@ internal class Parser
             }
 
             generics.Add(ParseType());
+
+            Expect<CommaToken, GreaterThanToken>();
         }
 
         Advance();
