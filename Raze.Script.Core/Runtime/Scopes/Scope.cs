@@ -34,7 +34,7 @@ public abstract class Scope
 
         if (_variables.ContainsKey(name))
         {
-            throw new RedeclarationException($"Symbol {name} is already declared", source);
+            throw new RedeclarationException($"The variable {name} is already declared", source);
         }
 
         _variables[name] = variable;
