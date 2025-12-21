@@ -116,4 +116,24 @@ public class VariableTests
         Assert.IsType<BooleanValue>(result);
         Assert.False(((BooleanValue)result).BoolValue);
     }
+
+    [Theory]
+    [InlineData("integer", "10", "+=", "10", "20")]
+    [InlineData("integer", "10", "-=", "10", "0")]
+    [InlineData("integer", "10", "*=", "10", "100")]
+    [InlineData("integer", "10", "/=", "2", "5")]
+    [InlineData("integer", "10", "%=", "3", "1")]
+    public void Evaluate_CompoundAssignmentOperation_ExecutesCorrespondingOperation(
+        string variableType, string startValueStr, string op, string rightSideValue, string expectedResultStr
+    )
+    {
+        var script = $@"
+            var {variableType} test = {startValueStr};
+            test {op} {rightSideValue};
+            test;
+        ";
+
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
+        Assert.Equal(expectedResultStr, result.ToString());
+    }
 }

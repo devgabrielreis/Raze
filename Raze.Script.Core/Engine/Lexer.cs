@@ -61,6 +61,11 @@ internal class Lexer
         ["++"] = (string lexeme, SourceInfo source) => new IncrementToken(lexeme, source),
         ["--"] = (string lexeme, SourceInfo source) => new DecrementToken(lexeme, source),
         ["??"] = (string lexeme, SourceInfo source) => new NullCheckerToken(lexeme, source),
+        ["+="] = (string lexeme, SourceInfo source) => new CompoundAssignmentToken(new AdditionToken("+", source), lexeme, source),
+        ["-="] = (string lexeme, SourceInfo source) => new CompoundAssignmentToken(new SubtractionToken("-", source), lexeme, source),
+        ["*="] = (string lexeme, SourceInfo source) => new CompoundAssignmentToken(new MultiplicationToken("*", source), lexeme, source),
+        ["/="] = (string lexeme, SourceInfo source) => new CompoundAssignmentToken(new DivisionToken("/", source), lexeme, source),
+        ["%="] = (string lexeme, SourceInfo source) => new CompoundAssignmentToken(new ModuloToken("%", source), lexeme, source)
     };
 
     private static readonly Dictionary<char, Func<string, SourceInfo, Token>> _singleCharTokens = new()

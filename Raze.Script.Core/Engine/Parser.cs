@@ -505,12 +505,19 @@ internal class Parser
             return left;
         }
 
+        AssignmentToken op = (AssignmentToken)Current();
         Advance();
+
         Expression value = ParseOperatorExpression();
 
         if (left is not IdentifierExpression)
         {
             throw new InvalidAssignmentException("Invalid assignment target", left.SourceInfo);
+        }
+
+        if (op is CompoundAssignmentToken compoundOp)
+        {
+            value = new BinaryExpression(left, compoundOp.Operator, value, compoundOp.SourceInfo);
         }
         
         return new AssignmentStatement((IdentifierExpression)left, value, left.SourceInfo);
