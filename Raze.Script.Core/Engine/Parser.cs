@@ -507,8 +507,13 @@ internal class Parser
 
         Advance();
         Expression value = ParseOperatorExpression();
+
+        if (left is not IdentifierExpression)
+        {
+            throw new InvalidAssignmentException("Invalid assignment target", left.SourceInfo);
+        }
         
-        return new AssignmentStatement(left, value, left.SourceInfo);
+        return new AssignmentStatement((IdentifierExpression)left, value, left.SourceInfo);
     }
 
     private Expression ParseOperatorExpression()

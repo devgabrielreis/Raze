@@ -6,10 +6,10 @@ namespace Raze.Script.Core.Statements;
 
 internal class AssignmentStatement : Statement
 {
-    public Expression Target { get; private set; }
+    public IdentifierExpression Target { get; private set; }
     public Expression Value { get; private set; }
 
-    public AssignmentStatement(Expression target, Expression value, SourceInfo source)
+    public AssignmentStatement(IdentifierExpression target, Expression value, SourceInfo source)
         : base(source)
     {
         Target = target;
