@@ -200,7 +200,9 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
     public RuntimeValue VisitUnaryMutationExpression(UnaryMutationExpression expression, Scope scope)
     {
-        var variable = scope.GetVariable(expression.Operand.Symbol, expression.SourceInfo);
+        var variable = scope.GetVariable(
+            expression.Operand.Symbol, expression.SourceInfo, throwIfNotInitialized: true
+        );
 
         var valueBefore = variable.Value;
         var valueAfter = _operationDispatcher.ExecuteUnaryOperation(
@@ -221,7 +223,9 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
     public RuntimeValue VisitIdentifierExpression(IdentifierExpression expression, Scope scope)
     {
-        var variable = scope.GetVariable(expression.Symbol, expression.SourceInfo);
+        var variable = scope.GetVariable(
+            expression.Symbol, expression.SourceInfo, throwIfNotInitialized: true
+        );
 
         return variable.Value;
     }

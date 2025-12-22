@@ -36,7 +36,7 @@ public class VariableTests
     }
 
     [Fact]
-    public void Evaluate_UninitializedVariable_ThrowsUninitializedVariableException()
+    public void Evaluate_AccessingUninitializedVariable_ThrowsUninitializedVariableException()
     {
         var scope = new InterpreterScope();
 
@@ -52,6 +52,20 @@ public class VariableTests
         {
             RazeScript.Evaluate("nullableVariable", "Raze.Tests", scope);
         });
+    }
+
+    [Fact]
+    public void Evaluate_UninitializedVariable_CanBeAssignedTo()
+    {
+        var script = $@"
+            var integer a;
+            a = 80;
+            a
+        ";
+
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(80, ((IntegerValue)result).IntValue);
     }
 
     [Fact]

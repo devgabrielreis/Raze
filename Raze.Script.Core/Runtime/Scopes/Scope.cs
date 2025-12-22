@@ -40,7 +40,7 @@ public abstract class Scope
         _variables[name] = variable;
     }
 
-    public virtual VariableSymbol GetVariable(string name, SourceInfo source, bool throwIfNotInitialized = true)
+    public virtual VariableSymbol GetVariable(string name, SourceInfo source, bool throwIfNotInitialized = false)
     {
         var variable = TryGetVariable(name);
 
