@@ -1,8 +1,6 @@
 ﻿using Raze.Script.Core.Constants;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Values;
-using Raze.Script.Core.Tokens.Operators;
-using Raze.Script.Core.Tokens.Operators.EqualityOperators;
 
 namespace Raze.Script.Core.Runtime.Operations;
 
@@ -11,22 +9,22 @@ internal class BooleanOperationRegistrar : IOperationRegistrar
     public static void RegisterBinaryOperations(OperationDispatcher dispatcher)
     {
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, typeof(EqualToken), TypeNames.BOOLEAN_TYPE_NAME),
+            new BinaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, Operators.EQUAL, TypeNames.BOOLEAN_TYPE_NAME),
             EqualBoolean
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, typeof(NotEqualToken), TypeNames.BOOLEAN_TYPE_NAME),
+            new BinaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, Operators.NOT_EQUAL, TypeNames.BOOLEAN_TYPE_NAME),
             NotEqualBoolean
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, typeof(AndToken), TypeNames.BOOLEAN_TYPE_NAME),
+            new BinaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, Operators.AND, TypeNames.BOOLEAN_TYPE_NAME),
             AndBoolean
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, typeof(OrToken), TypeNames.BOOLEAN_TYPE_NAME),
+            new BinaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, Operators.OR, TypeNames.BOOLEAN_TYPE_NAME),
             OrBoolean
         );
     }
@@ -34,7 +32,7 @@ internal class BooleanOperationRegistrar : IOperationRegistrar
     public static void RegisterUnaryOperations(OperationDispatcher dispatcher)
     {
         dispatcher.RegisterUnaryOperation(
-            new UnaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, typeof(NotToken), IsPostfix: false),
+            new UnaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, Operators.NOT, IsPostfix: false),
             Not
         );
     }

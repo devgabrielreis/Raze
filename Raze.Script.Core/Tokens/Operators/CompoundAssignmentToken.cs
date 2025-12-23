@@ -4,9 +4,9 @@ namespace Raze.Script.Core.Tokens.Operators;
 
 internal class CompoundAssignmentToken : AssignmentToken
 {
-    internal OperatorToken Operator { get; private set; }
+    internal string Operator { get; private set; }
 
-    internal CompoundAssignmentToken(OperatorToken op, string lexeme, SourceInfo source)
+    internal CompoundAssignmentToken(string op, string lexeme, SourceInfo source)
         : base(lexeme, source)
     {
         Operator = op;

@@ -569,7 +569,7 @@ internal class Parser
 
             var operand = ParseUnaryExpression();
 
-            return new UnarySimpleExpression(operand, op, isPostfix: false, op.SourceInfo);
+            return new UnarySimpleExpression(operand, op.Lexeme, isPostfix: false, op.SourceInfo);
         }
 
         if (Current() is IncrementToken
@@ -588,7 +588,7 @@ internal class Parser
                 );
             }
 
-            return new UnaryMutationExpression((IdentifierExpression)operand, op, isPostfix: false, op.SourceInfo);
+            return new UnaryMutationExpression((IdentifierExpression)operand, op.Lexeme, isPostfix: false, op.SourceInfo);
         }
 
         return ParsePostfixExpression();
@@ -623,7 +623,7 @@ internal class Parser
 
                 expr = op is NullCheckerToken
                     ? new NullCheckerExpression((IdentifierExpression)expr, expr.SourceInfo)
-                    : new UnaryMutationExpression((IdentifierExpression)expr, op, isPostfix: true, expr.SourceInfo);
+                    : new UnaryMutationExpression((IdentifierExpression)expr, op.Lexeme, isPostfix: true, expr.SourceInfo);
                 continue;
             }
 
@@ -741,7 +741,7 @@ internal class Parser
 
             Expression right = next();
 
-            left = new BinaryExpression(left, op, right, left.SourceInfo);
+            left = new BinaryExpression(left, op.Lexeme, right, left.SourceInfo);
         }
 
         return left;

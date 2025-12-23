@@ -10,7 +10,6 @@ using Raze.Script.Core.Runtime.Values;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
-using Raze.Script.Core.Tokens.Operators;
 
 namespace Raze.Script.Core.Engine;
 
@@ -183,7 +182,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     public RuntimeValue VisitBinaryExpression(BinaryExpression expression, Scope scope)
     {
         RuntimeValue leftHand = Evaluate(expression.Left, scope);
-        OperatorToken op = expression.Operator;
+        string op = expression.Operator;
         RuntimeValue rightHand = Evaluate(expression.Right, scope);
 
         return _operationDispatcher.ExecuteBinaryOperation(leftHand, op, rightHand, expression.SourceInfo);
@@ -192,7 +191,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     public RuntimeValue VisitUnarySimpleExpression(UnarySimpleExpression expression, Scope scope)
     {
         RuntimeValue operand = Evaluate(expression.Operand, scope);
-        OperatorToken op = expression.Operator;
+        string op = expression.Operator;
         bool isPostfix = expression.IsPostfix;
 
         return _operationDispatcher.ExecuteUnaryOperation(operand, op, isPostfix, expression.SourceInfo);

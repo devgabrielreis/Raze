@@ -1,6 +1,6 @@
 ﻿namespace Raze.Script.Core.Constants;
 
-internal static class TypeNames
+public static class TypeNames
 {
     public const string INTEGER_TYPE_NAME  = "integer";
     public const string DECIMAL_TYPE_NAME  = "decimal";

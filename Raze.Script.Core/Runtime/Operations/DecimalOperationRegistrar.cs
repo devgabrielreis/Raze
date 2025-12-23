@@ -2,11 +2,6 @@
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Values;
-using Raze.Script.Core.Tokens.Operators;
-using Raze.Script.Core.Tokens.Operators.AdditiveOperators;
-using Raze.Script.Core.Tokens.Operators.EqualityOperators;
-using Raze.Script.Core.Tokens.Operators.MultiplicativeOperators;
-using Raze.Script.Core.Tokens.Operators.RelationalOperators;
 
 namespace Raze.Script.Core.Runtime.Operations;
 
@@ -15,57 +10,57 @@ internal class DecimalOperationRegistrar : IOperationRegistrar
     public static void RegisterBinaryOperations(OperationDispatcher dispatcher)
     {
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(AdditionToken), TypeNames.DECIMAL_TYPE_NAME),
+            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.PLUS, TypeNames.DECIMAL_TYPE_NAME),
             AddDecimal
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(SubtractionToken), TypeNames.DECIMAL_TYPE_NAME),
+            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.MINUS, TypeNames.DECIMAL_TYPE_NAME),
             SubtractDecimal
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(MultiplicationToken), TypeNames.DECIMAL_TYPE_NAME),
+            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.MULTIPLICATION, TypeNames.DECIMAL_TYPE_NAME),
             MultiplyDecimal
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(DivisionToken), TypeNames.DECIMAL_TYPE_NAME),
+            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.DIVISION, TypeNames.DECIMAL_TYPE_NAME),
             DivideDecimal
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(ModuloToken), TypeNames.DECIMAL_TYPE_NAME),
+            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.MODULO, TypeNames.DECIMAL_TYPE_NAME),
             ModuloDecimal
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(EqualToken), TypeNames.DECIMAL_TYPE_NAME),
+            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.EQUAL, TypeNames.DECIMAL_TYPE_NAME),
             EqualDecimal
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(NotEqualToken), TypeNames.DECIMAL_TYPE_NAME),
+            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.NOT_EQUAL, TypeNames.DECIMAL_TYPE_NAME),
             NotEqualDecimal
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(LessThanToken), TypeNames.DECIMAL_TYPE_NAME),
+            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.LESS_THAN, TypeNames.DECIMAL_TYPE_NAME),
             LessThanDecimal
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(GreaterThanToken), TypeNames.DECIMAL_TYPE_NAME),
+            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.GREATER_THAN, TypeNames.DECIMAL_TYPE_NAME),
             GreaterThanDecimal
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(LessOrEqualThanToken), TypeNames.DECIMAL_TYPE_NAME),
+            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.LESS_OR_EQUAL, TypeNames.DECIMAL_TYPE_NAME),
             LessOrEqualDecimal
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(GreaterOrEqualThanToken), TypeNames.DECIMAL_TYPE_NAME),
+            new BinaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.GREATER_OR_EQUAL, TypeNames.DECIMAL_TYPE_NAME),
             GreaterOrEqualDecimal
         );
     }
@@ -73,32 +68,32 @@ internal class DecimalOperationRegistrar : IOperationRegistrar
     public static void RegisterUnaryOperations(OperationDispatcher dispatcher)
     {
         dispatcher.RegisterUnaryOperation(
-            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(AdditionToken), IsPostfix: false),
+            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.PLUS, IsPostfix: false),
             UnaryPlus
         );
 
         dispatcher.RegisterUnaryOperation(
-            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(SubtractionToken), IsPostfix: false),
+            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.MINUS, IsPostfix: false),
             UnaryMinus
         );
 
         dispatcher.RegisterUnaryOperation(
-            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(IncrementToken), IsPostfix: true),
+            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.INCREMENT, IsPostfix: true),
             Increment
         );
 
         dispatcher.RegisterUnaryOperation(
-            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(IncrementToken), IsPostfix: false),
+            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.INCREMENT, IsPostfix: false),
             Increment
         );
 
         dispatcher.RegisterUnaryOperation(
-            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(DecrementToken), IsPostfix: true),
+            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.DECREMENT, IsPostfix: true),
             Decrement
         );
 
         dispatcher.RegisterUnaryOperation(
-            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, typeof(DecrementToken), IsPostfix: false),
+            new UnaryOperationKey(TypeNames.DECIMAL_TYPE_NAME, Operators.DECREMENT, IsPostfix: false),
             Decrement
         );
     }
