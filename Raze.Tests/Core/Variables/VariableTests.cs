@@ -36,7 +36,7 @@ public class VariableTests
     }
 
     [Fact]
-    public void Evaluate_UninitializedVariable_ThrowsUninitializedVariableException()
+    public void Evaluate_AccessingUninitializedVariable_ThrowsUninitializedVariableException()
     {
         var scope = new InterpreterScope();
 
@@ -52,6 +52,20 @@ public class VariableTests
         {
             RazeScript.Evaluate("nullableVariable", "Raze.Tests", scope);
         });
+    }
+
+    [Fact]
+    public void Evaluate_UninitializedVariable_CanBeAssignedTo()
+    {
+        var script = $@"
+            var integer a;
+            a = 80;
+            a
+        ";
+
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(80, ((IntegerValue)result).IntValue);
     }
 
     [Fact]
@@ -115,5 +129,25 @@ public class VariableTests
         result = RazeScript.Evaluate(script, "Raze.Tests");
         Assert.IsType<BooleanValue>(result);
         Assert.False(((BooleanValue)result).BoolValue);
+    }
+
+    [Theory]
+    [InlineData("integer", "10", "+=", "10", "20")]
+    [InlineData("integer", "10", "-=", "10", "0")]
+    [InlineData("integer", "10", "*=", "10", "100")]
+    [InlineData("integer", "10", "/=", "2", "5")]
+    [InlineData("integer", "10", "%=", "3", "1")]
+    public void Evaluate_CompoundAssignmentOperation_ExecutesCorrespondingOperation(
+        string variableType, string startValueStr, string op, string rightSideValue, string expectedResultStr
+    )
+    {
+        var script = $@"
+            var {variableType} test = {startValueStr};
+            test {op} {rightSideValue};
+            test;
+        ";
+
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
+        Assert.Equal(expectedResultStr, result.ToString());
     }
 }

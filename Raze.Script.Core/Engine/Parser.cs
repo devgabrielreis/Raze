@@ -487,6 +487,8 @@ internal class Parser
             }
 
             generics.Add(ParseType());
+
+            Expect<CommaToken, GreaterThanToken>();
         }
 
         Advance();
@@ -503,10 +505,22 @@ internal class Parser
             return left;
         }
 
+        AssignmentToken op = (AssignmentToken)Current();
         Advance();
+
         Expression value = ParseOperatorExpression();
+
+        if (left is not IdentifierExpression)
+        {
+            throw new InvalidAssignmentException("Invalid assignment target", left.SourceInfo);
+        }
+
+        if (op is CompoundAssignmentToken compoundOp)
+        {
+            value = new BinaryExpression(left, compoundOp.Operator, value, compoundOp.SourceInfo);
+        }
         
-        return new AssignmentStatement(left, value, left.SourceInfo);
+        return new AssignmentStatement((IdentifierExpression)left, value, left.SourceInfo);
     }
 
     private Expression ParseOperatorExpression()
@@ -555,7 +569,7 @@ internal class Parser
 
             var operand = ParseUnaryExpression();
 
-            return new UnarySimpleExpression(operand, op, isPostfix: false, op.SourceInfo);
+            return new UnarySimpleExpression(operand, op.Lexeme, isPostfix: false, op.SourceInfo);
         }
 
         if (Current() is IncrementToken
@@ -574,7 +588,7 @@ internal class Parser
                 );
             }
 
-            return new UnaryMutationExpression((IdentifierExpression)operand, op, isPostfix: false, op.SourceInfo);
+            return new UnaryMutationExpression((IdentifierExpression)operand, op.Lexeme, isPostfix: false, op.SourceInfo);
         }
 
         return ParsePostfixExpression();
@@ -609,7 +623,7 @@ internal class Parser
 
                 expr = op is NullCheckerToken
                     ? new NullCheckerExpression((IdentifierExpression)expr, expr.SourceInfo)
-                    : new UnaryMutationExpression((IdentifierExpression)expr, op, isPostfix: true, expr.SourceInfo);
+                    : new UnaryMutationExpression((IdentifierExpression)expr, op.Lexeme, isPostfix: true, expr.SourceInfo);
                 continue;
             }
 
@@ -727,7 +741,7 @@ internal class Parser
 
             Expression right = next();
 
-            left = new BinaryExpression(left, op, right, left.SourceInfo);
+            left = new BinaryExpression(left, op.Lexeme, right, left.SourceInfo);
         }
 
         return left;

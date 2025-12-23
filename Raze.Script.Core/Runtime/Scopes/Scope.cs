@@ -1,7 +1,6 @@
 ﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Symbols;
-using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Script.Core.Runtime.Scopes;
 
@@ -18,7 +17,7 @@ public abstract class Scope
     public Scope(Scope? parent)
     {
         _parent = parent;
-        _variables = new();
+        _variables = [];
     }
 
     public virtual void DeclareVariable(string name, VariableSymbol variable, SourceInfo source)
@@ -33,46 +32,41 @@ public abstract class Scope
             throw new ScopeDeclarationException("constant", this.GetType().Name, source);
         }
 
-        if (FindSymbol(name) is not null)
+        if (_variables.ContainsKey(name))
         {
-            throw new RedeclarationException($"Symbol {name} is already declared", source);
+            throw new RedeclarationException($"The variable {name} is already declared", source);
         }
 
         _variables[name] = variable;
     }
 
-    public virtual void AssignVariable(string name, RuntimeValue value, SourceInfo source)
+    public virtual VariableSymbol GetVariable(string name, SourceInfo source, bool throwIfNotInitialized = false)
     {
-        var resolvedScope = FindSymbolScope(name);
+        var variable = TryGetVariable(name);
 
-        if (resolvedScope is null)
+        if (variable is null)
         {
             throw new UndefinedIdentifierException(name, source);
         }
 
-        resolvedScope._variables[name].SetValue(value, source);
-    }
-
-    public virtual Symbol? FindSymbol(string symbol)
-    {
-        if (_variables.TryGetValue(symbol, out var result))
+        if (throwIfNotInitialized && !variable.IsInitialized)
         {
-            return result;
+            throw new UninitializedVariableException(source);
         }
 
-        return null;
+        return variable;
     }
 
-    public virtual Scope? FindSymbolScope(string symbol)
+    public virtual VariableSymbol? TryGetVariable(string name)
     {
-        if (FindSymbol(symbol) is not null)
+        if (_variables.TryGetValue(name, out var value))
         {
-            return this;
+            return value;
         }
 
-        if (_parent is not null && _parent.FindSymbolScope(symbol) is Scope result)
+        if (_parent is not null)
         {
-            return result;
+            return _parent.TryGetVariable(name);
         }
 
         return null;

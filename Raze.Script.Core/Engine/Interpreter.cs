@@ -10,7 +10,6 @@ using Raze.Script.Core.Runtime.Values;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
-using Raze.Script.Core.Tokens.Operators;
 
 namespace Raze.Script.Core.Engine;
 
@@ -172,14 +171,10 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
     public RuntimeValue VisitAssignmentStatement(AssignmentStatement statement, Scope scope)
     {
-        switch (statement.Target)
-        {
-            case IdentifierExpression expr:
-                scope.AssignVariable(expr.Symbol, Evaluate(statement.Value, scope), statement.SourceInfo);
-                break;
-            default:
-                throw new InvalidAssignmentException(statement.SourceInfo);
-        }
+        var variable = scope.GetVariable(statement.Target.Symbol, statement.SourceInfo);
+        var newValue = Evaluate(statement.Value, scope);
+
+        variable.SetValue(newValue, statement.SourceInfo);
 
         return new VoidValue();
     }
@@ -187,7 +182,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     public RuntimeValue VisitBinaryExpression(BinaryExpression expression, Scope scope)
     {
         RuntimeValue leftHand = Evaluate(expression.Left, scope);
-        OperatorToken op = expression.Operator;
+        string op = expression.Operator;
         RuntimeValue rightHand = Evaluate(expression.Right, scope);
 
         return _operationDispatcher.ExecuteBinaryOperation(leftHand, op, rightHand, expression.SourceInfo);
@@ -196,7 +191,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     public RuntimeValue VisitUnarySimpleExpression(UnarySimpleExpression expression, Scope scope)
     {
         RuntimeValue operand = Evaluate(expression.Operand, scope);
-        OperatorToken op = expression.Operator;
+        string op = expression.Operator;
         bool isPostfix = expression.IsPostfix;
 
         return _operationDispatcher.ExecuteUnaryOperation(operand, op, isPostfix, expression.SourceInfo);
@@ -204,7 +199,9 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
     public RuntimeValue VisitUnaryMutationExpression(UnaryMutationExpression expression, Scope scope)
     {
-        var variable = GetVariable(expression.Operand, scope);
+        var variable = scope.GetVariable(
+            expression.Operand.Symbol, expression.SourceInfo, throwIfNotInitialized: true
+        );
 
         var valueBefore = variable.Value;
         var valueAfter = _operationDispatcher.ExecuteUnaryOperation(
@@ -225,7 +222,9 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
     public RuntimeValue VisitIdentifierExpression(IdentifierExpression expression, Scope scope)
     {
-        var variable = GetVariable(expression, scope);
+        var variable = scope.GetVariable(
+            expression.Symbol, expression.SourceInfo, throwIfNotInitialized: true
+        );
 
         return variable.Value;
     }
@@ -393,29 +392,5 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         }
 
         return (conditionResult as BooleanValue)!.BoolValue;
-    }
-
-    private static VariableSymbol GetVariable(IdentifierExpression expression, Scope scope)
-    {
-        var resolvedScope = scope.FindSymbolScope(expression.Symbol);
-
-        if (resolvedScope is null)
-        {
-            throw new UndefinedIdentifierException(expression.Symbol, expression.SourceInfo);
-        }
-
-        var result = resolvedScope.FindSymbol(expression.Symbol);
-
-        if (result is VariableSymbol variable)
-        {
-            if (!variable.IsInitialized)
-            {
-                throw new UninitializedVariableException(expression.SourceInfo);
-            }
-
-            return variable;
-        }
-
-        throw new Exception("nao implementado ainda");
     }
 }

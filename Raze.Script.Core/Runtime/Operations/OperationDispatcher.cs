@@ -1,13 +1,12 @@
 ﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Values;
-using Raze.Script.Core.Tokens.Operators;
 
 namespace Raze.Script.Core.Runtime.Operations;
 
 internal readonly record struct BinaryOperationKey(
     string LeftTypeName,
-    Type Operator,
+    string Operator,
     string RightTypeName
 );
 
@@ -19,7 +18,7 @@ internal delegate RuntimeValue BinaryOperation(
 
 internal readonly record struct UnaryOperationKey(
     string OperandTypeName,
-    Type Operator,
+    string Operator,
     bool IsPostfix
 );
 
@@ -45,28 +44,28 @@ internal class OperationDispatcher
         TOperationRegistrar.RegisterUnaryOperations(this);
     }
 
-    public RuntimeValue ExecuteBinaryOperation(RuntimeValue left, OperatorToken op, RuntimeValue right, SourceInfo source)
+    public RuntimeValue ExecuteBinaryOperation(RuntimeValue left, string op, RuntimeValue right, SourceInfo source)
     {
-        var key = new BinaryOperationKey(left.TypeName, op.GetType(), right.TypeName);
+        var key = new BinaryOperationKey(left.TypeName, op, right.TypeName);
 
         if (!_binaryOperations.TryGetValue(key, out var operationFunc))
         {
             throw new UnsupportedBinaryOperationException(
-                left.TypeName, right.TypeName, op.Lexeme, source
+                left.TypeName, right.TypeName, op, source
             );
         }
 
         return operationFunc(left, right, source);
     }
 
-    public RuntimeValue ExecuteUnaryOperation(RuntimeValue operand, OperatorToken op, bool isPostfix, SourceInfo source)
+    public RuntimeValue ExecuteUnaryOperation(RuntimeValue operand, string op, bool isPostfix, SourceInfo source)
     {
-        var key = new UnaryOperationKey(operand.TypeName, op.GetType(), isPostfix);
+        var key = new UnaryOperationKey(operand.TypeName, op, isPostfix);
 
         if (!_unaryOperations.TryGetValue(key, out var operationFunc))
         {
             throw new UnsupportedUnaryOperationException(
-                op.Lexeme, operand.TypeName, isPostfix, source
+                op, operand.TypeName, isPostfix, source
             );
         }
 
@@ -75,11 +74,6 @@ internal class OperationDispatcher
 
     public void RegisterBinaryOperation(BinaryOperationKey key, BinaryOperation operation)
     {
-        if (!typeof(OperatorToken).IsAssignableFrom(key.Operator))
-        {
-            throw new ArgumentException($"Operator must be an {nameof(OperatorToken)}");
-        }
-
         if (_binaryOperations.ContainsKey(key))
         {
             throw new InvalidOperationException("A value with this key already exists");
@@ -90,11 +84,6 @@ internal class OperationDispatcher
 
     public void RegisterUnaryOperation(UnaryOperationKey key, UnaryOperation operation)
     {
-        if (!typeof(OperatorToken).IsAssignableFrom(key.Operator))
-        {
-            throw new ArgumentException($"Operator must be an {nameof(OperatorToken)}");
-        }
-
         if (_unaryOperations.ContainsKey(key))
         {
             throw new InvalidOperationException("A value with this key already exists");
