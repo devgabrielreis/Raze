@@ -278,4 +278,31 @@ public class NamespaceTests
             RazeScript.Evaluate(script, "Raze.Tests");
         });
     }
+
+    [Fact]
+    public void Evaluate_Namespaces_ShouldSupportMutualDependency()
+    {
+        var script = """
+            namespace first {
+                const integer MY_NUM = 3;
+
+                def integer better_sum(integer num1, integer num2) {
+                    return num1 + num2 + second::sum(4);
+                }
+            }
+
+            namespace second {
+                def integer sum(integer num) {
+                    return num + first::MY_NUM;
+                }
+            }
+
+            first::better_sum(10, 5)
+        """;
+
+        var result = RazeScript.Evaluate(script, "Raze.Tests");
+
+        Assert.IsType<IntegerValue>(result);
+        Assert.Equal(22, (result as IntegerValue)!.IntValue);
+    }
 }
