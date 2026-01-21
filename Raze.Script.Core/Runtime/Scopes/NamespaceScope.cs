@@ -1,12 +1,12 @@
 ﻿namespace Raze.Script.Core.Runtime.Scopes;
 
-internal class LocalScope : Scope
+internal class NamespaceScope : Scope
 {
     protected override bool CanDeclareConstants => true;
-    protected override bool CanDeclareVariables => true;
+    protected override bool CanDeclareVariables => false;
     protected override bool CanDeclareNamespaces => false;
 
-    public LocalScope(Scope parent)
+    public NamespaceScope(Scope parent)
         : base(parent)
     {
     }

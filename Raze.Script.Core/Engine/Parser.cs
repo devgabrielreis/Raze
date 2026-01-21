@@ -117,17 +117,34 @@ internal class Parser
     {
         return Current() switch
         {
-            VariableDeclarationToken => ParseVariableDeclaration(),
-            FunctionDeclarationToken => ParseFunctionDeclaration(),
-            OpenBracesToken          => ParseCodeBlock(),
-            IfToken                  => ParseIfElse(),
-            ForToken                 => ParseForLoop(),
-            WhileToken               => ParseWhileLoop(),
-            BreakToken               => ParseBreakStatement(),
-            ContinueToken            => ParseContinueStatement(),
-            ReturnToken              => ParseReturnStatement(),
-            _                        => ParseAssignmentStatement()
+            NamespaceDeclarationToken => ParseNamespaceDeclaration(),
+            VariableDeclarationToken  => ParseVariableDeclaration(),
+            FunctionDeclarationToken  => ParseFunctionDeclaration(),
+            OpenBracesToken           => ParseCodeBlock(),
+            IfToken                   => ParseIfElse(),
+            ForToken                  => ParseForLoop(),
+            WhileToken                => ParseWhileLoop(),
+            BreakToken                => ParseBreakStatement(),
+            ContinueToken             => ParseContinueStatement(),
+            ReturnToken               => ParseReturnStatement(),
+            _                         => ParseAssignmentStatement()
         };
+    }
+
+    private NamespaceDeclarationStatement ParseNamespaceDeclaration()
+    {
+        Expect<NamespaceDeclarationToken>();
+        var source = Current().SourceInfo;
+        Advance();
+
+        Expect<IdentifierToken>();
+        var identifier = Current().Lexeme;
+        Advance();
+
+        Expect<OpenBracesToken>();
+        var body = ParseCodeBlock();
+
+        return new NamespaceDeclarationStatement(identifier, body, source);
     }
 
     private BreakStatement ParseBreakStatement()
@@ -667,7 +684,36 @@ internal class Parser
     {
         var obj = ParsePrimaryExpression();
 
+        if (Current() is NamespaceAccessorToken)
+        {
+            return ParseNamespaceAccessExpression(obj);
+        }
+
         return obj;
+    }
+
+    private NamespaceAccessExpression ParseNamespaceAccessExpression(Expression namespaceIdentifier)
+    {
+        Expect<NamespaceAccessorToken>();
+        var op = Current();
+        Advance();
+
+        if (namespaceIdentifier is not IdentifierExpression)
+        {
+            throw new InvalidOperandException(
+                $"The {op.Lexeme} operator can only be applied to identifiers",
+                op.SourceInfo
+            );
+        }
+
+        Expect<IdentifierToken>();
+        var memberIdentifier = ParsePrimaryExpression();
+
+        return new NamespaceAccessExpression(
+            (namespaceIdentifier as IdentifierExpression)!,
+            (memberIdentifier as IdentifierExpression)!,
+            namespaceIdentifier.SourceInfo
+        );
     }
 
     private Expression ParsePrimaryExpression()
