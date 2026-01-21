@@ -1,4 +1,5 @@
 ﻿using Raze.Script.Core;
+using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Runtime.Values;
 
@@ -304,5 +305,20 @@ public class NamespaceTests
 
         Assert.IsType<IntegerValue>(result);
         Assert.Equal(22, (result as IntegerValue)!.IntValue);
+    }
+
+    [Fact]
+    public void Evaluate_NamespaceAccessWithInvalidMember_ThrowsUnexpectedTokenException()
+    {
+        var script = """
+            namespace main {}
+
+            main::10
+        """;
+
+        Assert.Throws<UnexpectedTokenException>(() =>
+        {
+            RazeScript.Evaluate(script, "Raze.Tests");
+        });
     }
 }
