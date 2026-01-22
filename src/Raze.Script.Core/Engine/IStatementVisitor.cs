@@ -8,6 +8,10 @@ internal interface IStatementVisitor<TState, TResult>
 {
     public TResult VisitProgramExpression(ProgramExpression program, TState state);
 
+    public TResult VisitNamespaceDeclarationStatement(NamespaceDeclarationStatement statement, TState state);
+
+    public TResult VisitNamespaceAccessExpression(NamespaceAccessExpression expression, TState state);
+
     public TResult VisitVariableDeclarationStatement(VariableDeclarationStatement statement, TState state);
 
     public TResult VisitReturnStatement(ReturnStatement statement, TState state);

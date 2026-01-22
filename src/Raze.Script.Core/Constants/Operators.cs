@@ -38,4 +38,6 @@ public static class Operators
     public const string CLOSE_PARENTHESIS = ")";
     public const string OPEN_BRACES       = "{";
     public const string CLOSE_BRACES      = "}";
+
+    public const string NAMESPACE_ACCESSOR = "::";
 }

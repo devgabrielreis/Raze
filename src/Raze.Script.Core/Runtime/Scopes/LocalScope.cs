@@ -4,6 +4,7 @@ internal class LocalScope : Scope
 {
     protected override bool CanDeclareConstants => true;
     protected override bool CanDeclareVariables => true;
+    protected override bool CanDeclareNamespaces => false;
 
     public LocalScope(Scope parent)
         : base(parent)

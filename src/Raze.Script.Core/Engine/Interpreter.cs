@@ -46,6 +46,46 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         return lastValue;
     }
 
+    public RuntimeValue VisitNamespaceDeclarationStatement(NamespaceDeclarationStatement statement, Scope scope)
+    {
+        NamespaceScope namespaceScope;
+
+        if (scope.TryGetNamespace(statement.Identifier) is NamespaceSymbol namespaceSymbol)
+        {
+            namespaceScope = namespaceSymbol.Scope;
+        }
+        else
+        {
+            namespaceScope = new NamespaceScope(scope);
+            var newNamespaceSymbol = new NamespaceSymbol(namespaceScope);
+
+            scope.DeclareNamespace(statement.Identifier, newNamespaceSymbol, statement.SourceInfo);
+        }
+
+        foreach (var stmt in statement.DeclarationBlock.Body)
+        {
+            Evaluate(stmt, namespaceScope);
+        }
+
+        return new VoidValue();
+    }
+
+    public RuntimeValue VisitNamespaceAccessExpression(NamespaceAccessExpression expression, Scope scope)
+    {
+        var namespaceSymbol = scope.GetNamespace(
+            expression.NamespaceIdentifier.Symbol,
+            expression.SourceInfo
+        );
+
+        var variable = namespaceSymbol.Scope.GetVariable(
+            expression.MemberIdentifier.Symbol,
+            expression.MemberIdentifier.SourceInfo,
+            throwIfNotInitialized: true
+        );
+
+        return variable.Value;
+    }
+
     public RuntimeValue VisitVariableDeclarationStatement(VariableDeclarationStatement statement, Scope scope)
     {
         VariableSymbol variable = new VariableSymbol(

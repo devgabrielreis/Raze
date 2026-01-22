@@ -4,6 +4,7 @@ public class InterpreterScope : Scope
 {
     protected override bool CanDeclareConstants => true;
     protected override bool CanDeclareVariables => true;
+    protected override bool CanDeclareNamespaces => true;
 
     public InterpreterScope()
         : base(null)
