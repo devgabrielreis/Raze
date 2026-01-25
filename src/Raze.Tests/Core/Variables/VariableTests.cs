@@ -150,4 +150,40 @@ public class VariableTests
         var result = RazeScript.Evaluate(script, "Raze.Tests");
         Assert.Equal(expectedResultStr, result.ToString());
     }
+
+    [Theory]
+    [InlineData("+=")]
+    [InlineData("-=")]
+    [InlineData("*=")]
+    [InlineData("/=")]
+    [InlineData("%=")]
+    public void Evaluate_DeclaringVaribleWithCompoundAssignmentOperator_ThrowsUnexpectedTokenException(string op)
+    {
+        var script = $"""
+            var integer test {op} 10
+        """;
+
+        Assert.Throws<UnexpectedTokenException>(() =>
+        {
+            RazeScript.Evaluate(script, "Raze.Tests");
+        });
+    }
+
+    [Theory]
+    [InlineData("+=")]
+    [InlineData("-=")]
+    [InlineData("*=")]
+    [InlineData("/=")]
+    [InlineData("%=")]
+    public void Evaluate_DeclaringConstantWithCompoundAssignmentOperator_ThrowsUnexpectedTokenException(string op)
+    {
+        var script = $"""
+            const integer test {op} 10
+        """;
+
+        Assert.Throws<UnexpectedTokenException>(() =>
+        {
+            RazeScript.Evaluate(script, "Raze.Tests");
+        });
+    }
 }
