@@ -332,6 +332,16 @@ internal class Parser
             return new VariableDeclarationStatement(identifier, type, null, isConstant, sourceStart);
         }
 
+        if (Current() is CompoundAssignmentToken)
+        {
+            throw new UnexpectedTokenException(
+                Current().GetType().Name,
+                nameof(AssignmentToken),
+                Current().Lexeme,
+                Current().SourceInfo
+            );
+        }
+
         Advance();
         Expression value = ParseOperatorExpression();
 
