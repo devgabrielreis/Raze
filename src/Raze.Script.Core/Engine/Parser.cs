@@ -6,40 +6,38 @@ using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 using Raze.Script.Core.Tokens;
-using Raze.Script.Core.Tokens.ControlStructures;
-using Raze.Script.Core.Tokens.Delimiters;
-using Raze.Script.Core.Tokens.Grouping;
-using Raze.Script.Core.Tokens.Literals;
-using Raze.Script.Core.Tokens.Operators;
-using Raze.Script.Core.Tokens.Operators.AdditiveOperators;
-using Raze.Script.Core.Tokens.Operators.EqualityOperators;
-using Raze.Script.Core.Tokens.Operators.MultiplicativeOperators;
-using Raze.Script.Core.Tokens.Operators.RelationalOperators;
-using Raze.Script.Core.Tokens.Primitives;
-using Raze.Script.Core.Tokens.VariableDeclaration;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Engine;
 
 internal class Parser
 {
-    private readonly IList<Token> _tokens;
+    private readonly Token[] _tokens;
     private readonly string _sourceLocation;
 
-    private int _currentIndex = 0;
+    private int _currentIndex;
+    private Token _currentToken;
 
-    private Parser(IList<Token> tokens, string sourceLocation)
+    private ref readonly Token CurrentToken => ref _currentToken;
+
+    private Parser(Token[] tokens, string sourceLocation)
     {
-        if (tokens.Count == 0 || tokens.Last() is not EOFToken)
+        if (tokens.Length == 0 || tokens[^1].Type != TokenType.EOF)
         {
             throw new InvalidTokenListException(new SourceInfo(sourceLocation));
         }
 
         _tokens = tokens;
         _sourceLocation = sourceLocation;
+
+        _currentIndex = 0;
+        _currentToken = _tokens[0];
     }
 
-    public static ProgramExpression Parse(IList<Token> tokens, string sourceLocation)
+    public static ProgramExpression Parse(Token[] tokens, string sourceLocation)
     {
         var parser = new Parser(tokens, sourceLocation);
         return parser.ParseInternal();
@@ -47,11 +45,11 @@ internal class Parser
 
     private ProgramExpression ParseInternal()
     {
-        var programBody = new List<Statement>();;
+        var programBody = new List<Statement>();
 
         while (!HasEnded())
         {
-            if (Current() is SemiColonToken)
+            if (CurrentToken.Type == TokenType.SemiColon)
             {
                 Advance();
                 continue;
@@ -59,9 +57,9 @@ internal class Parser
 
             programBody.Add(ParseCurrent());
 
-            if (programBody.Last().RequireSemicolon)
+            if (programBody[^1].RequireSemicolon)
             {
-                Expect<SemiColonToken, EOFToken>();
+                Expect(TokenType.SemiColon, TokenType.EOF);
             }
         }
 
@@ -72,76 +70,104 @@ internal class Parser
         return new ProgramExpression(programBody, source);
     }
 
-    private Token Current()
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void Expect(TokenType expected)
     {
-        return _tokens[_currentIndex];
-    }
-
-    private void Expect<T>() where T : Token
-    {
-        if (Current() is not T)
+        if (CurrentToken.Type != expected)
         {
-            throw new UnexpectedTokenException(
-                Current().GetType().Name,
-                typeof(T).Name,
-                Current().Lexeme,
-                Current().SourceInfo
-            );
+            ThrowUnexpectedTokenException(expected.GetFriendlyName());
         }
     }
 
-    private void Expect<T1, T2>() where T1 : Token where T2 : Token
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void Expect(TokenType expected1, TokenType expected2)
     {
-        if (Current() is not T1 && Current() is not T2)
+        if (CurrentToken.Type != expected1 && CurrentToken.Type != expected2)
         {
-            throw new UnexpectedTokenException(
-                Current().GetType().Name,
-                $"{typeof(T1).Name} or {typeof(T2).Name}",
-                Current().Lexeme,
-                Current().SourceInfo
-            );
+            ThrowUnexpectedTokenException<object>($"{expected1.GetFriendlyName()} or {expected2.GetFriendlyName()}");
         }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void Expect(Func<TokenType, bool> condition, string expectedPrettyStr)
+    {
+        if (!condition(CurrentToken.Type))
+        {
+            ThrowUnexpectedTokenException(expectedPrettyStr);
+        }
+    }
+
+    [DoesNotReturn]
+    [StackTraceHidden]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void ThrowUnexpectedTokenException(string? expectedPrettyStr, Token? token = null)
+    {
+        throw CreateUnexpectedTokenException(expectedPrettyStr, (token is null ? CurrentToken : token.Value));
+    }
+
+    [DoesNotReturn]
+    [StackTraceHidden]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private T ThrowUnexpectedTokenException<T>(string? expectedPrettyStr, Token? token = null)
+    {
+        throw CreateUnexpectedTokenException(expectedPrettyStr, (token is null ? CurrentToken : token.Value));
+    }
+
+    [StackTraceHidden]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static UnexpectedTokenException CreateUnexpectedTokenException(string? expectedPrettyStr, Token token)
+    {
+        var message = expectedPrettyStr == null
+            ? $"Unexpected token found. Found: {token.Type.GetFriendlyName()}. Value: {token.Lexeme}"
+            : $"Unexpected token found. Expected: {expectedPrettyStr}. Found: {token.Type.GetFriendlyName()}. Value: {token.Lexeme}";
+
+        return new UnexpectedTokenException(
+            message,
+            token.SourceInfo
+        );
     }
 
     private void Advance(int howMuch = 1)
     {
         _currentIndex += howMuch;
+        _currentToken = _tokens[_currentIndex];
     }
 
     private bool HasEnded()
     {
-        return _currentIndex >= _tokens.Count || Current() is EOFToken;
+        return _currentIndex >= _tokens.Length || CurrentToken.Type == TokenType.EOF;
     }
 
     private Statement ParseCurrent()
     {
-        return Current() switch
+        return CurrentToken.Type switch
         {
-            NamespaceDeclarationToken => ParseNamespaceDeclaration(),
-            VariableDeclarationToken  => ParseVariableDeclaration(),
-            FunctionDeclarationToken  => ParseFunctionDeclaration(),
-            OpenBracesToken           => ParseCodeBlock(),
-            IfToken                   => ParseIfElse(),
-            ForToken                  => ParseForLoop(),
-            WhileToken                => ParseWhileLoop(),
-            BreakToken                => ParseBreakStatement(),
-            ContinueToken             => ParseContinueStatement(),
-            ReturnToken               => ParseReturnStatement(),
-            _                         => ParseAssignmentStatement()
+            TokenType.NamespaceDeclaration => ParseNamespaceDeclaration(),
+            TokenType.Var                  => ParseVariableDeclaration(),
+            TokenType.Const                => ParseVariableDeclaration(),
+            TokenType.FunctionDeclaration  => ParseFunctionDeclaration(),
+            TokenType.OpenBraces           => ParseCodeBlock(),
+            TokenType.If                   => ParseIfElse(),
+            TokenType.For                  => ParseForLoop(),
+            TokenType.While                => ParseWhileLoop(),
+            TokenType.Break                => ParseBreakStatement(),
+            TokenType.Continue             => ParseContinueStatement(),
+            TokenType.Return               => ParseReturnStatement(),
+            _                              => ParseAssignmentStatement()
         };
     }
 
     private NamespaceDeclarationStatement ParseNamespaceDeclaration()
     {
-        Expect<NamespaceDeclarationToken>();
-        var source = Current().SourceInfo;
+        Expect(TokenType.NamespaceDeclaration);
+        var source = CurrentToken.SourceInfo;
         Advance();
 
-        Expect<IdentifierToken>();
-        var identifier = Current().Lexeme;
+        Expect(TokenType.Identifier);
+        var identifier = CurrentToken.Lexeme;
         Advance();
 
-        Expect<OpenBracesToken>();
+        Expect(TokenType.OpenBraces);
         var body = ParseCodeBlock();
 
         return new NamespaceDeclarationStatement(identifier, body, source);
@@ -149,8 +175,8 @@ internal class Parser
 
     private BreakStatement ParseBreakStatement()
     {
-        Expect<BreakToken>();
-        var source = Current().SourceInfo;
+        Expect(TokenType.Break);
+        var source = CurrentToken.SourceInfo;
         Advance();
 
         return new BreakStatement(source);
@@ -158,8 +184,8 @@ internal class Parser
 
     private ContinueStatement ParseContinueStatement()
     {
-        Expect<ContinueToken>();
-        var source = Current().SourceInfo;
+        Expect(TokenType.Continue);
+        var source = CurrentToken.SourceInfo;
         Advance();
 
         return new ContinueStatement(source);
@@ -167,11 +193,11 @@ internal class Parser
 
     private ReturnStatement ParseReturnStatement()
     {
-        Expect<ReturnToken>();
-        var sourceStart = Current().SourceInfo;
+        Expect(TokenType.Return);
+        var sourceStart = CurrentToken.SourceInfo;
         Advance();
         
-        if (Current() is SemiColonToken || Current() is EOFToken)
+        if (CurrentToken.Type == TokenType.SemiColon || CurrentToken.Type == TokenType.EOF)
         {
             return new ReturnStatement(null, sourceStart);
         }
@@ -183,15 +209,15 @@ internal class Parser
 
     private CodeBlockStatement ParseCodeBlock()
     {
-        Expect<OpenBracesToken>();
-        var sourceStart = Current().SourceInfo;
+        Expect(TokenType.OpenBraces);
+        var sourceStart = CurrentToken.SourceInfo;
         Advance();
 
         var codeBlockBody = new List<Statement>();
 
-        while (!HasEnded() && !(Current() is CloseBracesToken))
+        while (!HasEnded() && CurrentToken.Type != TokenType.CloseBraces)
         {
-            if (Current() is SemiColonToken)
+            if (CurrentToken.Type == TokenType.SemiColon)
             {
                 Advance();
                 continue;
@@ -199,13 +225,13 @@ internal class Parser
 
             codeBlockBody.Add(ParseCurrent());
 
-            if (codeBlockBody.Last().RequireSemicolon)
+            if (codeBlockBody[^1].RequireSemicolon)
             {
-                Expect<SemiColonToken>();
+                Expect(TokenType.SemiColon);
             }
         }
 
-        Expect<CloseBracesToken>();
+        Expect(TokenType.CloseBraces);
         Advance();
 
         return new CodeBlockStatement(codeBlockBody, sourceStart);
@@ -213,34 +239,32 @@ internal class Parser
 
     private IfElseStatement ParseIfElse()
     {
-        Expect<IfToken>();
-        var sourceStart = Current().SourceInfo;
+        Expect(TokenType.If);
+        var sourceStart = CurrentToken.SourceInfo;
         Advance();
 
-        Expect<OpenParenthesisToken>();
+        Expect(TokenType.OpenParenthesis);
         Advance();
 
         Expression condition = ParseOperatorExpression();
 
-        Expect<CloseParenthesisToken>();
+        Expect(TokenType.CloseParenthesis);
         Advance();
 
-        Expect<OpenBracesToken>();
+        Expect(TokenType.OpenBraces);
         CodeBlockStatement then = ParseCodeBlock();
 
         Statement? elseStmt = null;
 
-        if (Current() is ElseToken)
+        if (CurrentToken.Type == TokenType.Else)
         {
             Advance();
 
-            elseStmt = Current() switch
+            elseStmt = CurrentToken.Type switch
             {
-                OpenBracesToken => ParseCodeBlock(),
-                IfToken         => ParseIfElse(),
-                _ => throw new UnexpectedTokenException(
-                    Current().GetType().Name, Current().Lexeme, Current().SourceInfo
-                )
+                TokenType.OpenBraces => ParseCodeBlock(),
+                TokenType.If         => ParseIfElse(),
+                _ => ThrowUnexpectedTokenException<Statement>(null)
             };
         }
 
@@ -249,45 +273,45 @@ internal class Parser
 
     private LoopStatement ParseForLoop()
     {
-        Expect<ForToken>();
-        var sourceStart = Current().SourceInfo;
+        Expect(TokenType.For);
+        var sourceStart = CurrentToken.SourceInfo;
         Advance();
 
-        Expect<OpenParenthesisToken>();
+        Expect(TokenType.OpenParenthesis);
         Advance();
 
         List<Statement> initialization = [];
 
-        if (Current() is not SemiColonToken)
+        if (CurrentToken.Type != TokenType.SemiColon)
         {
             initialization.Add(
-                Current() is VariableDeclarationToken
+                CurrentToken.Type == TokenType.Var
                     ? ParseVariableDeclaration()
                     : ParseAssignmentStatement()
             );
         }
 
-        Expect<SemiColonToken>();
+        Expect(TokenType.SemiColon);
         Advance();
 
         Expression? condition = null;
 
-        if (Current() is not SemiColonToken)
+        if (CurrentToken.Type != TokenType.SemiColon)
         {
             condition = ParseOperatorExpression();
         }
 
-        Expect<SemiColonToken>();
+        Expect(TokenType.SemiColon);
         Advance();
 
         Statement? update = null;
 
-        if (Current() is not CloseParenthesisToken)
+        if (CurrentToken.Type != TokenType.CloseParenthesis)
         {
             update = ParseAssignmentStatement();
         }
 
-        Expect<CloseParenthesisToken>();
+        Expect(TokenType.CloseParenthesis);
         Advance();
 
         CodeBlockStatement body = ParseCodeBlock();
@@ -297,16 +321,16 @@ internal class Parser
 
     private LoopStatement ParseWhileLoop()
     {
-        Expect<WhileToken>();
-        var sourceStart = Current().SourceInfo;
+        Expect(TokenType.While);
+        var sourceStart = CurrentToken.SourceInfo;
         Advance();
 
-        Expect<OpenParenthesisToken>();
+        Expect(TokenType.OpenParenthesis);
         Advance();
 
         Expression condition = ParseOperatorExpression();
 
-        Expect<CloseParenthesisToken>();
+        Expect(TokenType.CloseParenthesis);
         Advance();
 
         CodeBlockStatement body = ParseCodeBlock();
@@ -316,30 +340,20 @@ internal class Parser
 
     private VariableDeclarationStatement ParseVariableDeclaration()
     {
-        Expect<VariableDeclarationToken>();
-        bool isConstant = Current() is ConstToken;
-        var sourceStart = Current().SourceInfo;
+        Expect(TokenType.Var, TokenType.Const);
+        bool isConstant = CurrentToken.Type == TokenType.Const;
+        var sourceStart = CurrentToken.SourceInfo;
         Advance();
 
         RuntimeType type = ParseType();
 
-        Expect<IdentifierToken>();
-        string identifier = Current().Lexeme;
+        Expect(TokenType.Identifier);
+        string identifier = CurrentToken.Lexeme;
         Advance();
 
-        if (Current() is not AssignmentToken)
+        if (CurrentToken.Type != TokenType.Assignment)
         {
             return new VariableDeclarationStatement(identifier, type, null, isConstant, sourceStart);
-        }
-
-        if (Current() is CompoundAssignmentToken)
-        {
-            throw new UnexpectedTokenException(
-                Current().GetType().Name,
-                nameof(AssignmentToken),
-                Current().Lexeme,
-                Current().SourceInfo
-            );
         }
 
         Advance();
@@ -350,14 +364,14 @@ internal class Parser
 
     private FunctionDeclarationStatement ParseFunctionDeclaration()
     {
-        Expect<FunctionDeclarationToken>();
-        var sourcestart = Current().SourceInfo;
+        Expect(TokenType.FunctionDeclaration);
+        var sourcestart = CurrentToken.SourceInfo;
         Advance();
 
         var returnType = ParseType();
 
-        Expect<IdentifierToken>();
-        string identifier = Current().Lexeme;
+        Expect(TokenType.Identifier);
+        string identifier = CurrentToken.Lexeme;
         Advance();
 
         var parameterList = ParseParameterList();
@@ -371,19 +385,19 @@ internal class Parser
 
     private List<ParameterSymbol> ParseParameterList()
     {
-        Expect<OpenParenthesisToken>();
+        Expect(TokenType.OpenParenthesis);
         Advance();
 
         List<ParameterSymbol> parameterList = [];
         bool isDefaultParameterRequired = false;
 
-        while (Current() is ConstToken || Current() is PrimitiveTypeToken)
+        while (CurrentToken.Type == TokenType.Const || CurrentToken.Type.IsPrimitiveTypeKeyword())
         {
-            var sourceStart = Current().SourceInfo;
+            var sourceStart = CurrentToken.SourceInfo;
 
             bool isConstant = false;
 
-            if (Current() is ConstToken)
+            if (CurrentToken.Type == TokenType.Const)
             {
                 isConstant = true;
                 Advance();
@@ -391,12 +405,12 @@ internal class Parser
 
             RuntimeType type = ParseType();
 
-            Expect<IdentifierToken>();
-            string identifier = Current().Lexeme;
+            Expect(TokenType.Identifier);
+            string identifier = CurrentToken.Lexeme;
             Advance();
 
             Expression? defaultValue = null;
-            if (Current() is AssignmentToken)
+            if (CurrentToken.Type == TokenType.Assignment)
             {
                 Advance();
                 defaultValue = ParseOperatorExpression();
@@ -410,10 +424,13 @@ internal class Parser
                 );
             }
 
-            if (Current() is CommaToken)
+            if (CurrentToken.Type == TokenType.Comma)
             {
                 Advance();
-                Expect<ConstToken, PrimitiveTypeToken>();
+                Expect(
+                    t => t == TokenType.Const || t.IsPrimitiveTypeKeyword(),
+                    $"{TokenType.Const.GetFriendlyName()} or type name"
+                );
             }
 
             parameterList.Add(
@@ -427,7 +444,7 @@ internal class Parser
             );
         }
 
-        Expect<CloseParenthesisToken>();
+        Expect(TokenType.CloseParenthesis);
         Advance();
 
         return parameterList;
@@ -435,52 +452,52 @@ internal class Parser
 
     private RuntimeType ParseType()
     {
-        Expect<PrimitiveTypeToken>();
-        PrimitiveTypeToken type = (Current() as PrimitiveTypeToken)!;
+        Expect(t => t.IsPrimitiveTypeKeyword(), "type name");
+        var typeToken = CurrentToken;
         Advance();
 
         var isNullable = false;
-        if (Current() is QuestionMarkToken)
+        if (CurrentToken.Type == TokenType.QuestionMark)
         {
-            if (type is VoidPrimitiveToken)
+            if (typeToken.Type == TokenType.VoidTypeName)
             {
-                throw new InvalidTypeDeclarationException("void cannot be nullable", Current()!.SourceInfo);
+                throw new InvalidTypeDeclarationException("void cannot be nullable", CurrentToken!.SourceInfo);
             }
 
             isNullable = true;
             Advance();
         }
 
-        if (Current() is LessThanToken)
+        if (CurrentToken.Type == TokenType.LessThan)
         {
-            return type switch
+            return typeToken.Type switch
             {
-                FunctionPrimitiveToken => ParseFunctionType(isNullable, type.SourceInfo),
-                _ => throw new InvalidTypeDeclarationException("This type cannot have generics", Current()!.SourceInfo)
+                TokenType.FunctionTypeName => ParseFunctionType(isNullable, typeToken.SourceInfo),
+                _ => throw new InvalidTypeDeclarationException("This type cannot have generics", CurrentToken.SourceInfo)
             };
         }
-        else if (type is FunctionPrimitiveToken)
+        else if (typeToken.Type == TokenType.FunctionTypeName)
         {
             throw new InvalidTypeDeclarationException(
                 "Function type requires at least one generic",
-                type.SourceInfo
+                typeToken.SourceInfo
             );
         }
 
-        return (type) switch
+        return (typeToken.Type) switch
         {
-            BooleanPrimitiveToken => new BooleanType(isNullable),
-            DecimalPrimitiveToken => new DecimalType(isNullable),
-            IntegerPrimitiveToken => new IntegerType(isNullable),
-            StringPrimitiveToken  => new StringType(isNullable),
-            VoidPrimitiveToken    => new VoidType(),
-            _ => throw new UnexpectedTokenException(type.GetType().Name, type.Lexeme, type.SourceInfo)
+            TokenType.BooleanTypeName => new BooleanType(isNullable),
+            TokenType.DecimalTypeName => new DecimalType(isNullable),
+            TokenType.IntegerTypeName => new IntegerType(isNullable),
+            TokenType.StringTypeName  => new StringType(isNullable),
+            TokenType.VoidTypeName    => new VoidType(),
+            _ => ThrowUnexpectedTokenException<RuntimeType>("type name", typeToken)
         };
     }
 
     private FunctionType ParseFunctionType(bool isNullable, SourceInfo declarationStart)
     {
-        Expect<LessThanToken>();
+        Expect(TokenType.LessThan);
         var generics = ParseGenerics();
 
         if (generics.Count == 0)
@@ -496,26 +513,32 @@ internal class Parser
 
     private List<RuntimeType> ParseGenerics()
     {
-        Expect<LessThanToken>();
+        Expect(TokenType.LessThan);
         Advance();
 
-        Expect<PrimitiveTypeToken, GreaterThanToken>();
+        Expect(
+            t => t == TokenType.GreaterThan || t.IsPrimitiveTypeKeyword(),
+            $"{TokenType.GreaterThan.GetFriendlyName()} or type name"
+        );
 
         List<RuntimeType> generics = [];
-        while (Current() is not GreaterThanToken)
+        while (CurrentToken.Type != TokenType.GreaterThan)
         {
-            Expect<PrimitiveTypeToken, CommaToken>();
+            Expect(
+                t => t.IsPrimitiveTypeKeyword() || t == TokenType.Comma,
+                $"type name or {TokenType.Comma.GetFriendlyName()}"
+            );
 
-            if (Current() is CommaToken)
+            if (CurrentToken.Type == TokenType.Comma)
             {
                 Advance();
-                Expect<PrimitiveTypeToken>();
+                Expect(t => t.IsPrimitiveTypeKeyword(), "type name");
                 continue;
             }
 
             generics.Add(ParseType());
 
-            Expect<CommaToken, GreaterThanToken>();
+            Expect(TokenType.Comma, TokenType.GreaterThan);
         }
 
         Advance();
@@ -527,12 +550,12 @@ internal class Parser
     {
         Expression left = ParseOperatorExpression();
 
-        if (Current() is not AssignmentToken)
+        if (!CurrentToken.Type.IsAssignmentOrCompoundAssignmentOperator())
         {
             return left;
         }
 
-        AssignmentToken op = (AssignmentToken)Current();
+        var op = CurrentToken;
         Advance();
 
         Expression value = ParseOperatorExpression();
@@ -542,14 +565,15 @@ internal class Parser
             throw new InvalidAssignmentException("Invalid assignment target", left.SourceInfo);
         }
 
-        if (op is CompoundAssignmentToken compoundOp)
+        if (op.Type.IsCompoundAssignmentOperator())
         {
-            value = new BinaryExpression(left, compoundOp.Operator, value, compoundOp.SourceInfo);
+            value = new BinaryExpression(left, op.Type.GetCompoundAssignmentTokenOperator(), value, op.SourceInfo);
         }
         
         return new AssignmentStatement((IdentifierExpression)left, value, left.SourceInfo);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private Expression ParseOperatorExpression()
     {
         return ParseOrExpression();
@@ -557,41 +581,39 @@ internal class Parser
 
     private Expression ParseOrExpression()
     {
-        return ParseBinaryExpression<OrToken>(ParseAndExpression);
+        return ParseBinaryExpression(ParseAndExpression, t => t == TokenType.Or);
     }
 
     private Expression ParseAndExpression()
     {
-        return ParseBinaryExpression<AndToken>(ParseEqualityExpression);
+        return ParseBinaryExpression(ParseEqualityExpression, t => t == TokenType.And);
     }
 
     private Expression ParseEqualityExpression()
     {
-        return ParseBinaryExpression<EqualityOperatorToken>(ParseRelationalExpression);
+        return ParseBinaryExpression(ParseRelationalExpression, TokenTypeFacts.IsEqualityOperator);
     }
 
     private Expression ParseRelationalExpression()
     {
-        return ParseBinaryExpression<RelationalOperatorToken>(ParseAdditiveExpression);
+        return ParseBinaryExpression(ParseAdditiveExpression, TokenTypeFacts.IsRelationalOperator);
     }
 
     private Expression ParseAdditiveExpression()
     {
-        return ParseBinaryExpression<AdditiveOperatorToken>(ParseMultiplicativeExpression);
+        return ParseBinaryExpression(ParseMultiplicativeExpression, TokenTypeFacts.IsAdditiveOperator);
     }
 
     private Expression ParseMultiplicativeExpression()
     {
-        return ParseBinaryExpression<MultiplicativeOperatorToken>(ParseUnaryExpression);
+        return ParseBinaryExpression(ParseUnaryExpression, TokenTypeFacts.IsMultiplicativeOperator);
     }
 
     private Expression ParseUnaryExpression()
     {
-        if (Current() is NotToken
-            || Current() is AdditionToken
-            || Current() is SubtractionToken)
+        if (CurrentToken.Type.IsUnaryOperator())
         {
-            var op = (OperatorToken)Current();
+            var op = CurrentToken;
             Advance();
 
             var operand = ParseUnaryExpression();
@@ -599,15 +621,14 @@ internal class Parser
             return new UnarySimpleExpression(operand, op.Lexeme, isPostfix: false, op.SourceInfo);
         }
 
-        if (Current() is IncrementToken
-            || Current() is DecrementToken)
+        if (CurrentToken.Type.IsPrefixOperator())
         {
-            var op = (OperatorToken)Current();
+            var op = CurrentToken;
             Advance();
 
             var operand = ParseUnaryExpression();
 
-            if (operand is not IdentifierExpression)
+            if (operand is not IdentifierExpression identifier)
             {
                 throw new InvalidOperandException(
                     $"The {op.Lexeme} operator can only be applied to identifiers",
@@ -615,7 +636,7 @@ internal class Parser
                 );
             }
 
-            return new UnaryMutationExpression((IdentifierExpression)operand, op.Lexeme, isPostfix: false, op.SourceInfo);
+            return new UnaryMutationExpression(identifier, op.Lexeme, isPostfix: false, op.SourceInfo);
         }
 
         return ParsePostfixExpression();
@@ -627,17 +648,15 @@ internal class Parser
 
         while (true)
         {
-            if (Current() is OpenParenthesisToken)
+            if (CurrentToken.Type == TokenType.OpenParenthesis)
             {
                 expr = ParseCallExpression(expr);
                 continue;
             }
 
-            if (Current() is IncrementToken
-                || Current() is DecrementToken
-                || Current() is NullCheckerToken)
+            if (CurrentToken.Type.IsPostfixOperator())
             {
-                var op = (OperatorToken)Current();
+                var op = CurrentToken;
                 Advance();
 
                 if (expr is not IdentifierExpression)
@@ -648,7 +667,7 @@ internal class Parser
                     );
                 }
 
-                expr = op is NullCheckerToken
+                expr = op.Type == TokenType.NullChecker
                     ? new NullCheckerExpression((IdentifierExpression)expr, expr.SourceInfo)
                     : new UnaryMutationExpression((IdentifierExpression)expr, op.Lexeme, isPostfix: true, expr.SourceInfo);
                 continue;
@@ -662,29 +681,27 @@ internal class Parser
 
     private CallExpression ParseCallExpression(Expression caller)
     {
-        Expect<OpenParenthesisToken>();
+        Expect(TokenType.OpenParenthesis);
         Advance();
 
         List<Expression> argumentList = [];
 
-        while (Current() is not CloseParenthesisToken)
+        while (CurrentToken.Type != TokenType.CloseParenthesis)
         {
             argumentList.Add(ParseOperatorExpression());
 
-            if (Current() is CommaToken)
+            if (CurrentToken.Type == TokenType.Comma)
             {
                 Advance();
 
-                if (Current() is CloseParenthesisToken)
+                if (CurrentToken.Type == TokenType.CloseParenthesis)
                 {
-                    throw new UnexpectedTokenException(
-                        Current().GetType().Name, Current().Lexeme, Current().SourceInfo
-                    );
+                    ThrowUnexpectedTokenException(null);
                 }
             }
         }
 
-        Expect<CloseParenthesisToken>();
+        Expect(TokenType.CloseParenthesis);
         Advance();
 
         return new CallExpression(caller, argumentList, caller.SourceInfo);
@@ -694,7 +711,7 @@ internal class Parser
     {
         var obj = ParsePrimaryExpression();
 
-        if (Current() is NamespaceAccessorToken)
+        if (CurrentToken.Type == TokenType.NamespaceAccessor)
         {
             return ParseNamespaceAccessExpression(obj);
         }
@@ -704,8 +721,8 @@ internal class Parser
 
     private NamespaceAccessExpression ParseNamespaceAccessExpression(Expression namespaceIdentifier)
     {
-        Expect<NamespaceAccessorToken>();
-        var op = Current();
+        Expect(TokenType.NamespaceAccessor);
+        var op = CurrentToken;
         Advance();
 
         if (namespaceIdentifier is not IdentifierExpression)
@@ -716,7 +733,7 @@ internal class Parser
             );
         }
 
-        Expect<IdentifierToken>();
+        Expect(TokenType.Identifier);
         var memberIdentifier = ParsePrimaryExpression();
 
         return new NamespaceAccessExpression(
@@ -728,71 +745,70 @@ internal class Parser
 
     private Expression ParsePrimaryExpression()
     {
-        switch (Current())
+        switch (CurrentToken.Type)
         {
-            case IdentifierToken:
-                var identifierExpression = new IdentifierExpression(Current().Lexeme, Current().SourceInfo);
+            case TokenType.Identifier:
+                var identifierExpression = new IdentifierExpression(CurrentToken.Lexeme, CurrentToken.SourceInfo);
                 Advance();
                 return identifierExpression;
 
-            case IntegerLiteralToken:
-                var integerValue = Int128.Parse(Current().Lexeme);
-                var integerLiteralExpression = new IntegerLiteralExpression(integerValue, Current().SourceInfo);
+            case TokenType.IntegerLiteral:
+                var integerValue = Int128.Parse(CurrentToken.Lexeme);
+                var integerLiteralExpression = new IntegerLiteralExpression(integerValue, CurrentToken.SourceInfo);
                 Advance();
                 return integerLiteralExpression;
 
-            case DecimalLiteralToken:
-                var decimalValue = decimal.Parse(Current().Lexeme, CultureInfo.InvariantCulture);
-                var decimalLiteralExpression = new DecimalLiteralExpression(decimalValue, Current().SourceInfo);
+            case TokenType.DecimalLiteral:
+                var decimalValue = decimal.Parse(CurrentToken.Lexeme, CultureInfo.InvariantCulture);
+                var decimalLiteralExpression = new DecimalLiteralExpression(decimalValue, CurrentToken.SourceInfo);
                 Advance();
                 return decimalLiteralExpression;
 
-            case BooleanLiteralToken:
-                var boolValue = bool.Parse(Current().Lexeme);
-                var booleanLiteralExpression = new BooleanLiteralExpression(boolValue, Current().SourceInfo);
+            case TokenType.BooleanLiteral:
+                var boolValue = bool.Parse(CurrentToken.Lexeme);
+                var booleanLiteralExpression = new BooleanLiteralExpression(boolValue, CurrentToken.SourceInfo);
                 Advance();
                 return booleanLiteralExpression;
 
-            case StringLiteralToken:
-                var stringLiteralExpression = new StringLiteralExpression(Current().Lexeme, Current().SourceInfo);
+            case TokenType.StringLiteral:
+                var stringLiteralExpression = new StringLiteralExpression(CurrentToken.Lexeme, CurrentToken.SourceInfo);
                 Advance();
                 return stringLiteralExpression;
 
-            case NullLiteralToken:
-                var nullLiteralExpression = new NullLiteralExpression(Current().SourceInfo);
+            case TokenType.NullLiteral:
+                var nullLiteralExpression = new NullLiteralExpression(CurrentToken.SourceInfo);
                 Advance();
                 return nullLiteralExpression;
 
-            case OpenParenthesisToken:
+            case TokenType.OpenParenthesis:
                 return ParseParenthesis();
 
             default:
-                throw new UnexpectedTokenException(
-                    Current().GetType().Name, Current().Lexeme, Current().SourceInfo
-                );
+                return ThrowUnexpectedTokenException<Expression>(null);
         }
     }
 
     private Expression ParseParenthesis()
     {
-        Expect<OpenParenthesisToken>();
+        Expect(TokenType.OpenParenthesis);
         Advance();
 
         Expression expr = ParseOperatorExpression();
 
-        Expect<CloseParenthesisToken>();
+        Expect(TokenType.CloseParenthesis);
         Advance();
 
         return expr;
     }
 
-    private Expression ParseBinaryExpression<TOperator>(Func<Expression> next) where TOperator : OperatorToken
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private Expression ParseBinaryExpression(Func<Expression> next, Func<TokenType, bool> tokenCheck)
     {
         Expression left = next();
 
-        while (Current() is TOperator)
+        while (tokenCheck(CurrentToken.Type))
         {
-            OperatorToken op = (Current() as OperatorToken)!;
+            Token op = CurrentToken;
             Advance();
 
             Expression right = next();

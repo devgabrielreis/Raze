@@ -1,10 +1,9 @@
 ﻿namespace Raze.Script.Core.Metadata;
 
-public class SourceInfo
+public readonly struct SourceInfo
 {
-    public SourcePosition? SourcePosition { get; private set; }
-
-    public string Location { get; private set; }
+    public readonly SourcePosition? SourcePosition;
+    public readonly string Location;
 
     public SourceInfo(string location)
         : this(null, location)
