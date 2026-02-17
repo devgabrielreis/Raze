@@ -17,7 +17,7 @@ internal static class TokenTypeUtils
             TokenType.MultiplicationAssignment => Operators.MULTIPLICATION,
             TokenType.DivisionAssignment       => Operators.DIVISION,
             TokenType.ModuloAssignment         => Operators.MODULO,
-            _ => ThrowUnsupportedTokenException<string>(type)
+            _ => ThrowArgumentOutOfRangeException<string>(type)
         };
     }
 
@@ -92,15 +92,15 @@ internal static class TokenTypeUtils
             TokenType.OpenParenthesis  => "opening parenthesis",
             TokenType.CloseParenthesis => "closing parenthesis",
 
-            _ => ThrowUnsupportedTokenException<string>(type)
+            _ => ThrowArgumentOutOfRangeException<string>(type)
         };
     }
 
     [DoesNotReturn]
     [MethodImpl(MethodImplOptions.NoInlining)]
     [StackTraceHidden]
-    private static T ThrowUnsupportedTokenException<T>(TokenType unexpectedToken)
+    private static T ThrowArgumentOutOfRangeException<T>(TokenType unexpectedToken)
     {
-        throw new Exception($"The method does not support this token: {unexpectedToken.GetFriendlyName()}");
+        throw new ArgumentOutOfRangeException($"The method does not support this token: {unexpectedToken}");
     }
 }
