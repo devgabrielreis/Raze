@@ -3,59 +3,115 @@ using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Types;
 using Raze.Script.Core.Runtime.Values;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Runtime.Symbols;
 
-public class VariableSymbol : Symbol
+internal class VariableSymbol : Symbol
 {
-    public RuntimeValue Value => IsInitialized
-                                    ? _value!
-                                    : throw new UninitializedVariableException(new SourceInfo("RazeInternals"));
+    internal bool IsConstant { get; }
 
-    public bool IsConstant { get; private set; }
+    internal bool IsInitialized { get; private set; }
 
-    public bool IsInitialized => _value != null;
+    internal RuntimeType Type { get; }
 
-    public RuntimeType Type { get; private set; }
+    private RuntimeValue _value;
 
-    private RuntimeValue? _value;
-
-    public VariableSymbol(RuntimeValue? value, RuntimeType type, bool isConstant, SourceInfo source)
+    internal VariableSymbol(
+        RuntimeValue? value,
+        RuntimeType type,
+        bool isConstant,
+        ref readonly SourceInfo source
+    )
     {
-        if (type is VoidType)
+        if (type == RuntimeType.Void || type == RuntimeType.Null)
         {
-            throw new InvalidSymbolDeclarationException("Variable cannot have void type", source);
+            ThrowInvalidSymbolDeclarationException(type, in source);
         }
 
-        _value = null;
         Type = type;
         IsConstant = false;
+        IsInitialized = false;
 
         if (value != null)
         {
-            SetValue(value, source);
+            var refValue = value.Value;
+            SetValue(in refValue, in source);
         }
 
         IsConstant = isConstant;
 
         if (isConstant && !IsInitialized)
         {
-            throw new UninitializedConstantException(source);
+            ThrowUninitializedConstantException(in source);
         }
     }
 
-    public void SetValue(RuntimeValue newValue, SourceInfo source)
+    internal ref readonly RuntimeValue GetValue(ref readonly SourceInfo source)
+    {
+        if (!IsInitialized)
+        {
+            ThrowUninitializedVariableException(in source);
+        }
+
+        return ref _value;
+    }
+
+    internal void SetValue(ref readonly RuntimeValue newValue, ref readonly SourceInfo source)
     {
         if (IsConstant)
         {
-            throw new ConstantAssignmentException(source);
+            ThrowConstantAssignmentException(in source);
         }
 
-        if (!Type.AcceptValue(newValue))
+        if (!Type.IsCompatibleWith(in newValue))
         {
-            throw new VariableTypeException(newValue.TypeName, Type.TypeName, source);
+            ThrowVariableTypeException(in newValue, in source);
         }
 
-        _value = newValue.Clone() as RuntimeValue;
+        _value = newValue;
+        IsInitialized = true;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn]
+    [StackTraceHidden]
+    private static void ThrowInvalidSymbolDeclarationException(RuntimeType type, ref readonly SourceInfo source)
+    {
+        throw new InvalidSymbolDeclarationException($"Variable cannot have {type} type", source);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn]
+    [StackTraceHidden]
+    private static void ThrowUninitializedConstantException(ref readonly SourceInfo source)
+    {
+        throw new UninitializedConstantException(source);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn]
+    [StackTraceHidden]
+    private static void ThrowConstantAssignmentException(ref readonly SourceInfo source)
+    {
+        throw new ConstantAssignmentException(source);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn]
+    [StackTraceHidden]
+    private void ThrowVariableTypeException(ref readonly RuntimeValue value, ref readonly SourceInfo source)
+    {
+        throw new VariableTypeException(value.Type.ToString(), Type.ToString(), source);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn]
+    [StackTraceHidden]
+    private static void ThrowUninitializedVariableException(ref readonly SourceInfo source)
+    {
+        throw new UninitializedVariableException(source);
     }
 }

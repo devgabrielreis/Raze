@@ -6,9 +6,9 @@ namespace Raze.Script.Core.Runtime.Scopes;
 
 public abstract class Scope
 {
-    protected Scope? _parent;
+    private Scope? _parent;
 
-    protected Dictionary<string, VariableSymbol> _variables;
+    private Dictionary<string, VariableSymbol> _variables;
 
     private Dictionary<string, NamespaceSymbol> _namespaces;
 
@@ -25,7 +25,7 @@ public abstract class Scope
         _namespaces = [];
     }
 
-    public virtual void DeclareVariable(string name, VariableSymbol variable, SourceInfo source)
+    internal virtual void DeclareVariable(string name, VariableSymbol variable, SourceInfo source)
     {
         if (!CanDeclareVariables && !variable.IsConstant)
         {
@@ -45,7 +45,7 @@ public abstract class Scope
         _variables[name] = variable;
     }
 
-    public virtual VariableSymbol GetVariable(string name, SourceInfo source, bool throwIfNotInitialized = false)
+    internal virtual VariableSymbol GetVariable(string name, SourceInfo source, bool throwIfNotInitialized = false)
     {
         var variable = TryGetVariable(name);
 
@@ -62,7 +62,7 @@ public abstract class Scope
         return variable;
     }
 
-    public virtual VariableSymbol? TryGetVariable(string name)
+    internal virtual VariableSymbol? TryGetVariable(string name)
     {
         if (_variables.TryGetValue(name, out var value))
         {

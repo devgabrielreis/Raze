@@ -1,7 +1,11 @@
 ﻿using Raze.Script.Core.Constants;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Runtime.Types;
 using Raze.Script.Core.Runtime.Values;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Runtime.Operations;
 
@@ -10,57 +14,57 @@ internal class IntegerOperationRegistrar : IOperationRegistrar
     public static void RegisterBinaryOperations(OperationDispatcher dispatcher)
     {
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.PLUS, TypeNames.INTEGER_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.Integer, Operators.PLUS, RuntimeType.Integer),
             AddInteger
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.MINUS, TypeNames.INTEGER_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.Integer, Operators.MINUS, RuntimeType.Integer),
             SubtractInteger
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.MULTIPLICATION, TypeNames.INTEGER_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.Integer, Operators.MULTIPLICATION, RuntimeType.Integer),
             MultiplyInteger
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.DIVISION, TypeNames.INTEGER_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.Integer, Operators.DIVISION, RuntimeType.Integer),
             DivideInteger
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.MODULO, TypeNames.INTEGER_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.Integer, Operators.MODULO, RuntimeType.Integer),
             ModuloInteger
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.EQUAL, TypeNames.INTEGER_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.Integer, Operators.EQUAL, RuntimeType.Integer),
             EqualInteger
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.NOT_EQUAL, TypeNames.INTEGER_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.Integer, Operators.NOT_EQUAL, RuntimeType.Integer),
             NotEqualInteger
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.LESS_THAN, TypeNames.INTEGER_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.Integer, Operators.LESS_THAN, RuntimeType.Integer),
             LessThanInteger
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.GREATER_THAN, TypeNames.INTEGER_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.Integer, Operators.GREATER_THAN, RuntimeType.Integer),
             GreaterThanInteger
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.LESS_OR_EQUAL, TypeNames.INTEGER_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.Integer, Operators.LESS_OR_EQUAL, RuntimeType.Integer),
             LessOrEqualInteger
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.GREATER_OR_EQUAL, TypeNames.INTEGER_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.Integer, Operators.GREATER_OR_EQUAL, RuntimeType.Integer),
             GreaterOrEqualInteger
         );
     }
@@ -68,159 +72,275 @@ internal class IntegerOperationRegistrar : IOperationRegistrar
     public static void RegisterUnaryOperations(OperationDispatcher dispatcher)
     {
         dispatcher.RegisterUnaryOperation(
-            new UnaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.PLUS, IsPostfix: false),
+            new UnaryOperationKey(RuntimeType.Integer, Operators.PLUS, IsPostfix: false),
             UnaryPlus
         );
 
         dispatcher.RegisterUnaryOperation(
-            new UnaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.MINUS, IsPostfix: false),
+            new UnaryOperationKey(RuntimeType.Integer, Operators.MINUS, IsPostfix: false),
             UnaryMinus
         );
 
         dispatcher.RegisterUnaryOperation(
-            new UnaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.INCREMENT, IsPostfix: true),
+            new UnaryOperationKey(RuntimeType.Integer, Operators.INCREMENT, IsPostfix: true),
             Increment
         );
 
         dispatcher.RegisterUnaryOperation(
-            new UnaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.INCREMENT, IsPostfix: false),
+            new UnaryOperationKey(RuntimeType.Integer, Operators.INCREMENT, IsPostfix: false),
             Increment
         );
 
         dispatcher.RegisterUnaryOperation(
-            new UnaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.DECREMENT, IsPostfix: true),
+            new UnaryOperationKey(RuntimeType.Integer, Operators.DECREMENT, IsPostfix: true),
             Decrement
         );
 
         dispatcher.RegisterUnaryOperation(
-            new UnaryOperationKey(TypeNames.INTEGER_TYPE_NAME, Operators.DECREMENT, IsPostfix: false),
+            new UnaryOperationKey(RuntimeType.Integer, Operators.DECREMENT, IsPostfix: false),
             Decrement
         );
     }
 
-    private static RuntimeValue AddInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void AddInteger(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        return new IntegerValue(((IntegerValue)left).IntValue + ((IntegerValue)right).IntValue);
+        var leftValue = left.AsInteger();
+        var rightValue = right.AsInteger();
+
+        var resultValue = leftValue + rightValue;
+
+        result = new RuntimeValue(resultValue);
     }
 
-    private static RuntimeValue SubtractInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void SubtractInteger(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((IntegerValue)left).IntValue;
-        var rightValue = ((IntegerValue)right).IntValue;
+        var leftValue = left.AsInteger();
+        var rightValue = right.AsInteger();
 
-        return new IntegerValue(leftValue - rightValue);
+        var resultValue = leftValue - rightValue;
+
+        result = new RuntimeValue(resultValue);
     }
 
-    private static RuntimeValue MultiplyInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void MultiplyInteger(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((IntegerValue)left).IntValue;
-        var rightValue = ((IntegerValue)right).IntValue;
+        var leftValue = left.AsInteger();
+        var rightValue = right.AsInteger();
 
-        return new IntegerValue(leftValue * rightValue);
+        var resultValue = leftValue * rightValue;
+
+        result = new RuntimeValue(resultValue);
     }
 
-    private static RuntimeValue DivideInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void DivideInteger(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((IntegerValue)left).IntValue;
-        var rightValue = ((IntegerValue)right).IntValue;
+        var leftValue = left.AsInteger();
+        var rightValue = right.AsInteger();
 
         if (rightValue == 0)
         {
-            throw new DivisionByZeroException(source);
+            ThrowDivisionByZeroException(in source);
         }
 
-        return new IntegerValue(leftValue / rightValue);
+        var resultValue = leftValue / rightValue;
+
+        result = new RuntimeValue(resultValue);
     }
 
-    private static RuntimeValue ModuloInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void ModuloInteger(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((IntegerValue)left).IntValue;
-        var rightValue = ((IntegerValue)right).IntValue;
+        var leftValue = left.AsInteger();
+        var rightValue = right.AsInteger();
 
         if (rightValue == 0)
         {
-            throw new DivisionByZeroException(source);
+            ThrowDivisionByZeroException(in source);
         }
 
-        return new IntegerValue(leftValue % rightValue);
+        var resultValue = leftValue % rightValue;
+
+        result = new RuntimeValue(resultValue);
     }
 
-    private static RuntimeValue EqualInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void EqualInteger(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((IntegerValue)left).IntValue;
-        var rightValue = ((IntegerValue)right).IntValue;
+        var leftValue = left.AsInteger();
+        var rightValue = right.AsInteger();
 
-        return new BooleanValue(leftValue == rightValue);
+        var resultValue = leftValue == rightValue;
+
+        result = (resultValue)
+                ? RuntimeValue.True
+                : RuntimeValue.False;
     }
 
-    private static RuntimeValue NotEqualInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void NotEqualInteger(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((IntegerValue)left).IntValue;
-        var rightValue = ((IntegerValue)right).IntValue;
+        var leftValue = left.AsInteger();
+        var rightValue = right.AsInteger();
 
-        return new BooleanValue(leftValue != rightValue);
+        var resultValue = leftValue != rightValue;
+
+        result = (resultValue)
+                ? RuntimeValue.True
+                : RuntimeValue.False;
     }
 
-    private static RuntimeValue LessThanInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void LessThanInteger(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((IntegerValue)left).IntValue;
-        var rightValue = ((IntegerValue)right).IntValue;
+        var leftValue = left.AsInteger();
+        var rightValue = right.AsInteger();
 
-        return new BooleanValue(leftValue < rightValue);
+        var resultValue = leftValue < rightValue;
+
+        result = (resultValue)
+                ? RuntimeValue.True
+                : RuntimeValue.False;
     }
 
-    private static RuntimeValue GreaterThanInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void GreaterThanInteger(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((IntegerValue)left).IntValue;
-        var rightValue = ((IntegerValue)right).IntValue;
+        var leftValue = left.AsInteger();
+        var rightValue = right.AsInteger();
 
-        return new BooleanValue(leftValue > rightValue);
+        var resultValue = leftValue > rightValue;
+
+        result = (resultValue)
+                ? RuntimeValue.True
+                : RuntimeValue.False;
     }
 
-    private static RuntimeValue LessOrEqualInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void LessOrEqualInteger(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((IntegerValue)left).IntValue;
-        var rightValue = ((IntegerValue)right).IntValue;
+        var leftValue = left.AsInteger();
+        var rightValue = right.AsInteger();
 
-        return new BooleanValue(leftValue <= rightValue);
+        var resultValue = leftValue <= rightValue;
+
+        result = (resultValue)
+                ? RuntimeValue.True
+                : RuntimeValue.False;
     }
 
-    private static RuntimeValue GreaterOrEqualInteger(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void GreaterOrEqualInteger(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((IntegerValue)left).IntValue;
-        var rightValue = ((IntegerValue)right).IntValue;
+        var leftValue = left.AsInteger();
+        var rightValue = right.AsInteger();
 
-        return new BooleanValue(leftValue >= rightValue);
+        var resultValue = leftValue >= rightValue;
+
+        result = (resultValue)
+                ? RuntimeValue.True
+                : RuntimeValue.False;
     }
 
-    private static RuntimeValue UnaryPlus(RuntimeValue operand, SourceInfo source)
+    private static void UnaryPlus(
+        ref readonly RuntimeValue operand,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var value = ((IntegerValue)operand).IntValue;
+        var value = operand.AsInteger();
 
-        return new IntegerValue(value);
+        result = new RuntimeValue(value);
     }
 
-    private static RuntimeValue UnaryMinus(RuntimeValue operand, SourceInfo source)
+    private static void UnaryMinus(
+        ref readonly RuntimeValue operand,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var value = ((IntegerValue)operand).IntValue;
+        var value = operand.AsInteger();
         value = -value;
 
-        return new IntegerValue(value);
+        result = new RuntimeValue(value);
     }
 
-    private static RuntimeValue Increment(RuntimeValue operand, SourceInfo source)
+    private static void Increment(
+        ref readonly RuntimeValue operand,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var value = ((IntegerValue)operand).IntValue;
+        var value = operand.AsInteger();
         value++;
 
-        return new IntegerValue(value);
+        result = new RuntimeValue(value);
     }
 
-    private static RuntimeValue Decrement(RuntimeValue operand, SourceInfo source)
+    private static void Decrement(
+        ref readonly RuntimeValue operand,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var value = ((IntegerValue)operand).IntValue;
+        var value = operand.AsInteger();
         value--;
 
-        return new IntegerValue(value);
+        result = new RuntimeValue(value);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn]
+    [StackTraceHidden]
+    private static void ThrowDivisionByZeroException(ref readonly SourceInfo source)
+    {
+        throw new DivisionByZeroException(source);
     }
 }

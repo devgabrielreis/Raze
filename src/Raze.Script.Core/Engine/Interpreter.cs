@@ -36,7 +36,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
     public RuntimeValue VisitProgramExpression(ProgramExpression program, Scope scope)
     {
-        RuntimeValue lastValue = new VoidValue();
+        RuntimeValue lastValue = RuntimeValue.Void;
 
         foreach (var statement in program.Body)
         {
@@ -67,7 +67,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             Evaluate(stmt, namespaceScope);
         }
 
-        return new VoidValue();
+        return RuntimeValue.Void;
     }
 
     public RuntimeValue VisitNamespaceAccessExpression(NamespaceAccessExpression expression, Scope scope)
@@ -83,53 +83,51 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             throwIfNotInitialized: true
         );
 
-        return variable.Value;
+        var source = expression.SourceInfo;
+        return variable.GetValue(ref source);
     }
 
     public RuntimeValue VisitVariableDeclarationStatement(VariableDeclarationStatement statement, Scope scope)
     {
+        var source = statement.SourceInfo;
         VariableSymbol variable = new VariableSymbol(
             statement.Value is null ? null : Evaluate(statement.Value, scope),
             statement.Type,
             statement.IsConstant,
-            statement.SourceInfo
+            ref source
         );
 
         scope.DeclareVariable(statement.Identifier, variable, statement.SourceInfo);
-        return new VoidValue();
+        return RuntimeValue.Void;
     }
 
     public RuntimeValue VisitFunctionDeclarationStatement(FunctionDeclarationStatement statement, Scope scope)
     {
-        FunctionValue function = new FunctionValue(
+        UserFunctionValue function = new UserFunctionValue(
             statement.ReturnType, statement.Parameters, statement.Body, scope
         );
+        var value = new RuntimeValue(function);
+        var source = statement.SourceInfo;
 
-        List<RuntimeType> parameterTypes = statement.Parameters.Select(p => p.Type).ToList();
-
-        FunctionType type = new FunctionType(
-            false,
-            statement.ReturnType,
-            parameterTypes
-        );
-
-        VariableSymbol variable = new VariableSymbol(function, type, true, statement.SourceInfo);
+        VariableSymbol variable = new VariableSymbol(value, value.Type, true, in source);
 
         scope.DeclareVariable(statement.Identifier, variable, statement.SourceInfo);
 
-        return new VoidValue();
+        return RuntimeValue.Void;
     }
 
     public RuntimeValue VisitCallExpression(CallExpression callExpression, Scope scope)
     {
         var value = Evaluate(callExpression.Caller, scope);
 
-        if (value is not FunctionValue function)
+        if (value.Type.Base != BaseType.UserFunction)
         {
             throw new InvalidCallExpressionException(
-                $"Cannot call {value.TypeName}", callExpression.SourceInfo
+                $"Cannot call {value.Type}", callExpression.SourceInfo
             );
         }
+
+        var function = value.AsUserFunction();
 
         var parameters = function.Parameters;
         int minExpectedArguments = parameters.Count(p => !p.HasDefaultValue());
@@ -163,20 +161,20 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
                 argumentSource = function.Parameters[i].SourceInfo;
             }
 
-            if (!function.Parameters[i].Type.AcceptValue(argumentValue))
+            if (!function.Parameters[i].Type.IsCompatibleWith(ref argumentValue))
             {
                 throw new InvalidParameterListException(
-                    $"Parameter {function.Parameters[i].Identifier} expects type {function.Parameters[i].Type.TypeName}, but {argumentValue.TypeName} was given",
+                    $"Parameter {function.Parameters[i].Identifier} expects type {function.Parameters[i].Type}, but {argumentValue.Type} was given",
                     argumentSource
                 );
             }
 
-            var variable = new VariableSymbol(argumentValue, function.Parameters[i].Type, function.Parameters[i].IsConstant, argumentSource);
+            var variable = new VariableSymbol(argumentValue, function.Parameters[i].Type, function.Parameters[i].IsConstant, ref argumentSource);
 
             functionScope.DeclareVariable(function.Parameters[i].Identifier, variable, argumentSource);
         }
 
-        RuntimeValue returnedValue = new VoidValue();
+        RuntimeValue returnedValue = RuntimeValue.Void;
         SourceInfo returnedValueSource;
 
         _executionContext.EnterFunction();
@@ -196,10 +194,10 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             throw;
         }
 
-        if (!function.ReturnType.AcceptValue(returnedValue))
+        if (!function.ReturnType.IsCompatibleWith(ref returnedValue))
         {
             throw new UnexpectedReturnType(
-                $"Function was expected to return {function.ReturnType.TypeName} but {returnedValue.TypeName} was returned",
+                $"Function was expected to return {function.ReturnType} but {returnedValue.Type} was returned",
                 returnedValueSource
             );
         }
@@ -214,9 +212,11 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         var variable = scope.GetVariable(statement.Target.Symbol, statement.SourceInfo);
         var newValue = Evaluate(statement.Value, scope);
 
-        variable.SetValue(newValue, statement.SourceInfo);
+        var source = statement.SourceInfo;
 
-        return new VoidValue();
+        variable.SetValue(ref newValue, ref source);
+
+        return RuntimeValue.Void;
     }
 
     public RuntimeValue VisitBinaryExpression(BinaryExpression expression, Scope scope)
@@ -224,8 +224,11 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         RuntimeValue leftHand = Evaluate(expression.Left, scope);
         string op = expression.Operator;
         RuntimeValue rightHand = Evaluate(expression.Right, scope);
+        var source = expression.SourceInfo;
 
-        return _operationDispatcher.ExecuteBinaryOperation(leftHand, op, rightHand, expression.SourceInfo);
+        _operationDispatcher.ExecuteBinaryOperation(ref leftHand, op, ref rightHand, out var result, ref source);
+
+        return result;
     }
 
     public RuntimeValue VisitUnarySimpleExpression(UnarySimpleExpression expression, Scope scope)
@@ -233,40 +236,45 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         RuntimeValue operand = Evaluate(expression.Operand, scope);
         string op = expression.Operator;
         bool isPostfix = expression.IsPostfix;
+        var source = expression.SourceInfo;
 
-        return _operationDispatcher.ExecuteUnaryOperation(operand, op, isPostfix, expression.SourceInfo);
+        _operationDispatcher.ExecuteUnaryOperation(in operand, op, out var result, isPostfix, in source);
+
+        return result;
     }
 
     public RuntimeValue VisitUnaryMutationExpression(UnaryMutationExpression expression, Scope scope)
     {
+        var source = expression.SourceInfo;
         var variable = scope.GetVariable(
             expression.Operand.Symbol, expression.SourceInfo, throwIfNotInitialized: true
         );
 
-        var valueBefore = variable.Value;
-        var valueAfter = _operationDispatcher.ExecuteUnaryOperation(
-            valueBefore, expression.Operator, expression.IsPostfix, expression.SourceInfo
+        var valueBefore = variable.GetValue(in source);
+        _operationDispatcher.ExecuteUnaryOperation(
+            in valueBefore, expression.Operator, out var valueAfter, expression.IsPostfix, in source
         );
 
-        variable.SetValue(valueAfter, expression.SourceInfo);
+        variable.SetValue(in valueAfter, in source);
 
         return expression.IsPostfix ? valueBefore : valueAfter;
     }
 
     public RuntimeValue VisitNullCheckerExpression(NullCheckerExpression expression, Scope scope)
     {
-        var runtimeValue = Evaluate(expression.Operand, scope);
+        var value = Evaluate(expression.Operand, scope);
 
-        return new BooleanValue(runtimeValue is NullValue);
+        return value.Type == RuntimeType.Null ? RuntimeValue.True : RuntimeValue.False;
     }
 
     public RuntimeValue VisitIdentifierExpression(IdentifierExpression expression, Scope scope)
     {
+        var source = expression.SourceInfo;
         var variable = scope.GetVariable(
             expression.Symbol, expression.SourceInfo, throwIfNotInitialized: true
         );
 
-        return variable.Value;
+        return variable.GetValue(in source);
     }
 
     public RuntimeValue VisitCodeBlockStatement(CodeBlockStatement codeBlock, Scope scope)
@@ -278,7 +286,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             Evaluate(stmt, codeBlockScope);
         }
 
-        return new VoidValue();
+        return RuntimeValue.Void;
     }
 
     public RuntimeValue VisitIfElseStatement(IfElseStatement ifElse, Scope scope)
@@ -292,7 +300,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             Evaluate(ifElse.Else, scope);
         }
 
-        return new VoidValue();
+        return RuntimeValue.Void;
     }
 
     public RuntimeValue VisitLoopStatement(LoopStatement loopStmt, Scope scope)
@@ -342,7 +350,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
         _executionContext.ExitLoop(loopStmt.SourceInfo);
 
-        return new VoidValue();
+        return RuntimeValue.Void;
     }
 
     public RuntimeValue VisitBreakStatement(BreakStatement breakStmt, Scope scope)
@@ -382,7 +390,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         }
 
         RuntimeValue returnedValue = (statement.ReturnedValue is null)
-                                        ? new VoidValue()
+                                        ? RuntimeValue.Void
                                         : Evaluate(statement.ReturnedValue, scope);
 
         throw new ReturnException(returnedValue, statement.SourceInfo);
@@ -395,42 +403,42 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
     public RuntimeValue VisitBooleanLiteralExpression(BooleanLiteralExpression expression, Scope state)
     {
-        return new BooleanValue(expression.BoolValue);
+        return expression.BoolValue ? RuntimeValue.True : RuntimeValue.False;
     }
 
     public RuntimeValue VisitDecimalLiteralExpression(DecimalLiteralExpression expression, Scope state)
     {
-        return new DecimalValue(expression.DecValue);
+        return new RuntimeValue(expression.DecValue);
     }
 
     public RuntimeValue VisitIntegerLiteralExpression(IntegerLiteralExpression expression, Scope state)
     {
-        return new IntegerValue(expression.IntValue);
+        return new RuntimeValue(expression.IntValue);
     }
 
     public RuntimeValue VisitNullLiteralExpression(NullLiteralExpression expression, Scope state)
     {
-        return new NullValue();
+        return RuntimeValue.Null;
     }
 
     public RuntimeValue VisitStringLiteralExpression(StringLiteralExpression expression, Scope state)
     {
-        return new StringValue(expression.StrValue);
+        return new RuntimeValue(expression.StrValue);
     }
 
     private bool GetValidBooleanValue(Expression condition, Scope scope)
     {
         var conditionResult = Evaluate(condition, scope);
 
-        if (conditionResult is not BooleanValue)
+        if (conditionResult.Type != RuntimeType.Boolean)
         {
             throw new UnexpectedTypeException(
                 conditionResult.GetType().Name,
-                nameof(BooleanValue),
+                RuntimeType.Boolean.ToString(),
                 condition.SourceInfo
             );
         }
 
-        return (conditionResult as BooleanValue)!.BoolValue;
+        return conditionResult.AsBoolean();
     }
 }

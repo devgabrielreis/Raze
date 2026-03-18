@@ -3,41 +3,52 @@ using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Types;
 using Raze.Script.Core.Runtime.Values;
 using Raze.Script.Core.Statements.Expressions;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Runtime.Symbols;
 
-public class ParameterSymbol : Symbol
+internal class ParameterSymbol : Symbol
 {
-    public bool IsConstant { get; private set; }
+    internal bool IsConstant { get; }
 
-    public RuntimeType Type { get; private set; }
+    internal RuntimeType Type { get; }
 
-    public string Identifier { get; private set; }
+    internal string Identifier { get; }
 
-    internal Expression? DefaultValue { get; private set; }
+    internal Expression? DefaultValue { get; }
 
-    public SourceInfo SourceInfo { get; private set; }
+    internal SourceInfo SourceInfo { get; }
 
-    public ParameterSymbol(
-        bool isConstant, RuntimeType type, string identifier, SourceInfo source, RuntimeValue? defaultValue
+    internal ParameterSymbol(
+        bool isConstant,
+        RuntimeType type,
+        string identifier,
+        ref readonly SourceInfo source,
+        RuntimeValue? defaultValue
     )
         : this(
             isConstant,
             type,
             identifier,
-            (defaultValue is null ? null : new RuntimeValueExpression(defaultValue, source)),
-            source
+            (defaultValue is null ? null : new RuntimeValueExpression(defaultValue.Value, source)),
+            in source
         )
     {
     }
 
     internal ParameterSymbol(
-        bool isConstant, RuntimeType type, string identifier, Expression? defaultValue, SourceInfo source
+        bool isConstant,
+        RuntimeType type,
+        string identifier,
+        Expression? defaultValue,
+        ref readonly SourceInfo source
     )
     {
-        if (type is VoidType)
+        if (type == RuntimeType.Void || type == RuntimeType.Null)
         {
-            throw new InvalidSymbolDeclarationException("Parameter cannot have void type", source);
+            ThrowConstantAssignmentException(type, in source);
         }
 
         IsConstant = isConstant;
@@ -47,8 +58,16 @@ public class ParameterSymbol : Symbol
         SourceInfo = source;
     }
 
-    public bool HasDefaultValue()
+    internal bool HasDefaultValue()
     {
         return DefaultValue is not null;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn]
+    [StackTraceHidden]
+    private static void ThrowConstantAssignmentException(RuntimeType type, ref readonly SourceInfo source)
+    {
+        throw new InvalidSymbolDeclarationException($"Parameter cannot have {type} type", source);
     }
 }

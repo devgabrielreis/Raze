@@ -1,30 +1,36 @@
 ﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Runtime.Types;
 using Raze.Script.Core.Runtime.Values;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Runtime.Operations;
 
 internal readonly record struct BinaryOperationKey(
-    string LeftTypeName,
+    RuntimeType LeftType,
     string Operator,
-    string RightTypeName
+    RuntimeType RightType
 );
 
-internal delegate RuntimeValue BinaryOperation(
-    RuntimeValue left,
-    RuntimeValue right,
-    SourceInfo source
+internal delegate void BinaryOperation(
+    ref readonly RuntimeValue left,
+    ref readonly RuntimeValue right,
+    out RuntimeValue result,
+    ref readonly SourceInfo source
 );
 
 internal readonly record struct UnaryOperationKey(
-    string OperandTypeName,
+    RuntimeType OperandType,
     string Operator,
     bool IsPostfix
 );
 
-internal delegate RuntimeValue UnaryOperation(
-    RuntimeValue operand,
-    SourceInfo source
+internal delegate void UnaryOperation(
+    ref readonly RuntimeValue operand,
+    out RuntimeValue result,
+    ref readonly SourceInfo source
 );
 
 internal class OperationDispatcher
@@ -44,32 +50,40 @@ internal class OperationDispatcher
         TOperationRegistrar.RegisterUnaryOperations(this);
     }
 
-    public RuntimeValue ExecuteBinaryOperation(RuntimeValue left, string op, RuntimeValue right, SourceInfo source)
+    public void ExecuteBinaryOperation(
+        ref readonly RuntimeValue left,
+        string op,
+        ref readonly RuntimeValue right,
+        out RuntimeValue target,
+        ref readonly SourceInfo source
+    )
     {
-        var key = new BinaryOperationKey(left.TypeName, op, right.TypeName);
+        var key = new BinaryOperationKey(left.Type, op, right.Type);
 
         if (!_binaryOperations.TryGetValue(key, out var operationFunc))
         {
-            throw new UnsupportedBinaryOperationException(
-                left.TypeName, right.TypeName, op, source
-            );
+            ThrowUnsupportedBinaryOperationException(in left, op, in right, in source);
         }
 
-        return operationFunc(left, right, source);
+        operationFunc(in left, in right, out target, in source);
     }
 
-    public RuntimeValue ExecuteUnaryOperation(RuntimeValue operand, string op, bool isPostfix, SourceInfo source)
+    public void ExecuteUnaryOperation(
+        ref readonly RuntimeValue operand,
+        string op,
+        out RuntimeValue target,
+        bool isPostfix,
+        ref readonly SourceInfo source
+    )
     {
-        var key = new UnaryOperationKey(operand.TypeName, op, isPostfix);
+        var key = new UnaryOperationKey(operand.Type, op, isPostfix);
 
         if (!_unaryOperations.TryGetValue(key, out var operationFunc))
         {
-            throw new UnsupportedUnaryOperationException(
-                op, operand.TypeName, isPostfix, source
-            );
+            ThrowUnsupportedUnaryOperationException(in operand, op, isPostfix, in source);
         }
 
-        return operationFunc(operand, source);
+        operationFunc(in operand, out target, in source);
     }
 
     public void RegisterBinaryOperation(BinaryOperationKey key, BinaryOperation operation)
@@ -90,5 +104,35 @@ internal class OperationDispatcher
         }
 
         _unaryOperations.Add(key, operation);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn]
+    [StackTraceHidden]
+    private static void ThrowUnsupportedBinaryOperationException(
+        ref readonly RuntimeValue left,
+        string op,
+        ref readonly RuntimeValue right,
+        ref readonly SourceInfo source
+    )
+    {
+        throw new UnsupportedBinaryOperationException(
+            left.Type.ToString(), right.Type.ToString(), op, source
+        );
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn]
+    [StackTraceHidden]
+    private static void ThrowUnsupportedUnaryOperationException(
+        ref readonly RuntimeValue operand,
+        string op,
+        bool isPostfix,
+        ref readonly SourceInfo source
+    )
+    {
+        throw new UnsupportedUnaryOperationException(
+            op, operand.Type.ToString(), isPostfix, source
+        );
     }
 }

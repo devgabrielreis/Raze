@@ -1,5 +1,6 @@
 ﻿using Raze.Script.Core.Constants;
 using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Runtime.Types;
 using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Script.Core.Runtime.Operations;
@@ -9,17 +10,17 @@ internal class StringOperationRegistrar : IOperationRegistrar
     public static void RegisterBinaryOperations(OperationDispatcher dispatcher)
     {
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.STRING_TYPE_NAME, Operators.PLUS, TypeNames.STRING_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.String, Operators.PLUS, RuntimeType.String),
             AddString
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.STRING_TYPE_NAME, Operators.EQUAL, TypeNames.STRING_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.String, Operators.EQUAL, RuntimeType.String),
             EqualString
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.STRING_TYPE_NAME, Operators.NOT_EQUAL, TypeNames.STRING_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.String, Operators.NOT_EQUAL, RuntimeType.String),
             NotEqualString
         );
     }
@@ -28,27 +29,50 @@ internal class StringOperationRegistrar : IOperationRegistrar
     {
     }
 
-    private static RuntimeValue AddString(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void AddString(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((StringValue)left).StrValue;
-        var rightValue = ((StringValue)right).StrValue;
+        var leftValue = left.AsString();
+        var rightValue = right.AsString();
 
-        return new StringValue(leftValue + rightValue);
+        result = new RuntimeValue(leftValue + rightValue);
     }
 
-    private static RuntimeValue EqualString(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void EqualString(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((StringValue)left).StrValue;
-        var rightValue = ((StringValue)right).StrValue;
+        var leftValue = left.AsString();
+        var rightValue = right.AsString();
 
-        return new BooleanValue(leftValue == rightValue);
+        var resultValue = leftValue == rightValue;
+
+        result = (resultValue)
+                ? RuntimeValue.True
+                : RuntimeValue.False;
     }
 
-    private static RuntimeValue NotEqualString(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void NotEqualString(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((StringValue)left).StrValue;
-        var rightValue = ((StringValue)right).StrValue;
+        var leftValue = left.AsString();
+        var rightValue = right.AsString();
 
-        return new BooleanValue(leftValue != rightValue);
+        var resultValue = leftValue != rightValue;
+
+        result = (resultValue)
+                ? RuntimeValue.True
+                : RuntimeValue.False;
     }
 }

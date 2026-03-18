@@ -1,8 +1,9 @@
 ﻿using Raze.Script.Core;
 using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Result;
 using Raze.Script.Core.Runtime.Scopes;
-using Raze.Script.Core.Runtime.Values;
+using Raze.Script.Core.Runtime.Types;
 using System.Reflection;
 
 internal class Program
@@ -42,18 +43,15 @@ internal class Program
             var sourceName = $"interpreter-source-{sources.Count}";
             sources[sourceName] = command;
 
-            try
-            {
-                var result = RazeScript.Evaluate(command, sourceName, scope);
+            var result = RazeScript.Evaluate(command, sourceName, scope);
 
-                if (result is not VoidValue)
-                {
-                    Console.WriteLine(result);
-                }
-            }
-            catch (RazeException razeEx)
+            if (result is RazeSuccess success && success.ValueType != BaseType.Void)
             {
-                PrettyPrintRazeException(razeEx, sources);
+                Console.WriteLine(success.ValueString);
+            }
+            else if (result is RazeError error)
+            {
+                PrettyPrintRazeException(error.Error, sources);
             }
         }
     }

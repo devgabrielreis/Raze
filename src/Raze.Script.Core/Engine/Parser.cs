@@ -439,7 +439,7 @@ internal class Parser
                     type,
                     identifier,
                     defaultValue,
-                    sourceStart
+                    ref sourceStart
                 )
             );
         }
@@ -456,6 +456,24 @@ internal class Parser
         var typeToken = CurrentToken;
         Advance();
 
+        List<RuntimeType> generics = [];
+        if (CurrentToken.Type == TokenType.LessThan)
+        {
+            generics = ParseGenerics();
+        }
+
+        if (generics.Count > 0 && typeToken.Type != TokenType.FunctionTypeName)
+        {
+            throw new InvalidTypeDeclarationException("This type cannot have generics", CurrentToken.SourceInfo);
+        }
+        else if (generics.Count == 0 && typeToken.Type == TokenType.FunctionTypeName)
+        {
+            throw new InvalidTypeDeclarationException(
+                "Function type requires at least one generic",
+                typeToken.SourceInfo
+            );
+        }
+
         var isNullable = false;
         if (CurrentToken.Type == TokenType.QuestionMark)
         {
@@ -468,47 +486,16 @@ internal class Parser
             Advance();
         }
 
-        if (CurrentToken.Type == TokenType.LessThan)
-        {
-            return typeToken.Type switch
-            {
-                TokenType.FunctionTypeName => ParseFunctionType(isNullable, typeToken.SourceInfo),
-                _ => throw new InvalidTypeDeclarationException("This type cannot have generics", CurrentToken.SourceInfo)
-            };
-        }
-        else if (typeToken.Type == TokenType.FunctionTypeName)
-        {
-            throw new InvalidTypeDeclarationException(
-                "Function type requires at least one generic",
-                typeToken.SourceInfo
-            );
-        }
-
         return (typeToken.Type) switch
         {
-            TokenType.BooleanTypeName => new BooleanType(isNullable),
-            TokenType.DecimalTypeName => new DecimalType(isNullable),
-            TokenType.IntegerTypeName => new IntegerType(isNullable),
-            TokenType.StringTypeName  => new StringType(isNullable),
-            TokenType.VoidTypeName    => new VoidType(),
+            TokenType.BooleanTypeName  => (isNullable) ? RuntimeType.NullableBoolean : RuntimeType.Boolean,
+            TokenType.DecimalTypeName  => (isNullable) ? RuntimeType.NullableDecimal : RuntimeType.Decimal,
+            TokenType.IntegerTypeName  => (isNullable) ? RuntimeType.NullableInteger : RuntimeType.Integer,
+            TokenType.StringTypeName   => (isNullable) ? RuntimeType.NullableString : RuntimeType.String,
+            TokenType.VoidTypeName     => RuntimeType.Void,
+            TokenType.FunctionTypeName => TypeFactory.GetType(BaseType.UserFunction, isNullable, generics.ToArray()),
             _ => ThrowUnexpectedTokenException<RuntimeType>("type name", typeToken)
         };
-    }
-
-    private FunctionType ParseFunctionType(bool isNullable, SourceInfo declarationStart)
-    {
-        Expect(TokenType.LessThan);
-        var generics = ParseGenerics();
-
-        if (generics.Count == 0)
-        {
-            throw new InvalidTypeDeclarationException("Function type requires at least one generic", declarationStart);
-        }
-
-        var returnType = generics[generics.Count - 1];
-        generics.RemoveAt(generics.Count - 1);
-
-        return new FunctionType(isNullable, returnType, generics);
     }
 
     private List<RuntimeType> ParseGenerics()
