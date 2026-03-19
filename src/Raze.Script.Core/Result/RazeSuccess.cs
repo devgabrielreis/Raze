@@ -59,7 +59,7 @@ public class RazeSuccess : RazeResult
 
     public string AsString()
     {
-        if (ValueType != BaseType.Boolean)
+        if (ValueType != BaseType.String)
         {
             throw new InvalidOperationException("This value is not a string");
         }
