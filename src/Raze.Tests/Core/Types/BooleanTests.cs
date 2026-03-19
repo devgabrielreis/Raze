@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Exceptions.ParseExceptions;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 namespace Raze.Tests.Core.Types;
 
@@ -107,5 +108,12 @@ public class BooleanTests
     public void Evaluate_InvalidBooleanUnaryOperations_ThrowUnsupportedUnaryOperationException(string expression)
     {
         RazeAssert.ReturnsError<UnsupportedUnaryOperationException>(expression);
+    }
+
+    [Fact]
+    public void Evaluate_BooleanTypeWithGenerics_ThrowInvalidTypeDeclarationException()
+    {
+        RazeAssert.ReturnsError<InvalidTypeDeclarationException>("var boolean<integer> myVar");
+        RazeAssert.ReturnsError<InvalidTypeDeclarationException>("var boolean<> myVar");
     }
 }

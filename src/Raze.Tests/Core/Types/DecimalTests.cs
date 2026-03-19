@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Exceptions.ParseExceptions;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using System.Globalization;
 
 namespace Raze.Tests.Core.Types;
@@ -129,5 +130,12 @@ public class DecimalTests
     public void Evaluate_InvalidDecimalUnaryOperations_ThrowUnsupportedUnaryOperationException(string expression)
     {
         RazeAssert.ReturnsError<UnsupportedUnaryOperationException>(expression);
+    }
+
+    [Fact]
+    public void Evaluate_DecimalTypeWithGenerics_ThrowInvalidTypeDeclarationException()
+    {
+        RazeAssert.ReturnsError<InvalidTypeDeclarationException>("var decimal<integer> myVar");
+        RazeAssert.ReturnsError<InvalidTypeDeclarationException>("var decimal<> myVar");
     }
 }

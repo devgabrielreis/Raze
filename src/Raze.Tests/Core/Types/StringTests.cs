@@ -1,4 +1,5 @@
 ﻿using Raze.Script.Core.Exceptions.LexerExceptions;
+using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 namespace Raze.Tests.Core.Types;
@@ -119,5 +120,12 @@ public class StringTests
     public void Evaluate_InvalidStringUnaryOperations_ThrowUnsupportedUnaryOperationException(string expression)
     {
         RazeAssert.ReturnsError<UnsupportedUnaryOperationException>(expression);
+    }
+
+    [Fact]
+    public void Evaluate_StringTypeWithGenerics_ThrowInvalidTypeDeclarationException()
+    {
+        RazeAssert.ReturnsError<InvalidTypeDeclarationException>("var string<integer> myVar");
+        RazeAssert.ReturnsError<InvalidTypeDeclarationException>("var string<> myVar");
     }
 }

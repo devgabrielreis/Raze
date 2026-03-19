@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Exceptions.ParseExceptions;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 namespace Raze.Tests.Core.Types;
 
@@ -110,5 +111,12 @@ public class IntegerTests
     public void Evaluate_InvalidIntegerUnaryOperations_ThrowUnsupportedUnaryOperationException(string expression)
     {
         RazeAssert.ReturnsError<UnsupportedUnaryOperationException>(expression);
+    }
+
+    [Fact]
+    public void Evaluate_IntegerTypeWithGenerics_ThrowInvalidTypeDeclarationException()
+    {
+        RazeAssert.ReturnsError<InvalidTypeDeclarationException>("var integer<integer> myVar");
+        RazeAssert.ReturnsError<InvalidTypeDeclarationException>("var integer<> myVar");
     }
 }
