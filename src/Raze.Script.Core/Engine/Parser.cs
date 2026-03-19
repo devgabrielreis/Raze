@@ -459,14 +459,15 @@ internal class Parser
         List<RuntimeType> generics = [];
         if (CurrentToken.Type == TokenType.LessThan)
         {
+            if (typeToken.Type != TokenType.FunctionTypeName)
+            {
+                throw new InvalidTypeDeclarationException("This type cannot have generics", CurrentToken.SourceInfo);
+            }
+
             generics = ParseGenerics();
         }
 
-        if (generics.Count > 0 && typeToken.Type != TokenType.FunctionTypeName)
-        {
-            throw new InvalidTypeDeclarationException("This type cannot have generics", CurrentToken.SourceInfo);
-        }
-        else if (generics.Count == 0 && typeToken.Type == TokenType.FunctionTypeName)
+        if (generics.Count == 0 && typeToken.Type == TokenType.FunctionTypeName)
         {
             throw new InvalidTypeDeclarationException(
                 "Function type requires at least one generic",
