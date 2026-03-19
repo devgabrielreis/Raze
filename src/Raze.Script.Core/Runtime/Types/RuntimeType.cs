@@ -60,7 +60,7 @@ internal sealed class RuntimeType
             _ => $"<{Base}>"
         };
 
-        if (IsNullable)
+        if (IsNullable && Base != BaseType.Null)
         {
             typeName += Operators.QUESTION_MARK;
         }
