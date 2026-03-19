@@ -1,5 +1,4 @@
-﻿using Raze.Script.Core;
-using Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core.Exceptions.ParseExceptions;
 
 namespace Raze.Tests.Core.Types;
 
@@ -16,10 +15,7 @@ public class VoidTests
             myFunc();
         ";
 
-        Assert.Throws<InvalidSymbolDeclarationException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<InvalidSymbolDeclarationException>(script);
     }
 
     [Fact]
@@ -29,10 +25,7 @@ public class VoidTests
             var void test
         ";
 
-        Assert.Throws<InvalidSymbolDeclarationException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<InvalidSymbolDeclarationException>(script);
     }
 
     [Fact]
@@ -44,9 +37,6 @@ public class VoidTests
             }
         ";
 
-        Assert.Throws<InvalidTypeDeclarationException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<InvalidTypeDeclarationException>(script);
     }
 }

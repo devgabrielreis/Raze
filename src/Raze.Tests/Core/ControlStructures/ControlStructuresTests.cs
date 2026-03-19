@@ -1,5 +1,4 @@
-﻿using Raze.Script.Core;
-using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 namespace Raze.Tests.Core.ControlStructures;
 
@@ -8,23 +7,15 @@ public class ControlStructuresTests
     [Fact]
     public void Evaluate_ContinueStatementOutsideLoop_ThrowsUnexpectedStatementException()
     {
-        Assert.Throws<UnexpectedStatementException>(() =>
-        {
-            RazeScript.Evaluate("continue", "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnexpectedStatementException>("continue");
     }
 
     [Fact]
     public void Evaluate_BreakStatementOutsideLoop_ThrowsUnexpectedStatementException()
     {
-        Assert.Throws<UnexpectedStatementException>(() =>
-        {
-            RazeScript.Evaluate("break", "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnexpectedStatementException>("break");
 
-        Assert.Throws<UnexpectedStatementException>(() =>
-        {
-            RazeScript.Evaluate("""
+        var script = """
             def integer inner() {
                 break;
             }
@@ -32,16 +23,13 @@ public class ControlStructuresTests
             while (true) {
                 inner();
             }
-            """, "Raze.Tests");
-        });
+        """;
+        RazeAssert.ReturnsError<UnexpectedStatementException>(script);
     }
 
     [Fact]
     public void Evaluate_ReturnStatementOutsideFunction_ThrowsUnexpectedStatementException()
     {
-        Assert.Throws<UnexpectedStatementException>(() =>
-        {
-            RazeScript.Evaluate("return", "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnexpectedStatementException>("return");
     }
 }

@@ -1,7 +1,5 @@
-﻿using Raze.Script.Core;
-using Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Tests.Core.ControlStructures;
 
@@ -18,9 +16,7 @@ public class IfElseTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(10, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 10);
     }
 
     [Fact]
@@ -34,9 +30,7 @@ public class IfElseTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(0, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 0);
     }
 
     [Fact]
@@ -52,9 +46,7 @@ public class IfElseTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(20, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 20);
     }
 
     [Fact]
@@ -76,9 +68,7 @@ public class IfElseTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(50, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 50);
     }
 
     [Fact]
@@ -92,10 +82,7 @@ public class IfElseTests
             test
         ";
 
-        Assert.Throws<UnexpectedTokenException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnexpectedTokenException>(script);
     }
 
     [Fact]
@@ -109,10 +96,7 @@ public class IfElseTests
             test
         ";
 
-        Assert.Throws<UnexpectedTypeException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnexpectedTypeException>(script);
     }
 
     [Fact]
@@ -127,9 +111,6 @@ public class IfElseTests
             test
         ";
 
-        Assert.Throws<UnexpectedTypeException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnexpectedTypeException>(script);
     }
 }

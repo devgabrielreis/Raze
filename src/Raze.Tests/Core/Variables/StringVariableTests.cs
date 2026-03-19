@@ -1,7 +1,5 @@
-﻿using Raze.Script.Core;
-using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Runtime.Scopes;
-using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Tests.Core.Variables;
 
@@ -13,18 +11,15 @@ public class StringVariableTests
     public void Evaluate_StringVariableDeclaration_ReturnsExpectedValue(string expression, string varname, string? expected)
     {
         var scope = new InterpreterScope();
-        RazeScript.Evaluate(expression, "Raze.Tests", scope);
-
-        var result = RazeScript.Evaluate(varname, "Raze.Tests", scope);
+        RazeAssert.EvaluatesToVoid(expression, scope);
 
         if (expected is null)
         {
-            Assert.IsType<NullValue>(result);
+            RazeAssert.EvaluatesToNull(varname, scope);
         }
         else
         {
-            Assert.IsType<StringValue>(result);
-            Assert.Equal(expected, (result as StringValue)!.StrValue);
+            RazeAssert.EvaluatesToString(varname, expected, scope);
         }
     }
 
@@ -35,10 +30,7 @@ public class StringVariableTests
     [InlineData("var string test = null")]
     public void Evaluate_WrongStringVariableTypeAssignment_ThrowsVariableTypeException(string expression)
     {
-        Assert.Throws<VariableTypeException>(() =>
-        {
-            var result = RazeScript.Evaluate(expression, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<VariableTypeException>(expression);
     }
 
     [Theory]
@@ -53,9 +45,6 @@ public class StringVariableTests
             {(isPostfix ? $"test{op}" : $"{op}test")}
         """;
 
-        Assert.Throws<UnsupportedUnaryOperationException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnsupportedUnaryOperationException>(script);
     }
 }

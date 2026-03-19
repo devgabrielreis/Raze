@@ -1,7 +1,5 @@
-﻿using Raze.Script.Core;
-using Raze.Script.Core.Exceptions.LexerExceptions;
+﻿using Raze.Script.Core.Exceptions.LexerExceptions;
 using Raze.Script.Core.Exceptions.ParseExceptions;
-using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Tests.Core;
 
@@ -14,10 +12,7 @@ public class SyntaxTests
     [InlineData("0.0.")]
     public void Evaluate_Expression_ThrowsUnexpectedCharacterException(string expression)
     {
-        Assert.Throws<UnexpectedCharacterException>(() =>
-        {
-            RazeScript.Evaluate(expression, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnexpectedCharacterException>(expression);
     }
 
     [Theory]
@@ -27,10 +22,7 @@ public class SyntaxTests
     [InlineData("var nome = 10")]
     public void Evaluate_Expression_ThrowsUnexpectedTokenException(string expression)
     {
-        Assert.Throws<UnexpectedTokenException>(() =>
-        {
-            RazeScript.Evaluate(expression, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnexpectedTokenException>(expression);
     }
 
     [Theory]
@@ -38,12 +30,9 @@ public class SyntaxTests
     [InlineData("\"teste")]
     [InlineData("\"")]
     [InlineData("teste\"")]
-    public void Evaluate_InvalidString_ThrowsInvalidStringException(string expreesion)
+    public void Evaluate_InvalidString_ThrowsInvalidStringException(string expression)
     {
-        Assert.Throws<InvalidStringException>(() =>
-        {
-            RazeScript.Evaluate(expreesion, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<InvalidStringException>(expression);
     }
 
     [Fact]
@@ -54,10 +43,7 @@ public class SyntaxTests
             test = test + 1
         ";
 
-        Assert.Throws<UnexpectedTokenException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnexpectedTokenException>(script);
     }
 
     [Fact]
@@ -69,10 +55,7 @@ public class SyntaxTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(11, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 11);
     }
 
     [Fact]
@@ -86,10 +69,7 @@ public class SyntaxTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(11, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 11);
     }
 
     [Fact]
@@ -101,10 +81,7 @@ public class SyntaxTests
             }
         ";
 
-        Assert.Throws<UnexpectedTokenException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnexpectedTokenException>(script);
     }
 
     [Theory]
@@ -121,10 +98,7 @@ public class SyntaxTests
             {identifier}
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(11, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 11);
     }
 
     [Theory]
@@ -134,10 +108,7 @@ public class SyntaxTests
     [InlineData("++1.0")]
     public void Evaluate_UnaryMutationExpressionNotOnVariable_ThrowsInvalidOperandException(string expression)
     {
-        Assert.Throws<InvalidOperandException>(() =>
-        {
-            RazeScript.Evaluate(expression, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<InvalidOperandException>(expression);
     }
 
     [Theory]
@@ -146,9 +117,6 @@ public class SyntaxTests
     [InlineData("false??")]
     public void Evaluate_NullCheckerNotOnVariable_ThrowsInvalidOperandException(string expression)
     {
-        Assert.Throws<InvalidOperandException>(() =>
-        {
-            RazeScript.Evaluate(expression, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<InvalidOperandException>(expression);
     }
 }

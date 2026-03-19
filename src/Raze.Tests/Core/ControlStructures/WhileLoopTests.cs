@@ -1,7 +1,5 @@
-﻿using Raze.Script.Core;
-using Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Tests.Core.ControlStructures;
 
@@ -18,9 +16,7 @@ public class WhileLoopTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(12, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 12);
     }
 
     [Fact]
@@ -34,10 +30,7 @@ public class WhileLoopTests
             }
         ";
 
-        Assert.Throws<UnexpectedTypeException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnexpectedTypeException>(script);
     }
 
     [Fact]
@@ -50,10 +43,7 @@ public class WhileLoopTests
             }
         ";
 
-        Assert.Throws<UnexpectedTypeException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnexpectedTypeException>(script);
     }
 
     [Fact]
@@ -70,9 +60,7 @@ public class WhileLoopTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(5, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 5);
     }
 
     [Fact]
@@ -89,9 +77,7 @@ public class WhileLoopTests
             test
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(12, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 12);
     }
 
     [Fact]
@@ -103,10 +89,7 @@ public class WhileLoopTests
             }
         ";
 
-        Assert.Throws<UnexpectedTokenException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnexpectedTokenException>(script);
     }
 
     [Fact]
@@ -120,11 +103,7 @@ public class WhileLoopTests
             }
             test
         ";
-        Int128 expectedResult = 10;
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(expectedResult, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 10);
     }
 }

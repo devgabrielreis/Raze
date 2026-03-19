@@ -1,7 +1,4 @@
-﻿using Raze.Script.Core;
-using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Runtime.Scopes;
-using Raze.Script.Core.Runtime.Values;
+﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 namespace Raze.Tests.Core.Types;
 
@@ -26,11 +23,7 @@ public class BooleanTests
     [InlineData("false || false", false)]
     public void Evaluate_BooleanComparisonExpression_ReturnsExpectedValue(string expression, bool expected)
     {
-        var scope = new InterpreterScope();
-        var result = RazeScript.Evaluate(expression, "Raze.Tests", scope);
-
-        Assert.IsType<BooleanValue>(result);
-        Assert.Equal(expected, (result as BooleanValue)!.BoolValue);
+        RazeAssert.EvaluatesToBoolean(expression, expected);
     }
 
     [Theory]
@@ -97,10 +90,7 @@ public class BooleanTests
     [InlineData("true <= true")]
     public void Evaluate_InvalidBooleanBinaryOperations_ThrowUnsupportedBinaryOperationException(string expression)
     {
-        Assert.Throws<UnsupportedBinaryOperationException>(() =>
-        {
-            var result = RazeScript.Evaluate(expression, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnsupportedBinaryOperationException>(expression);
     }
 
     [Theory]
@@ -108,11 +98,7 @@ public class BooleanTests
     [InlineData("!false", true)]
     public void Evaluate_BooleanUnaryOperation_ReturnsExpectedValue(string expression, bool expected)
     {
-        var scope = new InterpreterScope();
-        var result = RazeScript.Evaluate(expression, "Raze.Tests", scope);
-
-        Assert.IsType<BooleanValue>(result);
-        Assert.Equal(expected, (result as BooleanValue)!.BoolValue);
+        RazeAssert.EvaluatesToBoolean(expression, expected);
     }
 
     [Theory]
@@ -120,9 +106,6 @@ public class BooleanTests
     [InlineData("+true")]
     public void Evaluate_InvalidBooleanUnaryOperations_ThrowUnsupportedUnaryOperationException(string expression)
     {
-        Assert.Throws<UnsupportedUnaryOperationException>(() =>
-        {
-            var result = RazeScript.Evaluate(expression, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnsupportedUnaryOperationException>(expression);
     }
 }

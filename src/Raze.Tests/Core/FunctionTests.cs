@@ -1,8 +1,8 @@
-﻿using Raze.Script.Core;
-using Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Runtime.Scopes;
-using Raze.Script.Core.Runtime.Values;
+using Raze.Script.Core.Runtime.Types;
+using System.Globalization;
 
 namespace Raze.Tests.Core;
 
@@ -15,14 +15,14 @@ public class FunctionTests
         }
         
         myFunc();
-    ", "10")]
+    ", 10, BaseType.Integer)]
     [InlineData(@"
         def decimal myFunc(decimal param) {
             return param + 5.0;
         }
         
         myFunc(5.0);
-    ", "10.0")]
+    ", "10.0", BaseType.Decimal)]
     [InlineData(@"
         def integer? myFunc(integer param, integer param2) {
             var integer result = param + param2;
@@ -35,7 +35,7 @@ public class FunctionTests
         }
         
         myFunc(5, 10);
-    ", "null")]
+    ", null, BaseType.Null)]
     [InlineData(@"
         def integer? myFunc(integer param, integer param2) {
             var integer result = param + param2;
@@ -48,12 +48,24 @@ public class FunctionTests
         }
         
         myFunc(10, 10);
-    ", "20")]
-    public void Evaluate_Function_ReturnsExpectedValue(string script, string expectedResult)
+    ", 20, BaseType.Integer)]
+    public void Evaluate_Function_ReturnsExpectedValue(string script, object? expectedResult, BaseType expectedType)
     {
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-
-        Assert.Equal(expectedResult, result.ToString());
+        switch (expectedType)
+        {
+            case BaseType.Integer:
+                RazeAssert.EvaluatesToInteger(script, (int)expectedResult!);
+                break;
+            case BaseType.Decimal:
+                decimal expectedDecimal = decimal.Parse((string)expectedResult!, CultureInfo.InvariantCulture);
+                RazeAssert.EvaluatesToDecimal(script, expectedDecimal);
+                break;
+            case BaseType.Null:
+                RazeAssert.EvaluatesToNull(script);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(expectedType));
+        }
     }
 
     [Fact]
@@ -65,15 +77,10 @@ public class FunctionTests
             }
         ";
         var scope = new InterpreterScope();
-        RazeScript.Evaluate(function, "Raze.Tests", scope);
 
-        var result = RazeScript.Evaluate("myFunc(5)", "Raze.Tests", scope);
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(20, (result as IntegerValue)!.IntValue);
-
-        result = RazeScript.Evaluate("myFunc(5, 25)", "Raze.Tests", scope);
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(30, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToVoid(function, scope);
+        RazeAssert.EvaluatesToInteger("myFunc(5)", 20, scope);
+        RazeAssert.EvaluatesToInteger("myFunc(5, 25)", 30, scope);
     }
 
     [Fact]
@@ -87,8 +94,7 @@ public class FunctionTests
             myFunc();
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<VoidValue>(result);
+        RazeAssert.EvaluatesToVoid(script);
 
         script = @"
             def void myFunc() {
@@ -97,8 +103,7 @@ public class FunctionTests
             myFunc();
         ";
 
-        result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<VoidValue>(result);
+        RazeAssert.EvaluatesToVoid(script);
     }
 
     [Fact]
@@ -118,23 +123,12 @@ public class FunctionTests
         ";
 
         var scope = new InterpreterScope();
-        RazeScript.Evaluate(script, "Raze.Tests", scope);
 
-        var result = RazeScript.Evaluate("counter2()", "Raze.Tests", scope);
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(51, (result as IntegerValue)!.IntValue);
-
-        result = RazeScript.Evaluate("counter1()", "Raze.Tests", scope);
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(101, (result as IntegerValue)!.IntValue);
-
-        result = RazeScript.Evaluate("counter2()", "Raze.Tests", scope);
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(52, (result as IntegerValue)!.IntValue);
-
-        result = RazeScript.Evaluate("counter1()", "Raze.Tests", scope);
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(102, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToVoid(script, scope);
+        RazeAssert.EvaluatesToInteger("counter2()", 51, scope);
+        RazeAssert.EvaluatesToInteger("counter1()", 101, scope);
+        RazeAssert.EvaluatesToInteger("counter2()", 52, scope);
+        RazeAssert.EvaluatesToInteger("counter1()", 102, scope);
     }
 
     [Fact]
@@ -152,9 +146,7 @@ public class FunctionTests
             myFunc(myFuncParam);
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(50, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 50);
     }
 
     [Fact]
@@ -168,10 +160,7 @@ public class FunctionTests
             myFunc();
         ";
 
-        Assert.Throws<InvalidParameterListException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<InvalidParameterListException>(script);
     }
 
     [Fact]
@@ -188,10 +177,7 @@ public class FunctionTests
             myFunc(10, 10);
         ";
 
-        Assert.Throws<ConstantAssignmentException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<ConstantAssignmentException>(script);
     }
 
     [Fact]
@@ -209,10 +195,7 @@ public class FunctionTests
             myFunc = myFunc2;
         ";
 
-        Assert.Throws<ConstantAssignmentException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<ConstantAssignmentException>(script);
     }
 
     [Fact]
@@ -224,10 +207,7 @@ public class FunctionTests
             }
         ";
 
-        Assert.Throws<InvalidParameterListException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<InvalidParameterListException>(script);
     }
 
     [Fact]
@@ -241,10 +221,7 @@ public class FunctionTests
             myFunc();
         ";
 
-        Assert.Throws<UnexpectedReturnType>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnexpectedReturnType>(script);
     }
 
     [Fact]
@@ -262,9 +239,7 @@ public class FunctionTests
             makeCounter(0)();
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(1, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 1);
     }
 
     [Fact]
@@ -282,9 +257,7 @@ public class FunctionTests
             fibonacci(6);
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(8, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 8);
     }
 
     [Fact]
@@ -296,9 +269,6 @@ public class FunctionTests
             myvar();
         ";
 
-        Assert.Throws<InvalidCallExpressionException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<InvalidCallExpressionException>(script);
     }
 }

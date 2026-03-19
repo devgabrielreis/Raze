@@ -1,7 +1,5 @@
-﻿using Raze.Script.Core;
-using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Runtime.Scopes;
-using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Tests.Core;
 
@@ -11,20 +9,14 @@ public class ScopeTests
     public void Evaluate_DuplicateVariableDeclaration_ThrowsException()
     {
         var scope = new InterpreterScope();
-        RazeScript.Evaluate("var integer x = 1", "Raze.Tests", scope);
 
-        Assert.Throws<RedeclarationException>(() =>
-        {
-            RazeScript.Evaluate("var integer x = 2", "Raze.Tests", scope);
-        });
+        RazeAssert.EvaluatesToVoid("var integer x = 1", scope);
+        RazeAssert.ReturnsError<RedeclarationException>("var integer x = 2", scope);
 
         var scope2 = new InterpreterScope();
-        RazeScript.Evaluate("var integer x = 1", "Raze.Tests", scope2);
 
-        Assert.Throws<RedeclarationException>(() =>
-        {
-            RazeScript.Evaluate("const integer x = 2", "Raze.Tests", scope2);
-        });
+        RazeAssert.EvaluatesToVoid("var integer x = 1", scope2);
+        RazeAssert.ReturnsError<RedeclarationException>("const integer x = 2", scope2);
     }
 
     [Fact]
@@ -44,9 +36,7 @@ public class ScopeTests
             a;
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(16, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 16);
     }
 
     [Fact]
@@ -59,10 +49,7 @@ public class ScopeTests
             test
         ";
 
-        Assert.Throws<UndefinedIdentifierException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UndefinedIdentifierException>(script);
     }
 
     [Fact]
@@ -76,17 +63,9 @@ public class ScopeTests
             }
         ";
 
-        RazeScript.Evaluate(script, "Raze.Tests", scope);
-
-        Assert.Throws<UndefinedIdentifierException>(() =>
-        {
-            RazeScript.Evaluate("test", "Raze.Tests", scope);
-        });
-
-        Assert.Throws<UndefinedIdentifierException>(() =>
-        {
-            RazeScript.Evaluate("i", "Raze.Tests", scope);
-        });
+        RazeAssert.EvaluatesToVoid(script, scope);
+        RazeAssert.ReturnsError<UndefinedIdentifierException>("test", scope);
+        RazeAssert.ReturnsError<UndefinedIdentifierException>("i", scope);
     }
 
     [Fact]
@@ -101,12 +80,8 @@ public class ScopeTests
             }
         ";
 
-        RazeScript.Evaluate(script, "Raze.Tests", scope);
-
-        Assert.Throws<UndefinedIdentifierException>(() =>
-        {
-            RazeScript.Evaluate("test", "Raze.Tests", scope);
-        });
+        RazeAssert.EvaluatesToVoid(script, scope);
+        RazeAssert.ReturnsError<UndefinedIdentifierException>("test", scope);
     }
 
     [Fact]
@@ -125,9 +100,6 @@ public class ScopeTests
             outer();
         ";
 
-        Assert.Throws<UndefinedIdentifierException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UndefinedIdentifierException>(script);
     }
 }

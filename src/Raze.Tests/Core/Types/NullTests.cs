@@ -1,5 +1,4 @@
 ﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core;
 
 namespace Raze.Tests.Core.Types;
 
@@ -73,10 +72,7 @@ public class NullTests
     [InlineData("null || \"a\"")]
     public void Evaluate_NullBinaryOperations_ThrowUnsupportedBinaryOperationException(string expression)
     {
-        Assert.Throws<UnsupportedBinaryOperationException>(() =>
-        {
-            var result = RazeScript.Evaluate(expression, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnsupportedBinaryOperationException>(expression);
     }
 
     [Theory]
@@ -85,9 +81,6 @@ public class NullTests
     [InlineData("!null")]
     public void Evaluate_InvalidNullUnaryOperations_ThrowUnsupportedUnaryOperationException(string expression)
     {
-        Assert.Throws<UnsupportedUnaryOperationException>(() =>
-        {
-            var result = RazeScript.Evaluate(expression, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnsupportedUnaryOperationException>(expression);
     }
 }
