@@ -6,18 +6,18 @@ namespace Raze.Script.Core.Runtime.Types;
 
 internal sealed class RuntimeType
 {
-    public static readonly RuntimeType Integer = TypeFactory.GetType(BaseType.Integer, false);
-    public static readonly RuntimeType Decimal = TypeFactory.GetType(BaseType.Decimal, false);
-    public static readonly RuntimeType Boolean = TypeFactory.GetType(BaseType.Boolean, false);
-    public static readonly RuntimeType String = TypeFactory.GetType(BaseType.String, false);
+    internal static readonly RuntimeType Integer = TypeFactory.GetType(BaseType.Integer, false);
+    internal static readonly RuntimeType Decimal = TypeFactory.GetType(BaseType.Decimal, false);
+    internal static readonly RuntimeType Boolean = TypeFactory.GetType(BaseType.Boolean, false);
+    internal static readonly RuntimeType String = TypeFactory.GetType(BaseType.String, false);
 
-    public static readonly RuntimeType NullableInteger = TypeFactory.GetType(BaseType.Integer, true);
-    public static readonly RuntimeType NullableDecimal = TypeFactory.GetType(BaseType.Decimal, true);
-    public static readonly RuntimeType NullableBoolean = TypeFactory.GetType(BaseType.Boolean, true);
-    public static readonly RuntimeType NullableString = TypeFactory.GetType(BaseType.String, true);
+    internal static readonly RuntimeType NullableInteger = TypeFactory.GetType(BaseType.Integer, true);
+    internal static readonly RuntimeType NullableDecimal = TypeFactory.GetType(BaseType.Decimal, true);
+    internal static readonly RuntimeType NullableBoolean = TypeFactory.GetType(BaseType.Boolean, true);
+    internal static readonly RuntimeType NullableString = TypeFactory.GetType(BaseType.String, true);
 
-    public static readonly RuntimeType Void = TypeFactory.GetType(BaseType.Void, false);
-    public static readonly RuntimeType Null = TypeFactory.GetType(BaseType.Null, true);
+    internal static readonly RuntimeType Void = TypeFactory.GetType(BaseType.Void, false);
+    internal static readonly RuntimeType Null = TypeFactory.GetType(BaseType.Null, true);
 
     internal BaseType Base { get; }
     internal bool IsNullable { get; }

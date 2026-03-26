@@ -3,10 +3,10 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements;
 
-internal class BreakStatement : Statement
+internal sealed class BreakStatement : Statement
 {
-    public BreakStatement(SourceInfo source)
-        : base(source)
+    internal BreakStatement(SourceInfo source)
+        : base(source, true)
     {
     }
 

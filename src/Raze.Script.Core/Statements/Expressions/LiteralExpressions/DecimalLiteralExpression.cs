@@ -3,18 +3,14 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 
-internal class DecimalLiteralExpression : LiteralExpression
+internal sealed class DecimalLiteralExpression : LiteralExpression
 {
-    public override object Value => _value;
+    internal readonly decimal DecValue;
 
-    public decimal DecValue => _value;
-
-    private readonly decimal _value;
-
-    public DecimalLiteralExpression(decimal value, SourceInfo source)
-        : base(source)
+    internal DecimalLiteralExpression(decimal value, SourceInfo source)
+        : base(source, true)
     {
-        _value = value;
+        DecValue = value;
     }
 
     internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)

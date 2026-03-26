@@ -1,5 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Runtime.Scopes;
+﻿using Raze.Script.Core;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 namespace Raze.Tests.Core;
 
@@ -8,12 +8,12 @@ public class ScopeTests
     [Fact]
     public void Evaluate_DuplicateVariableDeclaration_ThrowsException()
     {
-        var scope = new InterpreterScope();
+        var scope = RazeScript.CreateInterpreterScope();
 
         RazeAssert.EvaluatesToVoid("var integer x = 1", scope);
         RazeAssert.ReturnsError<RedeclarationException>("var integer x = 2", scope);
 
-        var scope2 = new InterpreterScope();
+        var scope2 = RazeScript.CreateInterpreterScope();
 
         RazeAssert.EvaluatesToVoid("var integer x = 1", scope2);
         RazeAssert.ReturnsError<RedeclarationException>("const integer x = 2", scope2);
@@ -55,7 +55,7 @@ public class ScopeTests
     [Fact]
     public void Evaluate_VariableDeclaredInsideForLoopConditionOutsideOfIt_ThrowsUndefinedIdentifierException()
     {
-        var scope = new InterpreterScope();
+        var scope = RazeScript.CreateInterpreterScope();
 
         var script = @"
             for (var integer i = 0; i < 10; i = i + 1) {
@@ -71,7 +71,7 @@ public class ScopeTests
     [Fact]
     public void Evaluate_VariableDeclaredInsideWhileLoopConditionOutsideOfIt_ThrowsUndefinedIdentifierException()
     {
-        var scope = new InterpreterScope();
+        var scope = RazeScript.CreateInterpreterScope();
 
         var script = @"
             while (true) {

@@ -6,11 +6,12 @@ public readonly struct SourceInfo
     public readonly string Location;
 
     public SourceInfo(string location)
-        : this(null, location)
     {
+        SourcePosition = null;
+        Location = location;
     }
 
-    internal SourceInfo(SourcePosition? position, string location)
+    internal SourceInfo(SourcePosition position, string location)
     {
         SourcePosition = position;
         Location = location;

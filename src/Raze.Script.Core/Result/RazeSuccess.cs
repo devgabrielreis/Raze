@@ -3,7 +3,7 @@ using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Script.Core.Result;
 
-public class RazeSuccess : RazeResult
+public sealed class RazeSuccess : RazeResult
 {
     public BaseType ValueType { get; }
 

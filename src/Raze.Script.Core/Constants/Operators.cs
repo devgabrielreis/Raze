@@ -1,43 +1,43 @@
 ﻿namespace Raze.Script.Core.Constants;
 
-public static class Operators
+internal static class Operators
 {
-    public const string PLUS           = "+";
-    public const string MINUS          = "-";
-    public const string MULTIPLICATION = "*";
-    public const string DIVISION       = "/";
-    public const string MODULO         = "%";
+    internal const string PLUS           = "+";
+    internal const string MINUS          = "-";
+    internal const string MULTIPLICATION = "*";
+    internal const string DIVISION       = "/";
+    internal const string MODULO         = "%";
 
-    public const string ASSIGNMENT      = "=";
-    public const string PLUS_ASSIGN     = "+=";
-    public const string MINUS_ASSIGN    = "-=";
-    public const string MULTIPLY_ASSIGN = "*=";
-    public const string DIVIDE_ASSIGN   = "/=";
-    public const string MODULO_ASSIGN   = "%=";
+    internal const string ASSIGNMENT      = "=";
+    internal const string PLUS_ASSIGN     = "+=";
+    internal const string MINUS_ASSIGN    = "-=";
+    internal const string MULTIPLY_ASSIGN = "*=";
+    internal const string DIVIDE_ASSIGN   = "/=";
+    internal const string MODULO_ASSIGN   = "%=";
 
-    public const string NOT              = "!";
-    public const string EQUAL            = "==";
-    public const string NOT_EQUAL        = "!=";
-    public const string GREATER_THAN     = ">";
-    public const string LESS_THAN        = "<";
-    public const string GREATER_OR_EQUAL = ">=";
-    public const string LESS_OR_EQUAL    = "<=";
-    public const string AND              = "&&";
-    public const string OR               = "||";
+    internal const string NOT              = "!";
+    internal const string EQUAL            = "==";
+    internal const string NOT_EQUAL        = "!=";
+    internal const string GREATER_THAN     = ">";
+    internal const string LESS_THAN        = "<";
+    internal const string GREATER_OR_EQUAL = ">=";
+    internal const string LESS_OR_EQUAL    = "<=";
+    internal const string AND              = "&&";
+    internal const string OR               = "||";
 
-    public const string INCREMENT = "++";
-    public const string DECREMENT = "--";
+    internal const string INCREMENT = "++";
+    internal const string DECREMENT = "--";
 
-    public const string NULL_CHECKER = "??";
+    internal const string NULL_CHECKER = "??";
 
-    public const string SEMICOLON     = ";";
-    public const string COMMA         = ",";
-    public const string QUESTION_MARK = "?";
+    internal const string SEMICOLON     = ";";
+    internal const string COMMA         = ",";
+    internal const string QUESTION_MARK = "?";
 
-    public const string OPEN_PARENTHESIS  = "(";
-    public const string CLOSE_PARENTHESIS = ")";
-    public const string OPEN_BRACES       = "{";
-    public const string CLOSE_BRACES      = "}";
+    internal const string OPEN_PARENTHESIS  = "(";
+    internal const string CLOSE_PARENTHESIS = ")";
+    internal const string OPEN_BRACES       = "{";
+    internal const string CLOSE_BRACES      = "}";
 
-    public const string NAMESPACE_ACCESSOR = "::";
+    internal const string NAMESPACE_ACCESSOR = "::";
 }

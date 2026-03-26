@@ -1,5 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Runtime.Scopes;
+﻿using Raze.Script.Core;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using System.Globalization;
 
 namespace Raze.Tests.Core.Variables;
@@ -13,7 +13,7 @@ public class DecimalVariableTests
     {
         decimal? expected = decimalStr is null ? null : decimal.Parse(decimalStr, CultureInfo.InvariantCulture);
 
-        var scope = new InterpreterScope();
+        var scope = RazeScript.CreateInterpreterScope();
         RazeAssert.EvaluatesToVoid(expression, scope);
 
         if (expected is null)
@@ -50,7 +50,7 @@ public class DecimalVariableTests
             {(isPostfix ? $"test{op}" : $"{op}test")}
         ";
 
-        var scope = new InterpreterScope();
+        var scope = RazeScript.CreateInterpreterScope();
 
         decimal expressionResult = decimal.Parse(expressionResultStr, CultureInfo.InvariantCulture);
         RazeAssert.EvaluatesToDecimal(script, expressionResult, scope);

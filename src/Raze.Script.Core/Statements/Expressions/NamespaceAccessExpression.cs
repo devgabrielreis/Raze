@@ -3,15 +3,15 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements.Expressions;
 
-internal class NamespaceAccessExpression : Expression
+internal sealed class NamespaceAccessExpression : Expression
 {
-    public IdentifierExpression NamespaceIdentifier { get; private set; }
-    public IdentifierExpression MemberIdentifier { get; private set; }
+    internal IdentifierExpression NamespaceIdentifier { get; private set; }
+    internal IdentifierExpression MemberIdentifier { get; private set; }
 
-    public NamespaceAccessExpression(
+    internal NamespaceAccessExpression(
         IdentifierExpression namespaceIdentifier, IdentifierExpression memberIdentifier ,SourceInfo source
     )
-        : base(source)
+        : base(source, true)
     {
         NamespaceIdentifier = namespaceIdentifier;
         MemberIdentifier = memberIdentifier;

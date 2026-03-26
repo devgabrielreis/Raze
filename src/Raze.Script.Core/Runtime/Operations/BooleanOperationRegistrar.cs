@@ -5,7 +5,7 @@ using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Script.Core.Runtime.Operations;
 
-internal class BooleanOperationRegistrar : IOperationRegistrar
+internal sealed class BooleanOperationRegistrar : IOperationRegistrar
 {
     public static void RegisterBinaryOperations(OperationDispatcher dispatcher)
     {

@@ -2,7 +2,7 @@
 
 namespace Raze.Script.Core.Exceptions.ParseExceptions;
 
-public class InvalidParameterListException : ParseException
+public sealed class InvalidParameterListException : ParseException
 {
     internal InvalidParameterListException(string message, SourceInfo source)
         : base(message, source, nameof(InvalidParameterListException))

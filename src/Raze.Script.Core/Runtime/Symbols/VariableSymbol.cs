@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Runtime.Symbols;
 
-internal class VariableSymbol : Symbol
+internal sealed class VariableSymbol
 {
     internal bool IsConstant { get; }
 

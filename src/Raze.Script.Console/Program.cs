@@ -2,7 +2,6 @@
 using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Result;
-using Raze.Script.Core.Runtime.Scopes;
 using Raze.Script.Core.Runtime.Types;
 using System.Reflection;
 
@@ -28,7 +27,7 @@ internal class Program
 
         Console.WriteLine();
 
-        InterpreterScope scope = new();
+        var scope = RazeScript.CreateInterpreterScope();
         var sources = new Dictionary<string, string>();
 
         while (true)

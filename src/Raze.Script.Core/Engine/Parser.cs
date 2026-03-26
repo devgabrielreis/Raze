@@ -13,7 +13,7 @@ using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Engine;
 
-internal class Parser
+internal sealed class Parser
 {
     private readonly Token[] _tokens;
     private readonly string _sourceLocation;

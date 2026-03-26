@@ -1,5 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Runtime.Scopes;
+﻿using Raze.Script.Core;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 namespace Raze.Tests.Core.Variables;
 
@@ -10,7 +10,7 @@ public class IntegerVariableTests
     [InlineData("var integer? test = null", "test", null)]
     public void Evaluate_IntegerVariableDeclaration_ReturnsExpectedValue(string expression, string varname, int? expected)
     {
-        var scope = new InterpreterScope();
+        var scope = RazeScript.CreateInterpreterScope();
         RazeAssert.EvaluatesToVoid(expression, scope);
 
         if (expected is null)
@@ -47,7 +47,7 @@ public class IntegerVariableTests
             {(isPostfix ? $"test{op}" : $"{op}test")}
         ";
 
-        var scope = new InterpreterScope();
+        var scope = RazeScript.CreateInterpreterScope();
 
         RazeAssert.EvaluatesToInteger(script, expressionResult, scope);
         RazeAssert.EvaluatesToInteger("test", variableAfterValue, scope);

@@ -2,7 +2,7 @@
 
 namespace Raze.Script.Core.Exceptions.ParseExceptions;
 
-public class InvalidTokenListException : ParseException
+public sealed class InvalidTokenListException : ParseException
 {
     internal InvalidTokenListException(SourceInfo source)
         : base("Invalid token list", source, nameof(InvalidTokenListException))

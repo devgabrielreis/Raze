@@ -4,10 +4,8 @@ namespace Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 
 internal abstract class LiteralExpression : Expression
 {
-    public abstract object? Value { get; }
-
-    public LiteralExpression(SourceInfo source)
-        : base(source)
+    internal LiteralExpression(SourceInfo source, bool requireSemicolon)
+        : base(source, requireSemicolon)
     {
     }
 }

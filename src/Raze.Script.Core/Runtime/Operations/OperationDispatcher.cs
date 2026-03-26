@@ -33,24 +33,24 @@ internal delegate void UnaryOperation(
     ref readonly SourceInfo source
 );
 
-internal class OperationDispatcher
+internal sealed class OperationDispatcher
 {
     private readonly Dictionary<BinaryOperationKey, BinaryOperation> _binaryOperations;
     private readonly Dictionary<UnaryOperationKey, UnaryOperation> _unaryOperations;
 
-    public OperationDispatcher()
+    internal OperationDispatcher()
     {
         _binaryOperations = new Dictionary<BinaryOperationKey, BinaryOperation>();
         _unaryOperations = new Dictionary<UnaryOperationKey, UnaryOperation>();
     }
 
-    public void RegisterFrom<TOperationRegistrar>() where TOperationRegistrar: IOperationRegistrar
+    internal void RegisterFrom<TOperationRegistrar>() where TOperationRegistrar: IOperationRegistrar
     {
         TOperationRegistrar.RegisterBinaryOperations(this);
         TOperationRegistrar.RegisterUnaryOperations(this);
     }
 
-    public void ExecuteBinaryOperation(
+    internal void ExecuteBinaryOperation(
         ref readonly RuntimeValue left,
         string op,
         ref readonly RuntimeValue right,
@@ -68,7 +68,7 @@ internal class OperationDispatcher
         operationFunc(in left, in right, out target, in source);
     }
 
-    public void ExecuteUnaryOperation(
+    internal void ExecuteUnaryOperation(
         ref readonly RuntimeValue operand,
         string op,
         out RuntimeValue target,
@@ -86,7 +86,7 @@ internal class OperationDispatcher
         operationFunc(in operand, out target, in source);
     }
 
-    public void RegisterBinaryOperation(BinaryOperationKey key, BinaryOperation operation)
+    internal void RegisterBinaryOperation(BinaryOperationKey key, BinaryOperation operation)
     {
         if (_binaryOperations.ContainsKey(key))
         {
@@ -96,7 +96,7 @@ internal class OperationDispatcher
         _binaryOperations.Add(key, operation);
     }
 
-    public void RegisterUnaryOperation(UnaryOperationKey key, UnaryOperation operation)
+    internal void RegisterUnaryOperation(UnaryOperationKey key, UnaryOperation operation)
     {
         if (_unaryOperations.ContainsKey(key))
         {

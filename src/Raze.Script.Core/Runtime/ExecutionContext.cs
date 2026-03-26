@@ -3,7 +3,7 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Runtime;
 
-internal class ExecutionContext
+internal sealed class ExecutionContext
 {
     private enum Context
     {

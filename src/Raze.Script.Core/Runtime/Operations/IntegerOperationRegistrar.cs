@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Runtime.Operations;
 
-internal class IntegerOperationRegistrar : IOperationRegistrar
+internal sealed class IntegerOperationRegistrar : IOperationRegistrar
 {
     public static void RegisterBinaryOperations(OperationDispatcher dispatcher)
     {

@@ -3,15 +3,13 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements;
 
-internal class NamespaceDeclarationStatement : Statement
+internal sealed class NamespaceDeclarationStatement : Statement
 {
-    public string Identifier { get; private set; }
-    public CodeBlockStatement DeclarationBlock { get; private set; }
+    internal string Identifier { get; private set; }
+    internal CodeBlockStatement DeclarationBlock { get; private set; }
 
-    public override bool RequireSemicolon => false;
-
-    public NamespaceDeclarationStatement(string identifier, CodeBlockStatement declarationBlock, SourceInfo source)
-        : base(source)
+    internal NamespaceDeclarationStatement(string identifier, CodeBlockStatement declarationBlock, SourceInfo source)
+        : base(source, false)
     {
         Identifier = identifier;
         DeclarationBlock = declarationBlock;

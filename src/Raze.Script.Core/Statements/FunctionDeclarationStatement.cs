@@ -5,26 +5,24 @@ using Raze.Script.Core.Runtime.Types;
 
 namespace Raze.Script.Core.Statements;
 
-internal class FunctionDeclarationStatement : Statement
+internal sealed class FunctionDeclarationStatement : Statement
 {
-    public string Identifier { get; private set; }
+    internal string Identifier { get; private set; }
 
-    public RuntimeType ReturnType { get; private set; }
+    internal RuntimeType ReturnType { get; private set; }
 
-    public IReadOnlyList<ParameterSymbol> Parameters { get; private set; }
+    internal IReadOnlyList<ParameterSymbol> Parameters { get; private set; }
 
-    public CodeBlockStatement Body { get; private set; }
+    internal CodeBlockStatement Body { get; private set; }
 
-    public override bool RequireSemicolon => false;
-
-    public FunctionDeclarationStatement(
+    internal FunctionDeclarationStatement(
         string identifier,
         RuntimeType returnType,
         IReadOnlyList<ParameterSymbol> parameters,
         CodeBlockStatement body,
         SourceInfo source
     )
-        : base(source)
+        : base(source, false)
     {
         Identifier = identifier;
         ReturnType = returnType;

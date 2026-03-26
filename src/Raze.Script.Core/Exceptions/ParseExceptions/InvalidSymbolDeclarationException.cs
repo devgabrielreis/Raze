@@ -2,7 +2,7 @@
 
 namespace Raze.Script.Core.Exceptions.ParseExceptions;
 
-public class InvalidSymbolDeclarationException : ParseException
+public sealed class InvalidSymbolDeclarationException : ParseException
 {
     internal InvalidSymbolDeclarationException(string message, SourceInfo source)
         : base(message, source, nameof(InvalidSymbolDeclarationException))

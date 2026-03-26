@@ -4,12 +4,12 @@ using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Script.Core.Statements.Expressions;
 
-internal class RuntimeValueExpression : Expression
+internal sealed class RuntimeValueExpression : Expression
 {
     internal RuntimeValue Value { get; private set; }
 
     internal RuntimeValueExpression(RuntimeValue value, SourceInfo source)
-        : base(source)
+        : base(source, true)
     {
         Value = value;
     }

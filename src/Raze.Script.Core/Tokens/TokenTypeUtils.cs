@@ -8,7 +8,7 @@ namespace Raze.Script.Core.Tokens;
 internal static class TokenTypeUtils
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static string GetCompoundAssignmentTokenOperator(this TokenType type)
+    internal static string GetCompoundAssignmentTokenOperator(this TokenType type)
     {
         return type switch
         {
@@ -22,7 +22,7 @@ internal static class TokenTypeUtils
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static string GetFriendlyName(this TokenType type)
+    internal static string GetFriendlyName(this TokenType type)
     {
         return type switch
         {

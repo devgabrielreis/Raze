@@ -1,5 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Runtime.Scopes;
+﻿using Raze.Script.Core;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 namespace Raze.Tests.Core.Variables;
 
@@ -11,7 +11,7 @@ public class BooleanVariableTests
     [InlineData("var boolean? test = null", "test", null)]
     public void Evaluate_BooleanVariableDeclaration_ReturnsExpectedValue(string expression, string varname, bool? expected)
     {
-        var scope = new InterpreterScope();
+        var scope = RazeScript.CreateInterpreterScope();
         RazeAssert.EvaluatesToVoid(expression, scope);
 
         if (expected is null)

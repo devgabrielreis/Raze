@@ -2,7 +2,7 @@
 
 namespace Raze.Script.Core.Exceptions.ControlExceptions;
 
-internal class BreakException : ControlException
+internal sealed class BreakException : ControlException
 {
     internal BreakException(SourceInfo source)
         : base(source, nameof(BreakException))

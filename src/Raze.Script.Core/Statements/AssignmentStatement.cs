@@ -4,13 +4,13 @@ using Raze.Script.Core.Statements.Expressions;
 
 namespace Raze.Script.Core.Statements;
 
-internal class AssignmentStatement : Statement
+internal sealed class AssignmentStatement : Statement
 {
-    public IdentifierExpression Target { get; private set; }
-    public Expression Value { get; private set; }
+    internal IdentifierExpression Target { get; private set; }
+    internal Expression Value { get; private set; }
 
-    public AssignmentStatement(IdentifierExpression target, Expression value, SourceInfo source)
-        : base(source)
+    internal AssignmentStatement(IdentifierExpression target, Expression value, SourceInfo source)
+        : base(source, true)
     {
         Target = target;
         Value = value;

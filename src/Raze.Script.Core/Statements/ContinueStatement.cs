@@ -3,10 +3,10 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements;
 
-internal class ContinueStatement : Statement
+internal sealed class ContinueStatement : Statement
 {
-    public ContinueStatement(SourceInfo source)
-        : base(source)
+    internal ContinueStatement(SourceInfo source)
+        : base(source, true)
     {
     }
 

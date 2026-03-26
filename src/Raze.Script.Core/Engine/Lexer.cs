@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Raze.Script.Core.Engine;
 
-internal class Lexer
+internal sealed class Lexer
 {
     private readonly string _sourceCode;
     private readonly string _sourceLocation;

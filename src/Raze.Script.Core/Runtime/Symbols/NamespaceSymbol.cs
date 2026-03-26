@@ -2,11 +2,11 @@
 
 namespace Raze.Script.Core.Runtime.Symbols;
 
-internal class NamespaceSymbol : Symbol
+internal sealed class NamespaceSymbol
 {
-    internal NamespaceScope Scope { get; private set; }
+    internal Scope Scope { get; }
 
-    internal NamespaceSymbol(NamespaceScope namespaceScope)
+    internal NamespaceSymbol(Scope namespaceScope)
     {
         Scope = namespaceScope;
     }

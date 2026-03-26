@@ -6,11 +6,11 @@ namespace Raze.Script.Core.Tokens;
 [StructLayout(LayoutKind.Auto)]
 internal readonly struct Token
 {
-    public readonly TokenType Type;
-    public readonly string Lexeme;
-    public readonly SourceInfo SourceInfo;
+    internal readonly TokenType Type;
+    internal readonly string Lexeme;
+    internal readonly SourceInfo SourceInfo;
 
-    public Token(TokenType type, string lexeme, SourceInfo source)
+    internal Token(TokenType type, string lexeme, SourceInfo source)
     {
         Type = type;
         Lexeme = lexeme;

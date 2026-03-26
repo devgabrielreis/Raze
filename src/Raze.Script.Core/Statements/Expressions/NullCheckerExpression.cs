@@ -3,12 +3,12 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements.Expressions;
 
-internal class NullCheckerExpression : Expression
+internal sealed class NullCheckerExpression : Expression
 {
     internal IdentifierExpression Operand { get; private set; }
 
     internal NullCheckerExpression(IdentifierExpression operand, SourceInfo source)
-        : base(source)
+        : base(source, true)
     {
         Operand = operand;
     }

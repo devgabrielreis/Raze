@@ -3,7 +3,7 @@ using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Script.Core.Exceptions.ControlExceptions;
 
-internal class ReturnException : ControlException
+internal sealed class ReturnException : ControlException
 {
     internal RuntimeValue ReturnedValue { get; private set; }
 

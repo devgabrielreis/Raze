@@ -1,12 +1,12 @@
 ﻿namespace Raze.Script.Core.Constants;
 
-public static class TypeNames
+internal static class TypeNames
 {
-    public const string INTEGER_TYPE_NAME  = "integer";
-    public const string DECIMAL_TYPE_NAME  = "decimal";
-    public const string BOOLEAN_TYPE_NAME  = "boolean";
-    public const string STRING_TYPE_NAME   = "string";
-    public const string FUNCTION_TYPE_NAME = "function";
-    public const string VOID_TYPE_NAME     = "void";
-    public const string NULL_TYPE_NAME     = "null";
+    internal const string INTEGER_TYPE_NAME  = "integer";
+    internal const string DECIMAL_TYPE_NAME  = "decimal";
+    internal const string BOOLEAN_TYPE_NAME  = "boolean";
+    internal const string STRING_TYPE_NAME   = "string";
+    internal const string FUNCTION_TYPE_NAME = "function";
+    internal const string VOID_TYPE_NAME     = "void";
+    internal const string NULL_TYPE_NAME     = "null";
 }

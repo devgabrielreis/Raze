@@ -2,7 +2,7 @@
 
 namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
-public class RedeclarationException : RuntimeException
+public sealed class RedeclarationException : RuntimeException
 {
     internal RedeclarationException(string error, SourceInfo source)
         : base(error, source, nameof(RedeclarationException))

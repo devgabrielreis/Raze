@@ -2,7 +2,7 @@
 
 namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
-public class UndefinedIdentifierException : RuntimeException
+public sealed class UndefinedIdentifierException : RuntimeException
 {
     internal UndefinedIdentifierException(string symbol, SourceInfo source)
         : base($"Undefined identifier: {symbol}", source, nameof(UndefinedIdentifierException))

@@ -3,7 +3,7 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements.Expressions;
 
-internal class UnarySimpleExpression : Expression
+internal sealed class UnarySimpleExpression : Expression
 {
     internal Expression Operand { get; private set; }
 
@@ -12,7 +12,7 @@ internal class UnarySimpleExpression : Expression
     internal bool IsPostfix { get; private set; }
 
     internal UnarySimpleExpression(Expression operand, string op, bool isPostfix, SourceInfo source)
-        : base(source)
+        : base(source, true)
     {
         Operand = operand;
         Operator = op;

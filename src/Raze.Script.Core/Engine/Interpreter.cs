@@ -13,7 +13,7 @@ using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 
 namespace Raze.Script.Core.Engine;
 
-internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
+internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 {
     private Runtime.ExecutionContext _executionContext;
     private OperationDispatcher _operationDispatcher;
@@ -48,7 +48,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
     public RuntimeValue VisitNamespaceDeclarationStatement(NamespaceDeclarationStatement statement, Scope scope)
     {
-        NamespaceScope namespaceScope;
+        Scope namespaceScope;
 
         if (scope.TryGetNamespace(statement.Identifier) is NamespaceSymbol namespaceSymbol)
         {
@@ -56,7 +56,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         }
         else
         {
-            namespaceScope = new NamespaceScope(scope);
+            namespaceScope = Scope.CreateNamespaceScope(scope);
             var newNamespaceSymbol = new NamespaceSymbol(namespaceScope);
 
             scope.DeclareNamespace(statement.Identifier, newNamespaceSymbol, statement.SourceInfo);
@@ -143,7 +143,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             );
         }
 
-        var functionScope = new LocalScope(function.Scope);
+        var functionScope = Scope.CreateLocalScope(function.Scope);
 
         for (int i = 0; i < function.Parameters.Count; i++)
         {
@@ -279,7 +279,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
     public RuntimeValue VisitCodeBlockStatement(CodeBlockStatement codeBlock, Scope scope)
     {
-        var codeBlockScope = new LocalScope(scope);
+        var codeBlockScope = Scope.CreateLocalScope(scope);
 
         foreach (var stmt in codeBlock.Body)
         {
@@ -305,7 +305,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
     public RuntimeValue VisitLoopStatement(LoopStatement loopStmt, Scope scope)
     {
-        var outerLoopScope = new LocalScope(scope);
+        var outerLoopScope = Scope.CreateLocalScope(scope);
 
         foreach (var stmt in loopStmt.Initialization)
         {
@@ -326,7 +326,7 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
             try
             {
-                var currentIterationScope = new LocalScope(outerLoopScope);
+                var currentIterationScope = Scope.CreateLocalScope(outerLoopScope);
                 Evaluate(loopStmt.Body, currentIterationScope);
             }
             catch (BreakException)

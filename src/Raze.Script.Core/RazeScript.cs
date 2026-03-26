@@ -12,11 +12,16 @@ public static class RazeScript
                                              .GetName()
                                              .Version!;
 
+    public static Scope CreateInterpreterScope()
+    {
+        return Scope.CreateInterpreterScope();
+    }
+
     public static RazeResult Evaluate(string source, string sourceLocation, Scope? scope = null)
     {
         if (scope is null)
         {
-            scope = new InterpreterScope();
+            scope = Scope.CreateInterpreterScope();
         }
 
         try

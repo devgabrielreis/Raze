@@ -5,7 +5,7 @@ namespace Raze.Script.Core.Tokens;
 internal static class TokenTypeFacts
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsPrimitiveTypeKeyword(this TokenType type)
+    internal static bool IsPrimitiveTypeKeyword(this TokenType type)
     {
         return type is TokenType.IntegerTypeName
                     or TokenType.DecimalTypeName
@@ -16,13 +16,13 @@ internal static class TokenTypeFacts
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsAssignmentOrCompoundAssignmentOperator(this TokenType type)
+    internal static bool IsAssignmentOrCompoundAssignmentOperator(this TokenType type)
     {
         return type == TokenType.Assignment || type.IsCompoundAssignmentOperator();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsCompoundAssignmentOperator(this TokenType type)
+    internal static bool IsCompoundAssignmentOperator(this TokenType type)
     {
         return type is TokenType.AdditionAssignment
                     or TokenType.SubtractionAssignment
@@ -32,14 +32,14 @@ internal static class TokenTypeFacts
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsEqualityOperator(this TokenType type)
+    internal static bool IsEqualityOperator(this TokenType type)
     {
         return type is TokenType.Equal
                     or TokenType.NotEqual;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsRelationalOperator(this TokenType type)
+    internal static bool IsRelationalOperator(this TokenType type)
     {
         return type is TokenType.GreaterThan
                     or TokenType.LessThan
@@ -48,14 +48,14 @@ internal static class TokenTypeFacts
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsAdditiveOperator(this TokenType type)
+    internal static bool IsAdditiveOperator(this TokenType type)
     {
         return type is TokenType.Plus
                     or TokenType.Minus;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsMultiplicativeOperator(this TokenType type)
+    internal static bool IsMultiplicativeOperator(this TokenType type)
     {
         return type is TokenType.Multiplication
                     or TokenType.Division
@@ -63,7 +63,7 @@ internal static class TokenTypeFacts
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsUnaryOperator(this TokenType type)
+    internal static bool IsUnaryOperator(this TokenType type)
     {
         return type is TokenType.Not
                     or TokenType.Plus
@@ -71,14 +71,14 @@ internal static class TokenTypeFacts
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsPrefixOperator(this TokenType type)
+    internal static bool IsPrefixOperator(this TokenType type)
     {
         return type is TokenType.Increment
                     or TokenType.Decrement;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsPostfixOperator(this TokenType type)
+    internal static bool IsPostfixOperator(this TokenType type)
     {
         return type is TokenType.Increment
                     or TokenType.Decrement

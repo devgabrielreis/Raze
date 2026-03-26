@@ -1,6 +1,6 @@
-﻿using Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core;
+using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Runtime.Scopes;
 
 namespace Raze.Tests.Core.Variables;
 
@@ -9,7 +9,7 @@ public class VariableTests
     [Fact]
     public void Evaluate_VariableAssignment_CreatesCopy()
     {
-        var scope = new InterpreterScope();
+        var scope = RazeScript.CreateInterpreterScope();
 
         RazeAssert.EvaluatesToVoid("var integer a = 10", scope);
         RazeAssert.EvaluatesToVoid("var integer b = a", scope);
@@ -21,7 +21,7 @@ public class VariableTests
     [Fact]
     public void Evaluate_ConstantAssignment_ThrowsConstantAssignmentException()
     {
-        var scope = new InterpreterScope();
+        var scope = RazeScript.CreateInterpreterScope();
 
         RazeAssert.EvaluatesToVoid("const integer test = 10", scope);
         RazeAssert.ReturnsError<ConstantAssignmentException>("test = 11", scope);
@@ -30,7 +30,7 @@ public class VariableTests
     [Fact]
     public void Evaluate_AccessingUninitializedVariable_ThrowsUninitializedVariableException()
     {
-        var scope = new InterpreterScope();
+        var scope = RazeScript.CreateInterpreterScope();
 
         RazeAssert.EvaluatesToVoid("var integer variable", scope);
         RazeAssert.EvaluatesToVoid("var integer? nullableVariable", scope);

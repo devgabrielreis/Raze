@@ -1,18 +1,18 @@
 ﻿namespace Raze.Script.Core.Constants;
 
-public static class Keywords
+internal static class Keywords
 {
-    public const string VARIABLE_DECLARATION  = "var";
-    public const string CONSTANT_DECLARATION  = "const";
-    public const string FUNCTION_DECLARATION  = "def";
-    public const string NAMESPACE_DECLARATION = "namespace";
-    public const string TRUE_LITERAL          = "true";
-    public const string FALSE_LITERAL         = "false";
-    public const string IF                    = "if";
-    public const string ELSE                  = "else";
-    public const string FOR                   = "for";
-    public const string WHILE                 = "while";
-    public const string BREAK                 = "break";
-    public const string CONTINUE              = "continue";
-    public const string RETURN                = "return";
+    internal const string VARIABLE_DECLARATION  = "var";
+    internal const string CONSTANT_DECLARATION  = "const";
+    internal const string FUNCTION_DECLARATION  = "def";
+    internal const string NAMESPACE_DECLARATION = "namespace";
+    internal const string TRUE_LITERAL          = "true";
+    internal const string FALSE_LITERAL         = "false";
+    internal const string IF                    = "if";
+    internal const string ELSE                  = "else";
+    internal const string FOR                   = "for";
+    internal const string WHILE                 = "while";
+    internal const string BREAK                 = "break";
+    internal const string CONTINUE              = "continue";
+    internal const string RETURN                = "return";
 }

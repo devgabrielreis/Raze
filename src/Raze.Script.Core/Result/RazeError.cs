@@ -2,7 +2,7 @@
 
 namespace Raze.Script.Core.Result;
 
-public class RazeError : RazeResult
+public sealed class RazeError : RazeResult
 {
     public RazeException Error { get; }
 

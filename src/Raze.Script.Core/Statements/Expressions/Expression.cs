@@ -4,8 +4,8 @@ namespace Raze.Script.Core.Statements.Expressions;
 
 internal abstract class Expression : Statement
 {
-    public Expression(SourceInfo source)
-        : base(source)
+    internal Expression(SourceInfo source, bool requireSemicolon)
+        : base(source, requireSemicolon)
     {
     }
 }

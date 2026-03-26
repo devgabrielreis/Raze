@@ -3,18 +3,14 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 
-internal class StringLiteralExpression : LiteralExpression
+internal sealed class StringLiteralExpression : LiteralExpression
 {
-    public override object Value => _value;
+    internal readonly string StrValue;
 
-    public string StrValue => _value;
-
-    private readonly string _value;
-
-    public StringLiteralExpression(string value, SourceInfo source)
-        : base(source)
+    internal StringLiteralExpression(string value, SourceInfo source)
+        : base(source, true)
     {
-        _value = value;
+        StrValue = value;
     }
 
     internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)

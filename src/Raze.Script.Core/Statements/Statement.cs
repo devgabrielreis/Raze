@@ -5,13 +5,14 @@ namespace Raze.Script.Core.Statements;
 
 internal abstract class Statement
 {
-    public SourceInfo SourceInfo { get; private set; }
+    internal SourceInfo SourceInfo { get; private set; }
 
-    public virtual bool RequireSemicolon => true;
+    internal readonly bool RequireSemicolon;
 
-    public Statement(SourceInfo source)
+    internal Statement(SourceInfo source, bool requireSemicolon)
     {
         SourceInfo = source;
+        RequireSemicolon = requireSemicolon;
     }
 
     internal abstract TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state);

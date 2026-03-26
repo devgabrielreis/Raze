@@ -1,6 +1,6 @@
-﻿using Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core;
+using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Runtime.Scopes;
 using Raze.Script.Core.Runtime.Types;
 using System.Globalization;
 
@@ -76,7 +76,7 @@ public class FunctionTests
                 return param + param2;
             }
         ";
-        var scope = new InterpreterScope();
+        var scope = RazeScript.CreateInterpreterScope();
 
         RazeAssert.EvaluatesToVoid(function, scope);
         RazeAssert.EvaluatesToInteger("myFunc(5)", 20, scope);
@@ -122,7 +122,7 @@ public class FunctionTests
             const function<integer> counter2 = makeCounter(50);
         ";
 
-        var scope = new InterpreterScope();
+        var scope = RazeScript.CreateInterpreterScope();
 
         RazeAssert.EvaluatesToVoid(script, scope);
         RazeAssert.EvaluatesToInteger("counter2()", 51, scope);
