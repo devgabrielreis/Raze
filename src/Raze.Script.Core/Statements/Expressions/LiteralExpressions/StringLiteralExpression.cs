@@ -7,14 +7,18 @@ internal sealed class StringLiteralExpression : LiteralExpression
 {
     internal readonly string StrValue;
 
-    internal StringLiteralExpression(string value, SourceInfo source)
-        : base(source, true)
+    internal StringLiteralExpression(string value, ref readonly SourceInfo source)
+        : base(in source, true)
     {
         StrValue = value;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitStringLiteralExpression(this, state);
+        visitor.VisitStringLiteralExpression(this, state, out result);
     }
 }

@@ -5,13 +5,17 @@ namespace Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 
 internal sealed class NullLiteralExpression : LiteralExpression
 {
-    internal NullLiteralExpression(SourceInfo source)
-        : base(source, true)
+    internal NullLiteralExpression(ref readonly SourceInfo source)
+        : base(in source, true)
     {
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitNullLiteralExpression(this, state);
+        visitor.VisitNullLiteralExpression(this, state, out result);
     }
 }

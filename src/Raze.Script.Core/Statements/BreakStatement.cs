@@ -5,13 +5,17 @@ namespace Raze.Script.Core.Statements;
 
 internal sealed class BreakStatement : Statement
 {
-    internal BreakStatement(SourceInfo source)
-        : base(source, true)
+    internal BreakStatement(ref readonly SourceInfo source)
+        : base(in source, true)
     {
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitBreakStatement(this, state);
+        visitor.VisitBreakStatement(this, state, out result);
     }
 }

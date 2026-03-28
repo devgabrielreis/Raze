@@ -19,9 +19,9 @@ internal sealed class RuntimeType
     internal static readonly RuntimeType Void = TypeFactory.GetType(BaseType.Void, false);
     internal static readonly RuntimeType Null = TypeFactory.GetType(BaseType.Null, true);
 
-    internal BaseType Base { get; }
-    internal bool IsNullable { get; }
-    internal RuntimeType[] Generics { get; }
+    internal readonly BaseType Base;
+    internal readonly bool IsNullable;
+    internal readonly RuntimeType[] Generics;
 
     private readonly int _hashCode;
 

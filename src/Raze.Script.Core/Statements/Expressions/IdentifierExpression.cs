@@ -5,16 +5,20 @@ namespace Raze.Script.Core.Statements.Expressions;
 
 internal sealed class IdentifierExpression : Expression
 {
-    internal string Symbol { get; private set; }
+    internal readonly string Symbol;
 
-    internal IdentifierExpression(string symbol, SourceInfo source)
-        : base(source, true)
+    internal IdentifierExpression(string symbol, ref readonly SourceInfo source)
+        : base(in source, true)
     {
         Symbol = symbol;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitIdentifierExpression(this, state);
+        visitor.VisitIdentifierExpression(this, state, out result);
     }
 }

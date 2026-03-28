@@ -5,16 +5,20 @@ namespace Raze.Script.Core.Statements.Expressions;
 
 internal sealed class ProgramExpression : Expression
 {
-    internal IReadOnlyList<Statement> Body { get; private set; }
+    internal readonly IReadOnlyList<Statement> Body;
 
-    internal ProgramExpression(IReadOnlyList<Statement> body, SourceInfo source)
-        : base(source, false)
+    internal ProgramExpression(IReadOnlyList<Statement> body, ref readonly SourceInfo source)
+        : base(in source, false)
     {
         Body = body;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitProgramExpression(this, state);
+        visitor.VisitProgramExpression(this, state, out result);
     }
 }

@@ -6,16 +6,22 @@ namespace Raze.Script.Core.Statements;
 
 internal sealed class LoopStatement : Statement
 {
-    internal IReadOnlyList<Statement> Initialization { get; }
+    internal readonly IReadOnlyList<Statement> Initialization;
 
-    internal Expression? Condition { get; }
+    internal readonly Expression? Condition;
     
-    internal Statement? Update { get; }
+    internal readonly Statement? Update;
 
-    internal CodeBlockStatement Body { get; }
+    internal readonly CodeBlockStatement Body;
 
-    internal LoopStatement(List<Statement> initialization, Expression? condition, Statement? update, CodeBlockStatement body, SourceInfo source)
-        : base(source, false)
+    internal LoopStatement(
+        List<Statement> initialization,
+        Expression? condition,
+        Statement? update,
+        CodeBlockStatement body,
+        ref readonly SourceInfo source
+    )
+        : base(in source, false)
     {
         Initialization = initialization;
         Condition = condition;
@@ -23,8 +29,12 @@ internal sealed class LoopStatement : Statement
         Body = body;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitLoopStatement(this, state);
+        visitor.VisitLoopStatement(this, state, out result);
     }
 }

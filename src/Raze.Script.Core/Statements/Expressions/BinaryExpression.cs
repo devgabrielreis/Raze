@@ -5,20 +5,24 @@ namespace Raze.Script.Core.Statements.Expressions;
 
 internal sealed class BinaryExpression : Expression
 {
-    internal Expression Left { get; private set; }
-    internal string Operator { get; private set; }
-    internal Expression Right { get; private set; }
+    internal readonly Expression Left;
+    internal readonly string Operator;
+    internal readonly Expression Right;
 
-    internal BinaryExpression(Expression left, string op, Expression right, SourceInfo source)
-        : base(source, true)
+    internal BinaryExpression(Expression left, string op, Expression right, ref readonly SourceInfo source)
+        : base(in source, true)
     {
         Left = left;
         Operator = op;
         Right = right;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitBinaryExpression(this, state);
+        visitor.VisitBinaryExpression(this, state, out result);
     }
 }

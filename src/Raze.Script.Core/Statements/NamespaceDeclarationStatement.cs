@@ -5,18 +5,26 @@ namespace Raze.Script.Core.Statements;
 
 internal sealed class NamespaceDeclarationStatement : Statement
 {
-    internal string Identifier { get; private set; }
-    internal CodeBlockStatement DeclarationBlock { get; private set; }
+    internal readonly string Identifier;
+    internal readonly CodeBlockStatement DeclarationBlock;
 
-    internal NamespaceDeclarationStatement(string identifier, CodeBlockStatement declarationBlock, SourceInfo source)
-        : base(source, false)
+    internal NamespaceDeclarationStatement(
+        string identifier,
+        CodeBlockStatement declarationBlock,
+        ref readonly SourceInfo source
+    )
+        : base(in source, false)
     {
         Identifier = identifier;
         DeclarationBlock = declarationBlock;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitNamespaceDeclarationStatement(this, state);
+        visitor.VisitNamespaceDeclarationStatement(this, state, out result);
     }
 }

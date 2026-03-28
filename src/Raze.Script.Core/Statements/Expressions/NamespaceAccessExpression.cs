@@ -5,20 +5,26 @@ namespace Raze.Script.Core.Statements.Expressions;
 
 internal sealed class NamespaceAccessExpression : Expression
 {
-    internal IdentifierExpression NamespaceIdentifier { get; private set; }
-    internal IdentifierExpression MemberIdentifier { get; private set; }
+    internal readonly IdentifierExpression NamespaceIdentifier;
+    internal readonly IdentifierExpression MemberIdentifier;
 
     internal NamespaceAccessExpression(
-        IdentifierExpression namespaceIdentifier, IdentifierExpression memberIdentifier ,SourceInfo source
+        IdentifierExpression namespaceIdentifier,
+        IdentifierExpression memberIdentifier,
+        ref readonly SourceInfo source
     )
-        : base(source, true)
+        : base(in source, true)
     {
         NamespaceIdentifier = namespaceIdentifier;
         MemberIdentifier = memberIdentifier;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitNamespaceAccessExpression(this, state);
+        visitor.VisitNamespaceAccessExpression(this, state, out result);
     }
 }

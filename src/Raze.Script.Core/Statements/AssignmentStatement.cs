@@ -6,18 +6,22 @@ namespace Raze.Script.Core.Statements;
 
 internal sealed class AssignmentStatement : Statement
 {
-    internal IdentifierExpression Target { get; private set; }
-    internal Expression Value { get; private set; }
+    internal readonly IdentifierExpression Target;
+    internal readonly Expression Value;
 
-    internal AssignmentStatement(IdentifierExpression target, Expression value, SourceInfo source)
-        : base(source, true)
+    internal AssignmentStatement(IdentifierExpression target, Expression value, ref readonly SourceInfo source)
+        : base(in source, true)
     {
         Target = target;
         Value = value;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitAssignmentStatement(this, state);
+        visitor.VisitAssignmentStatement(this, state, out result);
     }
 }

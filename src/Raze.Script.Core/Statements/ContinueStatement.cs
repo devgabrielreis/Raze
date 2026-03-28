@@ -5,13 +5,17 @@ namespace Raze.Script.Core.Statements;
 
 internal sealed class ContinueStatement : Statement
 {
-    internal ContinueStatement(SourceInfo source)
-        : base(source, true)
+    internal ContinueStatement(ref readonly SourceInfo source)
+        : base(in source, true)
     {
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitContinueStatement(this, state);
+        visitor.VisitContinueStatement(this, state, out result);
     }
 }

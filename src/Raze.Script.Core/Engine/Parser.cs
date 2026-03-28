@@ -67,7 +67,7 @@ internal sealed class Parser
                         ? programBody.First().SourceInfo
                         : new SourceInfo(_sourceLocation);
 
-        return new ProgramExpression(programBody, source);
+        return new ProgramExpression(programBody, in source);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -170,7 +170,7 @@ internal sealed class Parser
         Expect(TokenType.OpenBraces);
         var body = ParseCodeBlock();
 
-        return new NamespaceDeclarationStatement(identifier, body, source);
+        return new NamespaceDeclarationStatement(identifier, body, in source);
     }
 
     private BreakStatement ParseBreakStatement()
@@ -179,7 +179,7 @@ internal sealed class Parser
         var source = CurrentToken.SourceInfo;
         Advance();
 
-        return new BreakStatement(source);
+        return new BreakStatement(in source);
     }
 
     private ContinueStatement ParseContinueStatement()
@@ -188,7 +188,7 @@ internal sealed class Parser
         var source = CurrentToken.SourceInfo;
         Advance();
 
-        return new ContinueStatement(source);
+        return new ContinueStatement(in source);
     }
 
     private ReturnStatement ParseReturnStatement()
@@ -199,12 +199,12 @@ internal sealed class Parser
         
         if (CurrentToken.Type == TokenType.SemiColon || CurrentToken.Type == TokenType.EOF)
         {
-            return new ReturnStatement(null, sourceStart);
+            return new ReturnStatement(null, in sourceStart);
         }
 
         var returnedValue = ParseOperatorExpression();
 
-        return new ReturnStatement(returnedValue, sourceStart);
+        return new ReturnStatement(returnedValue, in sourceStart);
     }
 
     private CodeBlockStatement ParseCodeBlock()
@@ -234,7 +234,7 @@ internal sealed class Parser
         Expect(TokenType.CloseBraces);
         Advance();
 
-        return new CodeBlockStatement(codeBlockBody, sourceStart);
+        return new CodeBlockStatement(codeBlockBody, in sourceStart);
     }
 
     private IfElseStatement ParseIfElse()
@@ -268,7 +268,7 @@ internal sealed class Parser
             };
         }
 
-        return new IfElseStatement(condition, then, elseStmt, sourceStart);
+        return new IfElseStatement(condition, then, elseStmt, in sourceStart);
     }
 
     private LoopStatement ParseForLoop()
@@ -316,7 +316,7 @@ internal sealed class Parser
 
         CodeBlockStatement body = ParseCodeBlock();
 
-        return new LoopStatement(initialization, condition, update, body, sourceStart);
+        return new LoopStatement(initialization, condition, update, body, in sourceStart);
     }
 
     private LoopStatement ParseWhileLoop()
@@ -335,7 +335,7 @@ internal sealed class Parser
 
         CodeBlockStatement body = ParseCodeBlock();
 
-        return new LoopStatement([], condition, null, body, sourceStart);
+        return new LoopStatement([], condition, null, body, in sourceStart);
     }
 
     private VariableDeclarationStatement ParseVariableDeclaration()
@@ -353,13 +353,13 @@ internal sealed class Parser
 
         if (CurrentToken.Type != TokenType.Assignment)
         {
-            return new VariableDeclarationStatement(identifier, type, null, isConstant, sourceStart);
+            return new VariableDeclarationStatement(identifier, type, null, isConstant, in sourceStart);
         }
 
         Advance();
         Expression value = ParseOperatorExpression();
 
-        return new VariableDeclarationStatement(identifier, type, value, isConstant, sourceStart);
+        return new VariableDeclarationStatement(identifier, type, value, isConstant, in sourceStart);
     }
 
     private FunctionDeclarationStatement ParseFunctionDeclaration()
@@ -379,7 +379,7 @@ internal sealed class Parser
         var functionBody = ParseCodeBlock();
 
         return new FunctionDeclarationStatement(
-            identifier, returnType, parameterList, functionBody, sourcestart
+            identifier, returnType, parameterList, functionBody, in sourcestart
         );
     }
 
@@ -439,7 +439,7 @@ internal sealed class Parser
                     type,
                     identifier,
                     defaultValue,
-                    ref sourceStart
+                    in sourceStart
                 )
             );
         }
@@ -555,10 +555,10 @@ internal sealed class Parser
 
         if (op.Type.IsCompoundAssignmentOperator())
         {
-            value = new BinaryExpression(left, op.Type.GetCompoundAssignmentTokenOperator(), value, op.SourceInfo);
+            value = new BinaryExpression(left, op.Type.GetCompoundAssignmentTokenOperator(), value, in op.SourceInfo);
         }
         
-        return new AssignmentStatement((IdentifierExpression)left, value, left.SourceInfo);
+        return new AssignmentStatement((IdentifierExpression)left, value, in left.SourceInfo);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -606,7 +606,7 @@ internal sealed class Parser
 
             var operand = ParseUnaryExpression();
 
-            return new UnarySimpleExpression(operand, op.Lexeme, isPostfix: false, op.SourceInfo);
+            return new UnarySimpleExpression(operand, op.Lexeme, isPostfix: false, in op.SourceInfo);
         }
 
         if (CurrentToken.Type.IsPrefixOperator())
@@ -624,7 +624,7 @@ internal sealed class Parser
                 );
             }
 
-            return new UnaryMutationExpression(identifier, op.Lexeme, isPostfix: false, op.SourceInfo);
+            return new UnaryMutationExpression(identifier, op.Lexeme, isPostfix: false, in op.SourceInfo);
         }
 
         return ParsePostfixExpression();
@@ -656,8 +656,8 @@ internal sealed class Parser
                 }
 
                 expr = op.Type == TokenType.NullChecker
-                    ? new NullCheckerExpression((IdentifierExpression)expr, expr.SourceInfo)
-                    : new UnaryMutationExpression((IdentifierExpression)expr, op.Lexeme, isPostfix: true, expr.SourceInfo);
+                    ? new NullCheckerExpression((IdentifierExpression)expr, in expr.SourceInfo)
+                    : new UnaryMutationExpression((IdentifierExpression)expr, op.Lexeme, isPostfix: true, in expr.SourceInfo);
                 continue;
             }
 
@@ -692,7 +692,7 @@ internal sealed class Parser
         Expect(TokenType.CloseParenthesis);
         Advance();
 
-        return new CallExpression(caller, argumentList, caller.SourceInfo);
+        return new CallExpression(caller, argumentList, in caller.SourceInfo);
     }
 
     private Expression ParseMemberExpression()
@@ -727,7 +727,7 @@ internal sealed class Parser
         return new NamespaceAccessExpression(
             (namespaceIdentifier as IdentifierExpression)!,
             (memberIdentifier as IdentifierExpression)!,
-            namespaceIdentifier.SourceInfo
+            in namespaceIdentifier.SourceInfo
         );
     }
 
@@ -736,35 +736,35 @@ internal sealed class Parser
         switch (CurrentToken.Type)
         {
             case TokenType.Identifier:
-                var identifierExpression = new IdentifierExpression(CurrentToken.Lexeme, CurrentToken.SourceInfo);
+                var identifierExpression = new IdentifierExpression(CurrentToken.Lexeme, in CurrentToken.SourceInfo);
                 Advance();
                 return identifierExpression;
 
             case TokenType.IntegerLiteral:
                 var integerValue = Int128.Parse(CurrentToken.Lexeme);
-                var integerLiteralExpression = new IntegerLiteralExpression(integerValue, CurrentToken.SourceInfo);
+                var integerLiteralExpression = new IntegerLiteralExpression(integerValue, in CurrentToken.SourceInfo);
                 Advance();
                 return integerLiteralExpression;
 
             case TokenType.DecimalLiteral:
                 var decimalValue = decimal.Parse(CurrentToken.Lexeme, CultureInfo.InvariantCulture);
-                var decimalLiteralExpression = new DecimalLiteralExpression(decimalValue, CurrentToken.SourceInfo);
+                var decimalLiteralExpression = new DecimalLiteralExpression(decimalValue, in CurrentToken.SourceInfo);
                 Advance();
                 return decimalLiteralExpression;
 
             case TokenType.BooleanLiteral:
                 var boolValue = bool.Parse(CurrentToken.Lexeme);
-                var booleanLiteralExpression = new BooleanLiteralExpression(boolValue, CurrentToken.SourceInfo);
+                var booleanLiteralExpression = new BooleanLiteralExpression(boolValue, in CurrentToken.SourceInfo);
                 Advance();
                 return booleanLiteralExpression;
 
             case TokenType.StringLiteral:
-                var stringLiteralExpression = new StringLiteralExpression(CurrentToken.Lexeme, CurrentToken.SourceInfo);
+                var stringLiteralExpression = new StringLiteralExpression(CurrentToken.Lexeme, in CurrentToken.SourceInfo);
                 Advance();
                 return stringLiteralExpression;
 
             case TokenType.NullLiteral:
-                var nullLiteralExpression = new NullLiteralExpression(CurrentToken.SourceInfo);
+                var nullLiteralExpression = new NullLiteralExpression(in CurrentToken.SourceInfo);
                 Advance();
                 return nullLiteralExpression;
 
@@ -801,7 +801,7 @@ internal sealed class Parser
 
             Expression right = next();
 
-            left = new BinaryExpression(left, op.Lexeme, right, left.SourceInfo);
+            left = new BinaryExpression(left, op.Lexeme, right, in left.SourceInfo);
         }
 
         return left;

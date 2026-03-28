@@ -7,14 +7,18 @@ internal sealed class IntegerLiteralExpression : LiteralExpression
 {
     internal readonly Int128 IntValue;
 
-    internal IntegerLiteralExpression(Int128 value, SourceInfo source)
-        : base(source, true)
+    internal IntegerLiteralExpression(Int128 value, ref readonly SourceInfo source)
+        : base(in source, true)
     {
         IntValue = value;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitIntegerLiteralExpression(this, state);
+        visitor.VisitIntegerLiteralExpression(this, state, out result);
     }
 }

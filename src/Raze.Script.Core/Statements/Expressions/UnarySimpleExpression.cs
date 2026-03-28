@@ -5,22 +5,31 @@ namespace Raze.Script.Core.Statements.Expressions;
 
 internal sealed class UnarySimpleExpression : Expression
 {
-    internal Expression Operand { get; private set; }
+    internal readonly Expression Operand;
 
-    internal string Operator { get; private set; }
+    internal readonly string Operator;
 
-    internal bool IsPostfix { get; private set; }
+    internal readonly bool IsPostfix;
 
-    internal UnarySimpleExpression(Expression operand, string op, bool isPostfix, SourceInfo source)
-        : base(source, true)
+    internal UnarySimpleExpression(
+        Expression operand,
+        string op,
+        bool isPostfix,
+        ref readonly SourceInfo source
+    )
+        : base(in source, true)
     {
         Operand = operand;
         Operator = op;
         IsPostfix = isPostfix;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitUnarySimpleExpression(this, state);
+        visitor.VisitUnarySimpleExpression(this, state, out result);
     }
 }

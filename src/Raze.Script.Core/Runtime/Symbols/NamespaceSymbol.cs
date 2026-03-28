@@ -4,7 +4,7 @@ namespace Raze.Script.Core.Runtime.Symbols;
 
 internal sealed class NamespaceSymbol
 {
-    internal Scope Scope { get; }
+    internal readonly Scope Scope;
 
     internal NamespaceSymbol(Scope namespaceScope)
     {

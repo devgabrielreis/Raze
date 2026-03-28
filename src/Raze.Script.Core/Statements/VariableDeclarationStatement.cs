@@ -7,13 +7,19 @@ namespace Raze.Script.Core.Statements;
 
 internal sealed class VariableDeclarationStatement : Statement
 {
-    internal string Identifier { get; private set; }
-    internal Expression? Value { get; private set; }
-    internal RuntimeType Type { get; private set; }
-    internal bool IsConstant { get; private set; }
+    internal readonly string Identifier;
+    internal readonly Expression? Value;
+    internal readonly RuntimeType Type;
+    internal readonly bool IsConstant;
 
-    internal VariableDeclarationStatement(string identifier, RuntimeType type, Expression? value, bool isConstant, SourceInfo source)
-        : base(source, true)
+    internal VariableDeclarationStatement(
+        string identifier,
+        RuntimeType type,
+        Expression? value,
+        bool isConstant,
+        ref readonly SourceInfo source
+    )
+        : base(in source, true)
     {
         Identifier = identifier;
         Value = value;
@@ -21,8 +27,12 @@ internal sealed class VariableDeclarationStatement : Statement
         IsConstant = isConstant;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitVariableDeclarationStatement(this, state);
+        visitor.VisitVariableDeclarationStatement(this, state, out result);
     }
 }

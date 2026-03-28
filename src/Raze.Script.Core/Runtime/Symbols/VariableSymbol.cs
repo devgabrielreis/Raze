@@ -11,11 +11,11 @@ namespace Raze.Script.Core.Runtime.Symbols;
 
 internal sealed class VariableSymbol
 {
-    internal bool IsConstant { get; }
+    internal readonly bool IsConstant;
 
     internal bool IsInitialized { get; private set; }
 
-    internal RuntimeType Type { get; }
+    internal readonly RuntimeType Type;
 
     private RuntimeValue _value;
 

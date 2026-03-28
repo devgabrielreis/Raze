@@ -19,6 +19,8 @@ public sealed class Scope
         All = DeclareVariables | DeclareConstants | DeclareNamespaces
     }
 
+    public string Kind => _kind;
+
     private Scope? _parent;
 
     private Dictionary<string, VariableSymbol> _variables;
@@ -57,7 +59,7 @@ public sealed class Scope
         return new Scope(parent, ScopePermissions.DeclareConstants, "NamespaceScope");
     }
 
-    internal void DeclareVariable(string name, VariableSymbol variable, SourceInfo source)
+    internal void DeclareVariable(string name, VariableSymbol variable, ref readonly SourceInfo source)
     {
         var permissionNeeded = variable.IsConstant
                                 ? ScopePermissions.DeclareConstants
@@ -76,7 +78,7 @@ public sealed class Scope
         }
     }
 
-    internal VariableSymbol GetVariable(string name, SourceInfo source, bool throwIfNotInitialized = false)
+    internal VariableSymbol GetVariable(string name, ref readonly SourceInfo source, bool throwIfNotInitialized = false)
     {
         var variable = TryGetVariable(name);
 
@@ -108,7 +110,7 @@ public sealed class Scope
         return null;
     }
 
-    internal void DeclareNamespace(string name, NamespaceSymbol namespaceSymbol, SourceInfo source)
+    internal void DeclareNamespace(string name, NamespaceSymbol namespaceSymbol, ref readonly SourceInfo source)
     {
         if (!Can(ScopePermissions.DeclareNamespaces))
         {
@@ -121,7 +123,7 @@ public sealed class Scope
         }
     }
 
-    internal NamespaceSymbol GetNamespace(string name, SourceInfo source)
+    internal NamespaceSymbol GetNamespace(string name, ref readonly SourceInfo source)
     {
         var namespaceSymbol = TryGetNamespace(name);
 

@@ -7,13 +7,13 @@ namespace Raze.Script.Core.Runtime.Values;
 
 internal sealed class UserFunctionValue
 {
-    internal RuntimeType ReturnType { get; }
+    internal readonly RuntimeType ReturnType;
 
-    internal IReadOnlyList<ParameterSymbol> Parameters { get; }
+    internal readonly IReadOnlyList<ParameterSymbol> Parameters;
 
-    internal CodeBlockStatement Body { get; }
+    internal readonly CodeBlockStatement Body;
 
-    internal Scope Scope { get; }
+    internal readonly Scope Scope;
 
     internal UserFunctionValue(
         RuntimeType returnType,

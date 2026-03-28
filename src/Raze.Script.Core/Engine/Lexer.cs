@@ -16,69 +16,71 @@ internal sealed class Lexer
     private int _currentLine = 0;
     private int _currentColumn = 0;
 
-    private static readonly Dictionary<string, Func<SourceInfo, Token>> _keywordTokens = new()
+    private delegate Token TokenFactory(ref readonly SourceInfo s);
+
+    private static readonly Dictionary<string, TokenFactory> _keywordTokens = new()
     {
-        [Keywords.VARIABLE_DECLARATION]  = (SourceInfo s) => new Token(TokenType.Var, Keywords.VARIABLE_DECLARATION, s),
-        [Keywords.CONSTANT_DECLARATION]  = (SourceInfo s) => new Token(TokenType.Const, Keywords.CONSTANT_DECLARATION, s),
-        [Keywords.NAMESPACE_DECLARATION] = (SourceInfo s) => new Token(TokenType.NamespaceDeclaration, Keywords.NAMESPACE_DECLARATION, s),
-        [Keywords.TRUE_LITERAL]          = (SourceInfo s) => new Token(TokenType.BooleanLiteral, Keywords.TRUE_LITERAL, s),
-        [Keywords.FALSE_LITERAL]         = (SourceInfo s) => new Token(TokenType.BooleanLiteral, Keywords.FALSE_LITERAL, s),
-        [Keywords.IF]                    = (SourceInfo s) => new Token(TokenType.If, Keywords.IF, s),
-        [Keywords.ELSE]                  = (SourceInfo s) => new Token(TokenType.Else, Keywords.ELSE, s),
-        [Keywords.FOR]                   = (SourceInfo s) => new Token(TokenType.For, Keywords.FOR, s),
-        [Keywords.WHILE]                 = (SourceInfo s) => new Token(TokenType.While, Keywords.WHILE, s),
-        [Keywords.BREAK]                 = (SourceInfo s) => new Token(TokenType.Break, Keywords.BREAK, s),
-        [Keywords.CONTINUE]              = (SourceInfo s) => new Token(TokenType.Continue, Keywords.CONTINUE, s),
-        [Keywords.FUNCTION_DECLARATION]  = (SourceInfo s) => new Token(TokenType.FunctionDeclaration, Keywords.FUNCTION_DECLARATION, s),
-        [Keywords.RETURN]                = (SourceInfo s) => new Token(TokenType.Return, Keywords.RETURN, s),
-        [TypeNames.INTEGER_TYPE_NAME]    = (SourceInfo s) => new Token(TokenType.IntegerTypeName, TypeNames.INTEGER_TYPE_NAME, s),
-        [TypeNames.DECIMAL_TYPE_NAME]    = (SourceInfo s) => new Token(TokenType.DecimalTypeName, TypeNames.DECIMAL_TYPE_NAME, s),
-        [TypeNames.BOOLEAN_TYPE_NAME]    = (SourceInfo s) => new Token(TokenType.BooleanTypeName, TypeNames.BOOLEAN_TYPE_NAME, s),
-        [TypeNames.STRING_TYPE_NAME]     = (SourceInfo s) => new Token(TokenType.StringTypeName, TypeNames.STRING_TYPE_NAME, s),
-        [TypeNames.FUNCTION_TYPE_NAME]   = (SourceInfo s) => new Token(TokenType.FunctionTypeName, TypeNames.FUNCTION_TYPE_NAME, s),
-        [TypeNames.NULL_TYPE_NAME]       = (SourceInfo s) => new Token(TokenType.NullLiteral, TypeNames.NULL_TYPE_NAME, s),
-        [TypeNames.VOID_TYPE_NAME]       = (SourceInfo s) => new Token(TokenType.VoidTypeName, TypeNames.VOID_TYPE_NAME, s)
+        [Keywords.VARIABLE_DECLARATION]  = (ref readonly SourceInfo s) => new Token(TokenType.Var, Keywords.VARIABLE_DECLARATION, in s),
+        [Keywords.CONSTANT_DECLARATION]  = (ref readonly SourceInfo s) => new Token(TokenType.Const, Keywords.CONSTANT_DECLARATION, in s),
+        [Keywords.NAMESPACE_DECLARATION] = (ref readonly SourceInfo s) => new Token(TokenType.NamespaceDeclaration, Keywords.NAMESPACE_DECLARATION, in s),
+        [Keywords.TRUE_LITERAL]          = (ref readonly SourceInfo s) => new Token(TokenType.BooleanLiteral, Keywords.TRUE_LITERAL, in s),
+        [Keywords.FALSE_LITERAL]         = (ref readonly SourceInfo s) => new Token(TokenType.BooleanLiteral, Keywords.FALSE_LITERAL, in s),
+        [Keywords.IF]                    = (ref readonly SourceInfo s) => new Token(TokenType.If, Keywords.IF, in s),
+        [Keywords.ELSE]                  = (ref readonly SourceInfo s) => new Token(TokenType.Else, Keywords.ELSE, in s),
+        [Keywords.FOR]                   = (ref readonly SourceInfo s) => new Token(TokenType.For, Keywords.FOR, in s),
+        [Keywords.WHILE]                 = (ref readonly SourceInfo s) => new Token(TokenType.While, Keywords.WHILE, in s),
+        [Keywords.BREAK]                 = (ref readonly SourceInfo s) => new Token(TokenType.Break, Keywords.BREAK, in s),
+        [Keywords.CONTINUE]              = (ref readonly SourceInfo s) => new Token(TokenType.Continue, Keywords.CONTINUE, in s),
+        [Keywords.FUNCTION_DECLARATION]  = (ref readonly SourceInfo s) => new Token(TokenType.FunctionDeclaration, Keywords.FUNCTION_DECLARATION, in s),
+        [Keywords.RETURN]                = (ref readonly SourceInfo s) => new Token(TokenType.Return, Keywords.RETURN, in s),
+        [TypeNames.INTEGER_TYPE_NAME]    = (ref readonly SourceInfo s) => new Token(TokenType.IntegerTypeName, TypeNames.INTEGER_TYPE_NAME, in s),
+        [TypeNames.DECIMAL_TYPE_NAME]    = (ref readonly SourceInfo s) => new Token(TokenType.DecimalTypeName, TypeNames.DECIMAL_TYPE_NAME, in s),
+        [TypeNames.BOOLEAN_TYPE_NAME]    = (ref readonly SourceInfo s) => new Token(TokenType.BooleanTypeName, TypeNames.BOOLEAN_TYPE_NAME, in s),
+        [TypeNames.STRING_TYPE_NAME]     = (ref readonly SourceInfo s) => new Token(TokenType.StringTypeName, TypeNames.STRING_TYPE_NAME, in s),
+        [TypeNames.FUNCTION_TYPE_NAME]   = (ref readonly SourceInfo s) => new Token(TokenType.FunctionTypeName, TypeNames.FUNCTION_TYPE_NAME, in s),
+        [TypeNames.NULL_TYPE_NAME]       = (ref readonly SourceInfo s) => new Token(TokenType.NullLiteral, TypeNames.NULL_TYPE_NAME, in s),
+        [TypeNames.VOID_TYPE_NAME]       = (ref readonly SourceInfo s) => new Token(TokenType.VoidTypeName, TypeNames.VOID_TYPE_NAME, in s)
     };
 
-    private static readonly Dictionary<string, Func<SourceInfo, Token>>.AlternateLookup<ReadOnlySpan<char>> _keywordTokensSpanLookup
+    private static readonly Dictionary<string, TokenFactory>.AlternateLookup<ReadOnlySpan<char>> _keywordTokensSpanLookup
         = _keywordTokens.GetAlternateLookup<ReadOnlySpan<char>>();
 
-    private static readonly Dictionary<string, Func<SourceInfo, Token>> _operatorTokens = new()
+    private static readonly Dictionary<string, TokenFactory> _operatorTokens = new()
     {
-        [Operators.EQUAL]              = (SourceInfo s) => new Token(TokenType.Equal, Operators.EQUAL, s),
-        [Operators.NOT_EQUAL]          = (SourceInfo s) => new Token(TokenType.NotEqual, Operators.NOT_EQUAL, s),
-        [Operators.GREATER_OR_EQUAL]   = (SourceInfo s) => new Token(TokenType.GreaterEqual, Operators.GREATER_OR_EQUAL, s),
-        [Operators.LESS_OR_EQUAL]      = (SourceInfo s) => new Token(TokenType.LessEqual, Operators.LESS_OR_EQUAL, s),
-        [Operators.AND]                = (SourceInfo s) => new Token(TokenType.And, Operators.AND, s),
-        [Operators.OR]                 = (SourceInfo s) => new Token(TokenType.Or, Operators.OR, s),
-        [Operators.INCREMENT]          = (SourceInfo s) => new Token(TokenType.Increment, Operators.INCREMENT, s),
-        [Operators.DECREMENT]          = (SourceInfo s) => new Token(TokenType.Decrement, Operators.DECREMENT, s),
-        [Operators.NULL_CHECKER]       = (SourceInfo s) => new Token(TokenType.NullChecker, Operators.NULL_CHECKER, s),
-        [Operators.PLUS_ASSIGN]        = (SourceInfo s) => new Token(TokenType.AdditionAssignment, Operators.PLUS_ASSIGN, s),
-        [Operators.MINUS_ASSIGN]       = (SourceInfo s) => new Token(TokenType.SubtractionAssignment, Operators.MINUS_ASSIGN, s),
-        [Operators.MULTIPLY_ASSIGN]    = (SourceInfo s) => new Token(TokenType.MultiplicationAssignment, Operators.MULTIPLY_ASSIGN, s),
-        [Operators.DIVIDE_ASSIGN]      = (SourceInfo s) => new Token(TokenType.DivisionAssignment, Operators.DIVIDE_ASSIGN, s),
-        [Operators.MODULO_ASSIGN]      = (SourceInfo s) => new Token(TokenType.ModuloAssignment, Operators.MODULO_ASSIGN, s),
-        [Operators.SEMICOLON]          = (SourceInfo s) => new Token(TokenType.SemiColon, Operators.SEMICOLON, s),
-        [Operators.COMMA]              = (SourceInfo s) => new Token(TokenType.Comma, Operators.COMMA, s),
-        [Operators.OPEN_PARENTHESIS]   = (SourceInfo s) => new Token(TokenType.OpenParenthesis, Operators.OPEN_PARENTHESIS, s),
-        [Operators.CLOSE_PARENTHESIS]  = (SourceInfo s) => new Token(TokenType.CloseParenthesis, Operators.CLOSE_PARENTHESIS, s),
-        [Operators.OPEN_BRACES]        = (SourceInfo s) => new Token(TokenType.OpenBraces, Operators.OPEN_BRACES, s),
-        [Operators.CLOSE_BRACES]       = (SourceInfo s) => new Token(TokenType.CloseBraces, Operators.CLOSE_BRACES, s),
-        [Operators.ASSIGNMENT]         = (SourceInfo s) => new Token(TokenType.Assignment, Operators.ASSIGNMENT, s),
-        [Operators.PLUS]               = (SourceInfo s) => new Token(TokenType.Plus, Operators.PLUS, s),
-        [Operators.MINUS]              = (SourceInfo s) => new Token(TokenType.Minus, Operators.MINUS, s),
-        [Operators.MULTIPLICATION]     = (SourceInfo s) => new Token(TokenType.Multiplication, Operators.MULTIPLICATION, s),
-        [Operators.DIVISION]           = (SourceInfo s) => new Token(TokenType.Division, Operators.DIVISION, s),
-        [Operators.MODULO]             = (SourceInfo s) => new Token(TokenType.Modulo, Operators.MODULO, s),
-        [Operators.GREATER_THAN]       = (SourceInfo s) => new Token(TokenType.GreaterThan, Operators.GREATER_THAN, s),
-        [Operators.LESS_THAN]          = (SourceInfo s) => new Token(TokenType.LessThan, Operators.LESS_THAN, s),
-        [Operators.QUESTION_MARK]      = (SourceInfo s) => new Token(TokenType.QuestionMark, Operators.QUESTION_MARK, s),
-        [Operators.NOT]                = (SourceInfo s) => new Token(TokenType.Not, Operators.NOT, s),
-        [Operators.NAMESPACE_ACCESSOR] = (SourceInfo s) => new Token(TokenType.NamespaceAccessor, Operators.NAMESPACE_ACCESSOR, s)
+        [Operators.EQUAL]              = (ref readonly SourceInfo s) => new Token(TokenType.Equal, Operators.EQUAL, in s),
+        [Operators.NOT_EQUAL]          = (ref readonly SourceInfo s) => new Token(TokenType.NotEqual, Operators.NOT_EQUAL, in s),
+        [Operators.GREATER_OR_EQUAL]   = (ref readonly SourceInfo s) => new Token(TokenType.GreaterEqual, Operators.GREATER_OR_EQUAL, in s),
+        [Operators.LESS_OR_EQUAL]      = (ref readonly SourceInfo s) => new Token(TokenType.LessEqual, Operators.LESS_OR_EQUAL, in s),
+        [Operators.AND]                = (ref readonly SourceInfo s) => new Token(TokenType.And, Operators.AND, in s),
+        [Operators.OR]                 = (ref readonly SourceInfo s) => new Token(TokenType.Or, Operators.OR, in s),
+        [Operators.INCREMENT]          = (ref readonly SourceInfo s) => new Token(TokenType.Increment, Operators.INCREMENT, in s),
+        [Operators.DECREMENT]          = (ref readonly SourceInfo s) => new Token(TokenType.Decrement, Operators.DECREMENT, in s),
+        [Operators.NULL_CHECKER]       = (ref readonly SourceInfo s) => new Token(TokenType.NullChecker, Operators.NULL_CHECKER, in s),
+        [Operators.PLUS_ASSIGN]        = (ref readonly SourceInfo s) => new Token(TokenType.AdditionAssignment, Operators.PLUS_ASSIGN, in s),
+        [Operators.MINUS_ASSIGN]       = (ref readonly SourceInfo s) => new Token(TokenType.SubtractionAssignment, Operators.MINUS_ASSIGN, in s),
+        [Operators.MULTIPLY_ASSIGN]    = (ref readonly SourceInfo s) => new Token(TokenType.MultiplicationAssignment, Operators.MULTIPLY_ASSIGN, in s),
+        [Operators.DIVIDE_ASSIGN]      = (ref readonly SourceInfo s) => new Token(TokenType.DivisionAssignment, Operators.DIVIDE_ASSIGN, in s),
+        [Operators.MODULO_ASSIGN]      = (ref readonly SourceInfo s) => new Token(TokenType.ModuloAssignment, Operators.MODULO_ASSIGN, in s),
+        [Operators.SEMICOLON]          = (ref readonly SourceInfo s) => new Token(TokenType.SemiColon, Operators.SEMICOLON, in s),
+        [Operators.COMMA]              = (ref readonly SourceInfo s) => new Token(TokenType.Comma, Operators.COMMA, in s),
+        [Operators.OPEN_PARENTHESIS]   = (ref readonly SourceInfo s) => new Token(TokenType.OpenParenthesis, Operators.OPEN_PARENTHESIS, in s),
+        [Operators.CLOSE_PARENTHESIS]  = (ref readonly SourceInfo s) => new Token(TokenType.CloseParenthesis, Operators.CLOSE_PARENTHESIS, in s),
+        [Operators.OPEN_BRACES]        = (ref readonly SourceInfo s) => new Token(TokenType.OpenBraces, Operators.OPEN_BRACES, in s),
+        [Operators.CLOSE_BRACES]       = (ref readonly SourceInfo s) => new Token(TokenType.CloseBraces, Operators.CLOSE_BRACES, in s),
+        [Operators.ASSIGNMENT]         = (ref readonly SourceInfo s) => new Token(TokenType.Assignment, Operators.ASSIGNMENT, in s),
+        [Operators.PLUS]               = (ref readonly SourceInfo s) => new Token(TokenType.Plus, Operators.PLUS, in s),
+        [Operators.MINUS]              = (ref readonly SourceInfo s) => new Token(TokenType.Minus, Operators.MINUS, in s),
+        [Operators.MULTIPLICATION]     = (ref readonly SourceInfo s) => new Token(TokenType.Multiplication, Operators.MULTIPLICATION, in s),
+        [Operators.DIVISION]           = (ref readonly SourceInfo s) => new Token(TokenType.Division, Operators.DIVISION, in s),
+        [Operators.MODULO]             = (ref readonly SourceInfo s) => new Token(TokenType.Modulo, Operators.MODULO, in s),
+        [Operators.GREATER_THAN]       = (ref readonly SourceInfo s) => new Token(TokenType.GreaterThan, Operators.GREATER_THAN, in s),
+        [Operators.LESS_THAN]          = (ref readonly SourceInfo s) => new Token(TokenType.LessThan, Operators.LESS_THAN, in s),
+        [Operators.QUESTION_MARK]      = (ref readonly SourceInfo s) => new Token(TokenType.QuestionMark, Operators.QUESTION_MARK, in s),
+        [Operators.NOT]                = (ref readonly SourceInfo s) => new Token(TokenType.Not, Operators.NOT, in s),
+        [Operators.NAMESPACE_ACCESSOR] = (ref readonly SourceInfo s) => new Token(TokenType.NamespaceAccessor, Operators.NAMESPACE_ACCESSOR, in s)
     };
 
-    private static readonly Dictionary<string, Func<SourceInfo, Token>>.AlternateLookup<ReadOnlySpan<char>> _operatorTokensSpanLookup
+    private static readonly Dictionary<string, TokenFactory>.AlternateLookup<ReadOnlySpan<char>> _operatorTokensSpanLookup
         = _operatorTokens.GetAlternateLookup<ReadOnlySpan<char>>();
 
     private static readonly int _maxOperatorLength = _operatorTokens.Keys.Max(k => k.Length);
@@ -113,7 +115,9 @@ internal sealed class Lexer
             tokens.Add(ProcessCurrentToken());
         }
 
-        tokens.Add(new Token(TokenType.EOF, string.Empty, GetCurrentSourceInfo()));
+        var tokenSource = GetCurrentSourceInfo();
+
+        tokens.Add(new Token(TokenType.EOF, string.Empty, in tokenSource));
 
         return tokens.ToArray();
     }
@@ -194,7 +198,7 @@ internal sealed class Lexer
             {
                 var source = GetCurrentSourceInfo();
                 Advance(length);
-                return operatorFunc(source);
+                return operatorFunc(in source);
             }
         }
 
@@ -235,10 +239,10 @@ internal sealed class Lexer
 
         if (_keywordTokensSpanLookup.TryGetValue(identifierSpan, out var keywordFunc))
         {
-            return keywordFunc(sourceStart);
+            return keywordFunc(in sourceStart);
         }
 
-        return new Token(TokenType.Identifier, identifierSpan.ToString(), sourceStart);
+        return new Token(TokenType.Identifier, identifierSpan.ToString(), in sourceStart);
     }
 
     private Token ProcessNumber()
@@ -274,7 +278,7 @@ internal sealed class Lexer
                 ? TokenType.DecimalLiteral
                 : TokenType.IntegerLiteral;
 
-        return new Token(tokenType, number.ToString(), sourceStart);
+        return new Token(tokenType, number.ToString(), in sourceStart);
     }
 
     private Token ProcessString()
@@ -314,7 +318,7 @@ internal sealed class Lexer
 
         Advance();
 
-        return new Token(TokenType.StringLiteral, strBuilder.ToString(), sourceStart);
+        return new Token(TokenType.StringLiteral, strBuilder.ToString(), in sourceStart);
     }
 
     private bool CurrentIsValidIdentifierChar(bool isFirstChar)

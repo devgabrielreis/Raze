@@ -5,19 +5,23 @@ namespace Raze.Script.Core.Statements.Expressions;
 
 internal sealed class CallExpression : Expression
 {
-    internal Expression Caller { get; private set; }
+    internal readonly Expression Caller;
 
-    internal IReadOnlyList<Expression> ArgumentList { get; private set; }
+    internal readonly IReadOnlyList<Expression> ArgumentList;
 
-    internal CallExpression(Expression caller, IReadOnlyList<Expression> argumentList, SourceInfo source)
-        : base(source, true)
+    internal CallExpression(Expression caller, IReadOnlyList<Expression> argumentList, ref readonly SourceInfo source)
+        : base(in source, true)
     {
         Caller = caller;
         ArgumentList = argumentList;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitCallExpression(this, state);
+        visitor.VisitCallExpression(this, state, out result);
     }
 }

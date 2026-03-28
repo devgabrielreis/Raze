@@ -11,15 +11,15 @@ namespace Raze.Script.Core.Runtime.Symbols;
 
 internal sealed class ParameterSymbol
 {
-    internal bool IsConstant { get; }
+    internal readonly bool IsConstant;
 
-    internal RuntimeType Type { get; }
+    internal readonly RuntimeType Type;
 
-    internal string Identifier { get; }
+    internal readonly string Identifier;
 
-    internal Expression? DefaultValue { get; }
+    internal readonly Expression? DefaultValue;
 
-    internal SourceInfo SourceInfo { get; }
+    internal readonly SourceInfo SourceInfo;
 
     internal ParameterSymbol(
         bool isConstant,
@@ -32,7 +32,7 @@ internal sealed class ParameterSymbol
             isConstant,
             type,
             identifier,
-            (defaultValue is null ? null : new RuntimeValueExpression(defaultValue.Value, source)),
+            (defaultValue is null ? null : new RuntimeValueExpression(defaultValue.Value, in source)),
             in source
         )
     {

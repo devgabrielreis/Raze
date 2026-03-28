@@ -6,16 +6,20 @@ namespace Raze.Script.Core.Statements.Expressions;
 
 internal sealed class RuntimeValueExpression : Expression
 {
-    internal RuntimeValue Value { get; private set; }
+    internal readonly RuntimeValue Value;
 
-    internal RuntimeValueExpression(RuntimeValue value, SourceInfo source)
-        : base(source, true)
+    internal RuntimeValueExpression(RuntimeValue value, ref readonly SourceInfo source)
+        : base(in source, true)
     {
         Value = value;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitRuntimeValueExpression(this, state);
+        visitor.VisitRuntimeValueExpression(this, state, out result);
     }
 }

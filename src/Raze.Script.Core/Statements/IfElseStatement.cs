@@ -6,20 +6,29 @@ namespace Raze.Script.Core.Statements;
 
 internal sealed class IfElseStatement : Statement
 {
-    internal Expression Condition { get; }
-    internal CodeBlockStatement Then { get; }
-    internal Statement? Else { get; }
+    internal readonly Expression Condition;
+    internal readonly CodeBlockStatement Then;
+    internal readonly Statement? Else;
 
-    internal IfElseStatement(Expression condition, CodeBlockStatement then, Statement? elseStmt, SourceInfo source)
-        : base(source, false)
+    internal IfElseStatement(
+        Expression condition,
+        CodeBlockStatement then,
+        Statement? elseStmt,
+        ref readonly SourceInfo source
+    )
+        : base(in source, false)
     {
         Condition = condition;
         Then = then;
         Else = elseStmt;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitIfElseStatement(this, state);
+        visitor.VisitIfElseStatement(this, state, out result);
     }
 }

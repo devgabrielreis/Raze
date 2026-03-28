@@ -7,14 +7,18 @@ internal sealed class DecimalLiteralExpression : LiteralExpression
 {
     internal readonly decimal DecValue;
 
-    internal DecimalLiteralExpression(decimal value, SourceInfo source)
-        : base(source, true)
+    internal DecimalLiteralExpression(decimal value, ref readonly SourceInfo source)
+        : base(in source, true)
     {
         DecValue = value;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitDecimalLiteralExpression(this, state);
+        visitor.VisitDecimalLiteralExpression(this, state, out result);
     }
 }
