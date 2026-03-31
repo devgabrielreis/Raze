@@ -1,7 +1,7 @@
-﻿using Raze.Script.Core.Exceptions.ControlExceptions;
-using Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Runtime.Context;
 using Raze.Script.Core.Runtime.Operations;
 using Raze.Script.Core.Runtime.Scopes;
 using Raze.Script.Core.Runtime.Symbols;
@@ -15,12 +15,12 @@ namespace Raze.Script.Core.Engine;
 
 internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 {
-    private Runtime.ExecutionContext _executionContext;
+    private Runtime.Context.ExecutionContext _executionContext;
     private OperationDispatcher _operationDispatcher;
 
     public Interpreter()
     {
-        _executionContext = new Runtime.ExecutionContext();
+        _executionContext = new Runtime.Context.ExecutionContext();
 
         _operationDispatcher = new OperationDispatcher();
         _operationDispatcher.RegisterFrom<IntegerOperationRegistrar>();
@@ -200,21 +200,22 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         SourceInfo returnedValueSource;
 
         _executionContext.EnterFunction();
-        try
+
+        Evaluate(function.Body, functionScope, out _);
+        returnedValueSource = function.Body.SourceInfo;
+
+        if (_executionContext.HasPending(ContextSignal.Return))
         {
-            Evaluate(function.Body, functionScope, out _);
-            returnedValueSource = function.Body.SourceInfo;
+            _executionContext.ConsumeReturn(out var returnedSignal);
+
+            if (returnedSignal != null)
+            {
+                returnedValue = returnedSignal.Value.Value;
+                returnedValueSource = returnedSignal.Value.Source;
+            }
         }
-        catch (ReturnException returnException)
-        {
-            returnedValue = returnException.ReturnedValue;
-            returnedValueSource = returnException.SourceInfo;
-        }
-        catch
-        {
-            _executionContext.ExitFunction(in callExpression.SourceInfo);
-            throw;
-        }
+
+        _executionContext.ExitFunction(in returnedValueSource);
 
         if (!function.ReturnType.IsCompatibleWith(in returnedValue))
         {
@@ -223,8 +224,6 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
                 returnedValueSource
             );
         }
-
-        _executionContext.ExitFunction(in returnedValueSource);
 
         result = returnedValue;
     }
@@ -326,6 +325,11 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         foreach (var stmt in codeBlock.Body)
         {
             Evaluate(stmt, codeBlockScope, out _);
+
+            if (_executionContext.HasAnyPendingSignal())
+            {
+                break;
+            }
         }
 
         result = RuntimeValue.Void;
@@ -374,22 +378,22 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
                 }
             }
 
-            try
+
+            var currentIterationScope = Scope.CreateLocalScope(outerLoopScope);
+            Evaluate(loopStmt.Body, currentIterationScope, out _);
+
+            if (_executionContext.HasPending(ContextSignal.Break))
             {
-                var currentIterationScope = Scope.CreateLocalScope(outerLoopScope);
-                Evaluate(loopStmt.Body, currentIterationScope, out _);
-            }
-            catch (BreakException)
-            {
+                _executionContext.ConsumeBreak();
                 break;
             }
-            catch (ContinueException)
+            else if (_executionContext.HasPending(ContextSignal.Continue))
             {
+                _executionContext.ConsumeContinue();
             }
-            catch
+            else if (_executionContext.HasAnyPendingSignal())
             {
-                _executionContext.ExitLoop(in loopStmt.SourceInfo);
-                throw;
+                break;
             }
 
             if (loopStmt.Update is not null)
@@ -417,7 +421,8 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             );
         }
 
-        throw new BreakException(breakStmt.SourceInfo);
+        result = RuntimeValue.Void;
+        _executionContext.SignalBreak();
     }
 
     public void VisitContinueStatement(
@@ -434,7 +439,8 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             );
         }
 
-        throw new ContinueException(continueStmt.SourceInfo);
+        result = RuntimeValue.Void;
+        _executionContext.SignalContinue();
     }
 
     public void VisitReturnStatement(
@@ -451,18 +457,20 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             );
         }
 
-        RuntimeValue returnedValue;
+        ReturnedValue? returnedValue;
         
         if (statement.ReturnedValue != null)
         {
-            Evaluate(statement.ReturnedValue, scope, out returnedValue);
+            Evaluate(statement.ReturnedValue, scope, out var returnValue);
+            returnedValue = new ReturnedValue(in returnValue, in statement.SourceInfo);
         }
         else
         {
-            returnedValue = RuntimeValue.Void;
+            returnedValue = null;
         }
 
-        throw new ReturnException(returnedValue, statement.SourceInfo);
+        result = RuntimeValue.Void;
+        _executionContext.SignalReturn(in returnedValue);
     }
 
     public void VisitRuntimeValueExpression(

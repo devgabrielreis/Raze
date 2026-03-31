@@ -4,26 +4,74 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace Raze.Script.Core.Runtime;
+namespace Raze.Script.Core.Runtime.Context;
 
 internal sealed class ExecutionContext
 {
-    private enum Context
-    {
-        Loop,
-        Function
-    }
-
     private Stack<Context> _contextStack;
+    private ContextSignal _contextSignal;
+    private ReturnedValue? _returnValue;
 
     internal ExecutionContext()
     {
         _contextStack = new Stack<Context>();
+        _contextSignal = ContextSignal.None;
+        _returnValue = null;
     }
 
     internal void Reset()
     {
         _contextStack.Clear();
+        _contextSignal = ContextSignal.None;
+        _returnValue = null;
+    }
+
+    internal bool HasAnyPendingSignal()
+    {
+        return _contextSignal != ContextSignal.None;
+    }
+
+    internal bool HasPending(ContextSignal signal)
+    {
+        Debug.Assert(signal != ContextSignal.None);
+        return _contextSignal == signal;
+    }
+
+    internal void SignalBreak()
+    {
+        _contextSignal = ContextSignal.Break;
+    }
+
+    internal void SignalContinue()
+    {
+        _contextSignal = ContextSignal.Continue;
+    }
+
+    internal void SignalReturn(ref readonly ReturnedValue? returnValue)
+    {
+        _contextSignal = ContextSignal.Return;
+        _returnValue = returnValue;
+    }
+
+    internal void ConsumeBreak()
+    {
+        Debug.Assert(_contextSignal == ContextSignal.Break);
+        _contextSignal = ContextSignal.None;
+    }
+
+    internal void ConsumeContinue()
+    {
+        Debug.Assert(_contextSignal == ContextSignal.Continue);
+        _contextSignal = ContextSignal.None;
+    }
+
+    internal void ConsumeReturn(out ReturnedValue? returnedValue)
+    {
+        Debug.Assert(_contextSignal == ContextSignal.Return);
+        returnedValue = _returnValue;
+
+        _returnValue = null;
+        _contextSignal = ContextSignal.None;
     }
 
     internal void EnterLoop()
