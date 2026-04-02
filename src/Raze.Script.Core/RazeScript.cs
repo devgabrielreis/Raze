@@ -28,7 +28,7 @@ public static class RazeScript
         {
             var tokens = Lexer.Tokenize(source, sourceLocation);
             var program = Parser.Parse(tokens, sourceLocation);
-            new Interpreter().Evaluate(program, scope, out var result);
+            var result = Interpreter.Evaluate(program, scope);
 
             return new RazeSuccess(result);
         }

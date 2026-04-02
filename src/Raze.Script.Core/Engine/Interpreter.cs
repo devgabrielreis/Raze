@@ -18,7 +18,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     private Runtime.Context.ExecutionContext _executionContext;
     private OperationDispatcher _operationDispatcher;
 
-    public Interpreter()
+    private Interpreter()
     {
         _executionContext = new Runtime.Context.ExecutionContext();
 
@@ -29,7 +29,15 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         _operationDispatcher.RegisterFrom<BooleanOperationRegistrar>();
     }
 
-    public void Evaluate(Statement statement, Scope scope, out RuntimeValue result)
+    public static RuntimeValue Evaluate(ProgramExpression program, Scope scope)
+    {
+        var interpreter = new Interpreter();
+        interpreter.EvaluateInternal(program, scope, out var result);
+
+        return result;
+    }
+
+    private void EvaluateInternal(Statement statement, Scope scope, out RuntimeValue result)
     {
         statement.AcceptVisitor(this, scope, out result);
     }
@@ -40,7 +48,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
         foreach (var statement in program.Body)
         {
-            Evaluate(statement, scope, out result);
+            EvaluateInternal(statement, scope, out result);
         }
     }
 
@@ -66,7 +74,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
         foreach (var stmt in statement.DeclarationBlock.Body)
         {
-            Evaluate(stmt, namespaceScope, out _);
+            EvaluateInternal(stmt, namespaceScope, out _);
         }
 
         result = RuntimeValue.Void;
@@ -101,7 +109,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         RuntimeValue? value = null;
         if (statement.Value != null)
         {
-            Evaluate(statement.Value, scope, out var value2);
+            EvaluateInternal(statement.Value, scope, out var value2);
             value = value2;
         }
 
@@ -140,7 +148,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result
     )
     {
-        Evaluate(callExpression.Caller, scope, out var value);
+        EvaluateInternal(callExpression.Caller, scope, out var value);
 
         if (value.Type.Base != BaseType.UserFunction)
         {
@@ -174,12 +182,12 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
             if (i < callExpression.ArgumentList.Count)
             {
-                Evaluate(callExpression.ArgumentList[i], scope, out argumentValue);
+                EvaluateInternal(callExpression.ArgumentList[i], scope, out argumentValue);
                 argumentSource = callExpression.ArgumentList[i].SourceInfo;
             }
             else
             {
-                Evaluate(function.Parameters[i].DefaultValue!, function.Scope, out argumentValue);
+                EvaluateInternal(function.Parameters[i].DefaultValue!, function.Scope, out argumentValue);
                 argumentSource = function.Parameters[i].SourceInfo;
             }
 
@@ -201,7 +209,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
         _executionContext.EnterFunction();
 
-        Evaluate(function.Body, functionScope, out _);
+        EvaluateInternal(function.Body, functionScope, out _);
         returnedValueSource = function.Body.SourceInfo;
 
         if (_executionContext.HasPending(ContextSignal.Return))
@@ -235,7 +243,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     )
     {
         var variable = scope.GetVariable(statement.Target.Symbol, in statement.SourceInfo);
-        Evaluate(statement.Value, scope, out var newValue);
+        EvaluateInternal(statement.Value, scope, out var newValue);
 
         variable.SetValue(ref newValue, in statement.SourceInfo);
 
@@ -248,9 +256,9 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result
     )
     {
-        Evaluate(expression.Left, scope, out var leftHand);
+        EvaluateInternal(expression.Left, scope, out var leftHand);
         string op = expression.Operator;
-        Evaluate(expression.Right, scope, out var rightHand);
+        EvaluateInternal(expression.Right, scope, out var rightHand);
         var source = expression.SourceInfo;
 
         _operationDispatcher.ExecuteBinaryOperation(ref leftHand, op, ref rightHand, out result, ref source);
@@ -262,7 +270,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result
     )
     {
-        Evaluate(expression.Operand, scope, out var operand);
+        EvaluateInternal(expression.Operand, scope, out var operand);
         string op = expression.Operator;
         bool isPostfix = expression.IsPostfix;
         var source = expression.SourceInfo;
@@ -296,7 +304,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result
     )
     {
-        Evaluate(expression.Operand, scope, out var value);
+        EvaluateInternal(expression.Operand, scope, out var value);
 
         result = value.Type == RuntimeType.Null ? RuntimeValue.True : RuntimeValue.False;
     }
@@ -324,7 +332,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
         foreach (var stmt in codeBlock.Body)
         {
-            Evaluate(stmt, codeBlockScope, out _);
+            EvaluateInternal(stmt, codeBlockScope, out _);
 
             if (_executionContext.HasAnyPendingSignal())
             {
@@ -343,11 +351,11 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     {
         if (GetValidBooleanValue(ifElse.Condition, scope))
         {
-            Evaluate(ifElse.Then, scope, out _);
+            EvaluateInternal(ifElse.Then, scope, out _);
         }
         else if (ifElse.Else is not null)
         {
-            Evaluate(ifElse.Else, scope, out _);
+            EvaluateInternal(ifElse.Else, scope, out _);
         }
 
         result = RuntimeValue.Void;
@@ -363,7 +371,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
         foreach (var stmt in loopStmt.Initialization)
         {
-            Evaluate(stmt, outerLoopScope, out _);
+            EvaluateInternal(stmt, outerLoopScope, out _);
         }
 
         _executionContext.EnterLoop();
@@ -380,7 +388,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
 
             var currentIterationScope = Scope.CreateLocalScope(outerLoopScope);
-            Evaluate(loopStmt.Body, currentIterationScope, out _);
+            EvaluateInternal(loopStmt.Body, currentIterationScope, out _);
 
             if (_executionContext.HasPending(ContextSignal.Break))
             {
@@ -398,7 +406,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
             if (loopStmt.Update is not null)
             {
-                Evaluate(loopStmt.Update, outerLoopScope, out _);
+                EvaluateInternal(loopStmt.Update, outerLoopScope, out _);
             }
         }
 
@@ -461,7 +469,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         
         if (statement.ReturnedValue != null)
         {
-            Evaluate(statement.ReturnedValue, scope, out var returnValue);
+            EvaluateInternal(statement.ReturnedValue, scope, out var returnValue);
             returnedValue = new ReturnedValue(in returnValue, in statement.SourceInfo);
         }
         else
@@ -523,7 +531,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
     private bool GetValidBooleanValue(Expression condition, Scope scope)
     {
-        Evaluate(condition, scope, out var conditionResult);
+        EvaluateInternal(condition, scope, out var conditionResult);
 
         if (conditionResult.Type != RuntimeType.Boolean)
         {
