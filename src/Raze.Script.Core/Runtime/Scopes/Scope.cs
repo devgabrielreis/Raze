@@ -87,6 +87,14 @@ public sealed class Scope
 
         if (variable is null)
         {
+            if (TryGetNamespace(name) != null)
+            {
+                ThrowHelper.Throw<UnexpectedStatementException>(
+                    $"{name} is a namespace, but it is being used as a value",
+                    in source
+                );
+            }
+
             ThrowHelper.Throw<UndefinedIdentifierException>(
                 $"Undefined identifier: {name}",
                 in source
