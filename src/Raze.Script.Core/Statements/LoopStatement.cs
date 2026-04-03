@@ -4,20 +4,24 @@ using Raze.Script.Core.Statements.Expressions;
 
 namespace Raze.Script.Core.Statements;
 
-internal class LoopStatement : Statement
+internal sealed class LoopStatement : Statement
 {
-    public IReadOnlyList<Statement> Initialization { get; }
+    internal readonly Statement? Initialization;
 
-    public Expression? Condition { get; }
+    internal readonly Expression? Condition;
     
-    public Statement? Update { get; }
+    internal readonly Statement? Update;
 
-    public CodeBlockStatement Body { get; }
+    internal readonly CodeBlockStatement Body;
 
-    public override bool RequireSemicolon => false;
-
-    public LoopStatement(List<Statement> initialization, Expression? condition, Statement? update, CodeBlockStatement body, SourceInfo source)
-        : base(source)
+    internal LoopStatement(
+        Statement? initialization,
+        Expression? condition,
+        Statement? update,
+        CodeBlockStatement body,
+        ref readonly SourceInfo source
+    )
+        : base(in source, false)
     {
         Initialization = initialization;
         Condition = condition;
@@ -25,8 +29,12 @@ internal class LoopStatement : Statement
         Body = body;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitLoopStatement(this, state);
+        visitor.VisitLoopStatement(this, state, out result);
     }
 }

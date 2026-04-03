@@ -5,15 +5,21 @@ using Raze.Script.Core.Statements.Expressions;
 
 namespace Raze.Script.Core.Statements;
 
-internal class VariableDeclarationStatement : Statement
+internal sealed class VariableDeclarationStatement : Statement
 {
-    public string Identifier { get; private set; }
-    public Expression? Value { get; private set; }
-    public RuntimeType Type { get; private set; }
-    public bool IsConstant { get; private set; }
+    internal readonly string Identifier;
+    internal readonly Expression? Value;
+    internal readonly RuntimeType Type;
+    internal readonly bool IsConstant;
 
-    public VariableDeclarationStatement(string identifier, RuntimeType type, Expression? value, bool isConstant, SourceInfo source)
-        : base(source)
+    internal VariableDeclarationStatement(
+        string identifier,
+        RuntimeType type,
+        Expression? value,
+        bool isConstant,
+        ref readonly SourceInfo source
+    )
+        : base(in source, true)
     {
         Identifier = identifier;
         Value = value;
@@ -21,8 +27,12 @@ internal class VariableDeclarationStatement : Statement
         IsConstant = isConstant;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitVariableDeclarationStatement(this, state);
+        visitor.VisitVariableDeclarationStatement(this, state, out result);
     }
 }

@@ -2,10 +2,19 @@
 
 namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
-public class ConstantAssignmentException : RuntimeException
+public sealed class ConstantAssignmentException
+    : RuntimeException, IThrowableByThrowHelper<ConstantAssignmentException>
 {
-    internal ConstantAssignmentException(SourceInfo source)
-        : base("Cannot modify a constant value", source, nameof(ConstantAssignmentException))
+    private ConstantAssignmentException(string message, SourceInfo source)
+        : base(message, source, nameof(ConstantAssignmentException))
     {
+    }
+
+    static ConstantAssignmentException IThrowableByThrowHelper<ConstantAssignmentException>.Create(
+        string message,
+        ref readonly SourceInfo source
+    )
+    {
+        return new ConstantAssignmentException(message, source);
     }
 }

@@ -4,18 +4,22 @@ using Raze.Script.Core.Statements.Expressions;
 
 namespace Raze.Script.Core.Statements;
 
-internal class ReturnStatement : Statement
+internal sealed class ReturnStatement : Statement
 {
-    public Expression? ReturnedValue { get; private set; }
+    internal readonly Expression? ReturnedValue;
 
-    public ReturnStatement(Expression? returnedValue, SourceInfo source)
-        : base(source)
+    internal ReturnStatement(Expression? returnedValue, ref readonly SourceInfo source)
+        : base(in source, true)
     {
         ReturnedValue = returnedValue;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitReturnStatement(this, state);
+        visitor.VisitReturnStatement(this, state, out result);
     }
 }

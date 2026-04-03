@@ -3,15 +3,19 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements;
 
-internal class ContinueStatement : Statement
+internal sealed class ContinueStatement : Statement
 {
-    public ContinueStatement(SourceInfo source)
-        : base(source)
+    internal ContinueStatement(ref readonly SourceInfo source)
+        : base(in source, true)
     {
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitContinueStatement(this, state);
+        visitor.VisitContinueStatement(this, state, out result);
     }
 }

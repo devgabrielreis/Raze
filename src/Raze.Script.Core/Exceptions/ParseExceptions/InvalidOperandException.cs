@@ -2,10 +2,19 @@
 
 namespace Raze.Script.Core.Exceptions.ParseExceptions;
 
-public class InvalidOperandException : ParseException
+public sealed class InvalidOperandException
+    : ParseException, IThrowableByThrowHelper<InvalidOperandException>
 {
-    internal InvalidOperandException(string message, SourceInfo source)
+    private InvalidOperandException(string message, SourceInfo source)
         : base(message, source, nameof(InvalidOperandException))
     {
+    }
+
+    static InvalidOperandException IThrowableByThrowHelper<InvalidOperandException>.Create(
+        string message,
+        ref readonly SourceInfo source
+    )
+    {
+        return new InvalidOperandException(message, source);
     }
 }

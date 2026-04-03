@@ -1,78 +1,96 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Exceptions;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Runtime.Types;
 using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Script.Core.Runtime.Operations;
 
 internal readonly record struct BinaryOperationKey(
-    string LeftTypeName,
+    RuntimeType LeftType,
     string Operator,
-    string RightTypeName
+    RuntimeType RightType
 );
 
-internal delegate RuntimeValue BinaryOperation(
-    RuntimeValue left,
-    RuntimeValue right,
-    SourceInfo source
+internal delegate void BinaryOperation(
+    ref readonly RuntimeValue left,
+    ref readonly RuntimeValue right,
+    out RuntimeValue result,
+    ref readonly SourceInfo source
 );
 
 internal readonly record struct UnaryOperationKey(
-    string OperandTypeName,
+    RuntimeType OperandType,
     string Operator,
     bool IsPostfix
 );
 
-internal delegate RuntimeValue UnaryOperation(
-    RuntimeValue operand,
-    SourceInfo source
+internal delegate void UnaryOperation(
+    ref readonly RuntimeValue operand,
+    out RuntimeValue result,
+    ref readonly SourceInfo source
 );
 
-internal class OperationDispatcher
+internal sealed class OperationDispatcher
 {
     private readonly Dictionary<BinaryOperationKey, BinaryOperation> _binaryOperations;
     private readonly Dictionary<UnaryOperationKey, UnaryOperation> _unaryOperations;
 
-    public OperationDispatcher()
+    internal OperationDispatcher()
     {
         _binaryOperations = new Dictionary<BinaryOperationKey, BinaryOperation>();
         _unaryOperations = new Dictionary<UnaryOperationKey, UnaryOperation>();
     }
 
-    public void RegisterFrom<TOperationRegistrar>() where TOperationRegistrar: IOperationRegistrar
+    internal void RegisterFrom<TOperationRegistrar>() where TOperationRegistrar: IOperationRegistrar
     {
         TOperationRegistrar.RegisterBinaryOperations(this);
         TOperationRegistrar.RegisterUnaryOperations(this);
     }
 
-    public RuntimeValue ExecuteBinaryOperation(RuntimeValue left, string op, RuntimeValue right, SourceInfo source)
+    internal void ExecuteBinaryOperation(
+        ref readonly RuntimeValue left,
+        string op,
+        ref readonly RuntimeValue right,
+        out RuntimeValue target,
+        ref readonly SourceInfo source
+    )
     {
-        var key = new BinaryOperationKey(left.TypeName, op, right.TypeName);
+        var key = new BinaryOperationKey(left.Type, op, right.Type);
 
         if (!_binaryOperations.TryGetValue(key, out var operationFunc))
         {
-            throw new UnsupportedBinaryOperationException(
-                left.TypeName, right.TypeName, op, source
+            ThrowHelper.Throw<UnsupportedBinaryOperationException>(
+                $"Cannot perform {left.Type} {op} {right.Type}",
+                in source
             );
         }
 
-        return operationFunc(left, right, source);
+        operationFunc(in left, in right, out target, in source);
     }
 
-    public RuntimeValue ExecuteUnaryOperation(RuntimeValue operand, string op, bool isPostfix, SourceInfo source)
+    internal void ExecuteUnaryOperation(
+        ref readonly RuntimeValue operand,
+        string op,
+        out RuntimeValue target,
+        bool isPostfix,
+        ref readonly SourceInfo source
+    )
     {
-        var key = new UnaryOperationKey(operand.TypeName, op, isPostfix);
+        var key = new UnaryOperationKey(operand.Type, op, isPostfix);
 
         if (!_unaryOperations.TryGetValue(key, out var operationFunc))
         {
-            throw new UnsupportedUnaryOperationException(
-                op, operand.TypeName, isPostfix, source
+            var operation = isPostfix ? $"{operand.Type}{op}" : $"{op}{operand.Type}";
+            ThrowHelper.Throw<UnsupportedUnaryOperationException>(
+                $"Cannot perform {operation}", in source
             );
         }
 
-        return operationFunc(operand, source);
+        operationFunc(in operand, out target, in source);
     }
 
-    public void RegisterBinaryOperation(BinaryOperationKey key, BinaryOperation operation)
+    internal void RegisterBinaryOperation(BinaryOperationKey key, BinaryOperation operation)
     {
         if (_binaryOperations.ContainsKey(key))
         {
@@ -82,7 +100,7 @@ internal class OperationDispatcher
         _binaryOperations.Add(key, operation);
     }
 
-    public void RegisterUnaryOperation(UnaryOperationKey key, UnaryOperation operation)
+    internal void RegisterUnaryOperation(UnaryOperationKey key, UnaryOperation operation)
     {
         if (_unaryOperations.ContainsKey(key))
         {

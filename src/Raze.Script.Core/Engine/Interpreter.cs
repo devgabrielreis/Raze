@@ -1,7 +1,8 @@
-﻿using Raze.Script.Core.Exceptions.ControlExceptions;
+﻿using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Runtime.Context;
 using Raze.Script.Core.Runtime.Operations;
 using Raze.Script.Core.Runtime.Scopes;
 using Raze.Script.Core.Runtime.Symbols;
@@ -13,14 +14,14 @@ using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 
 namespace Raze.Script.Core.Engine;
 
-internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
+internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 {
-    private Runtime.ExecutionContext _executionContext;
+    private Runtime.Context.ExecutionContext _executionContext;
     private OperationDispatcher _operationDispatcher;
 
-    public Interpreter()
+    private Interpreter()
     {
-        _executionContext = new Runtime.ExecutionContext();
+        _executionContext = new Runtime.Context.ExecutionContext();
 
         _operationDispatcher = new OperationDispatcher();
         _operationDispatcher.RegisterFrom<IntegerOperationRegistrar>();
@@ -29,26 +30,36 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         _operationDispatcher.RegisterFrom<BooleanOperationRegistrar>();
     }
 
-    public RuntimeValue Evaluate(Statement statement, Scope scope)
+    public static RuntimeValue Evaluate(ProgramExpression program, Scope scope)
     {
-        return statement.AcceptVisitor(this, scope);
+        var interpreter = new Interpreter();
+        interpreter.EvaluateInternal(program, scope, out var result);
+
+        return result;
     }
 
-    public RuntimeValue VisitProgramExpression(ProgramExpression program, Scope scope)
+    private void EvaluateInternal(Statement statement, Scope scope, out RuntimeValue result)
     {
-        RuntimeValue lastValue = new VoidValue();
+        statement.AcceptVisitor(this, scope, out result);
+    }
+
+    public void VisitProgramExpression(ProgramExpression program, Scope scope, out RuntimeValue result)
+    {
+        result = RuntimeValue.Void;
 
         foreach (var statement in program.Body)
         {
-            lastValue = Evaluate(statement, scope);
+            EvaluateInternal(statement, scope, out result);
         }
-
-        return lastValue;
     }
 
-    public RuntimeValue VisitNamespaceDeclarationStatement(NamespaceDeclarationStatement statement, Scope scope)
+    public void VisitNamespaceDeclarationStatement(
+        NamespaceDeclarationStatement statement,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
-        NamespaceScope namespaceScope;
+        Scope namespaceScope;
 
         if (scope.TryGetNamespace(statement.Identifier) is NamespaceSymbol namespaceSymbol)
         {
@@ -56,80 +67,98 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         }
         else
         {
-            namespaceScope = new NamespaceScope(scope);
+            namespaceScope = Scope.CreateNamespaceScope(scope);
             var newNamespaceSymbol = new NamespaceSymbol(namespaceScope);
 
-            scope.DeclareNamespace(statement.Identifier, newNamespaceSymbol, statement.SourceInfo);
+            scope.DeclareNamespace(statement.Identifier, newNamespaceSymbol, in statement.SourceInfo);
         }
 
         foreach (var stmt in statement.DeclarationBlock.Body)
         {
-            Evaluate(stmt, namespaceScope);
+            EvaluateInternal(stmt, namespaceScope, out _);
         }
 
-        return new VoidValue();
+        result = RuntimeValue.Void;
     }
 
-    public RuntimeValue VisitNamespaceAccessExpression(NamespaceAccessExpression expression, Scope scope)
+    public void VisitNamespaceAccessExpression(
+        NamespaceAccessExpression expression,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
         var namespaceSymbol = scope.GetNamespace(
             expression.NamespaceIdentifier.Symbol,
-            expression.SourceInfo
+            in expression.SourceInfo
         );
 
         var variable = namespaceSymbol.Scope.GetVariable(
             expression.MemberIdentifier.Symbol,
-            expression.MemberIdentifier.SourceInfo,
+            in expression.MemberIdentifier.SourceInfo,
             throwIfNotInitialized: true
         );
 
-        return variable.Value;
+        result = variable.GetValue(in expression.SourceInfo);
     }
 
-    public RuntimeValue VisitVariableDeclarationStatement(VariableDeclarationStatement statement, Scope scope)
+    public void VisitVariableDeclarationStatement(
+        VariableDeclarationStatement statement,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
+        RuntimeValue? value = null;
+        if (statement.Value != null)
+        {
+            EvaluateInternal(statement.Value, scope, out var value2);
+            value = value2;
+        }
+
         VariableSymbol variable = new VariableSymbol(
-            statement.Value is null ? null : Evaluate(statement.Value, scope),
+            value,
             statement.Type,
             statement.IsConstant,
-            statement.SourceInfo
+            in statement.SourceInfo
         );
 
-        scope.DeclareVariable(statement.Identifier, variable, statement.SourceInfo);
-        return new VoidValue();
+        scope.DeclareVariable(statement.Identifier, variable, in statement.SourceInfo);
+        result = RuntimeValue.Void;
     }
 
-    public RuntimeValue VisitFunctionDeclarationStatement(FunctionDeclarationStatement statement, Scope scope)
+    public void VisitFunctionDeclarationStatement(
+        FunctionDeclarationStatement statement,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
-        FunctionValue function = new FunctionValue(
+        UserFunctionValue function = new UserFunctionValue(
             statement.ReturnType, statement.Parameters, statement.Body, scope
         );
+        var value = new RuntimeValue(function);
 
-        List<RuntimeType> parameterTypes = statement.Parameters.Select(p => p.Type).ToList();
+        VariableSymbol variable = new VariableSymbol(value, value.Type, true, in statement.SourceInfo);
 
-        FunctionType type = new FunctionType(
-            false,
-            statement.ReturnType,
-            parameterTypes
-        );
+        scope.DeclareVariable(statement.Identifier, variable, in statement.SourceInfo);
 
-        VariableSymbol variable = new VariableSymbol(function, type, true, statement.SourceInfo);
-
-        scope.DeclareVariable(statement.Identifier, variable, statement.SourceInfo);
-
-        return new VoidValue();
+        result = RuntimeValue.Void;
     }
 
-    public RuntimeValue VisitCallExpression(CallExpression callExpression, Scope scope)
+    public void VisitCallExpression(
+        CallExpression callExpression,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
-        var value = Evaluate(callExpression.Caller, scope);
+        EvaluateInternal(callExpression.Caller, scope, out var value);
 
-        if (value is not FunctionValue function)
+        if (value.Type.Base != BaseType.UserFunction)
         {
-            throw new InvalidCallExpressionException(
-                $"Cannot call {value.TypeName}", callExpression.SourceInfo
+            ThrowHelper.Throw<InvalidCallExpressionException>(
+                $"Cannot call {value.Type}", in callExpression.SourceInfo
             );
         }
+
+        var function = value.AsUserFunction();
 
         var parameters = function.Parameters;
         int minExpectedArguments = parameters.Count(p => !p.HasDefaultValue());
@@ -140,12 +169,12 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
                                 ? $"Function expects {parameters.Count} arguments, but {callExpression.ArgumentList.Count} were given"
                                 : $"Function expects between {minExpectedArguments} and {parameters.Count} arguments, but {callExpression.ArgumentList.Count} were given";
 
-            throw new InvalidParameterListException(
-                message, callExpression.SourceInfo
+            ThrowHelper.Throw<InvalidParameterListException>(
+                message, in callExpression.SourceInfo
             );
         }
 
-        var functionScope = new LocalScope(function.Scope);
+        var functionScope = Scope.CreateLocalScope(function.Scope);
 
         for (int i = 0; i < function.Parameters.Count; i++)
         {
@@ -154,154 +183,196 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
             if (i < callExpression.ArgumentList.Count)
             {
-                argumentValue = Evaluate(callExpression.ArgumentList[i], scope);
+                EvaluateInternal(callExpression.ArgumentList[i], scope, out argumentValue);
                 argumentSource = callExpression.ArgumentList[i].SourceInfo;
             }
             else
             {
-                argumentValue = Evaluate(function.Parameters[i].DefaultValue!, function.Scope);
+                EvaluateInternal(function.Parameters[i].DefaultValue!, function.Scope, out argumentValue);
                 argumentSource = function.Parameters[i].SourceInfo;
             }
 
-            if (!function.Parameters[i].Type.AcceptValue(argumentValue))
+            if (!function.Parameters[i].Type.IsCompatibleWith(in argumentValue))
             {
-                throw new InvalidParameterListException(
-                    $"Parameter {function.Parameters[i].Identifier} expects type {function.Parameters[i].Type.TypeName}, but {argumentValue.TypeName} was given",
-                    argumentSource
+                ThrowHelper.Throw<InvalidParameterListException>(
+                    $"Parameter {function.Parameters[i].Identifier} expects type {function.Parameters[i].Type}, but {argumentValue.Type} was given",
+                    in argumentSource
                 );
             }
 
-            var variable = new VariableSymbol(argumentValue, function.Parameters[i].Type, function.Parameters[i].IsConstant, argumentSource);
+            var variable = new VariableSymbol(argumentValue, function.Parameters[i].Type, function.Parameters[i].IsConstant, ref argumentSource);
 
-            functionScope.DeclareVariable(function.Parameters[i].Identifier, variable, argumentSource);
+            functionScope.DeclareVariable(function.Parameters[i].Identifier, variable, in argumentSource);
         }
 
-        RuntimeValue returnedValue = new VoidValue();
+        RuntimeValue returnedValue = RuntimeValue.Void;
         SourceInfo returnedValueSource;
 
         _executionContext.EnterFunction();
-        try
+
+        EvaluateInternal(function.Body, functionScope, out _);
+        returnedValueSource = function.Body.SourceInfo;
+
+        if (_executionContext.HasPending(ContextSignal.Return))
         {
-            Evaluate(function.Body, functionScope);
-            returnedValueSource = function.Body.SourceInfo;
-        }
-        catch (ReturnException returnException)
-        {
-            returnedValue = returnException.ReturnedValue;
-            returnedValueSource = returnException.SourceInfo;
-        }
-        catch
-        {
-            _executionContext.ExitFunction(callExpression.SourceInfo);
-            throw;
+            _executionContext.ConsumeReturn(out var returnedSignal);
+
+            if (returnedSignal != null)
+            {
+                returnedValue = returnedSignal.Value.Value;
+                returnedValueSource = returnedSignal.Value.Source;
+            }
         }
 
-        if (!function.ReturnType.AcceptValue(returnedValue))
+        _executionContext.ExitFunction(in returnedValueSource);
+
+        if (!function.ReturnType.IsCompatibleWith(in returnedValue))
         {
-            throw new UnexpectedReturnType(
-                $"Function was expected to return {function.ReturnType.TypeName} but {returnedValue.TypeName} was returned",
-                returnedValueSource
+            ThrowHelper.Throw<UnexpectedReturnType>(
+                $"Function was expected to return {function.ReturnType} but {returnedValue.Type} was returned",
+                in returnedValueSource
             );
         }
 
-        _executionContext.ExitFunction(returnedValueSource);
-
-        return returnedValue;
+        result = returnedValue;
     }
 
-    public RuntimeValue VisitAssignmentStatement(AssignmentStatement statement, Scope scope)
+    public void VisitAssignmentStatement(
+        AssignmentStatement statement,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
-        var variable = scope.GetVariable(statement.Target.Symbol, statement.SourceInfo);
-        var newValue = Evaluate(statement.Value, scope);
+        var variable = scope.GetVariable(statement.Target.Symbol, in statement.SourceInfo);
+        EvaluateInternal(statement.Value, scope, out var newValue);
 
-        variable.SetValue(newValue, statement.SourceInfo);
+        variable.SetValue(ref newValue, in statement.SourceInfo);
 
-        return new VoidValue();
+        result = RuntimeValue.Void;
     }
 
-    public RuntimeValue VisitBinaryExpression(BinaryExpression expression, Scope scope)
+    public void VisitBinaryExpression(
+        BinaryExpression expression,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
-        RuntimeValue leftHand = Evaluate(expression.Left, scope);
+        EvaluateInternal(expression.Left, scope, out var leftHand);
         string op = expression.Operator;
-        RuntimeValue rightHand = Evaluate(expression.Right, scope);
+        EvaluateInternal(expression.Right, scope, out var rightHand);
+        var source = expression.SourceInfo;
 
-        return _operationDispatcher.ExecuteBinaryOperation(leftHand, op, rightHand, expression.SourceInfo);
+        _operationDispatcher.ExecuteBinaryOperation(ref leftHand, op, ref rightHand, out result, ref source);
     }
 
-    public RuntimeValue VisitUnarySimpleExpression(UnarySimpleExpression expression, Scope scope)
+    public void VisitUnarySimpleExpression(
+        UnarySimpleExpression expression,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
-        RuntimeValue operand = Evaluate(expression.Operand, scope);
+        EvaluateInternal(expression.Operand, scope, out var operand);
         string op = expression.Operator;
         bool isPostfix = expression.IsPostfix;
+        var source = expression.SourceInfo;
 
-        return _operationDispatcher.ExecuteUnaryOperation(operand, op, isPostfix, expression.SourceInfo);
+        _operationDispatcher.ExecuteUnaryOperation(in operand, op, out result, isPostfix, in source);
     }
 
-    public RuntimeValue VisitUnaryMutationExpression(UnaryMutationExpression expression, Scope scope)
+    public void VisitUnaryMutationExpression(
+        UnaryMutationExpression expression,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
         var variable = scope.GetVariable(
-            expression.Operand.Symbol, expression.SourceInfo, throwIfNotInitialized: true
+            expression.Operand.Symbol, in expression.SourceInfo, throwIfNotInitialized: true
         );
 
-        var valueBefore = variable.Value;
-        var valueAfter = _operationDispatcher.ExecuteUnaryOperation(
-            valueBefore, expression.Operator, expression.IsPostfix, expression.SourceInfo
+        var valueBefore = variable.GetValue(in expression.SourceInfo);
+        _operationDispatcher.ExecuteUnaryOperation(
+            in valueBefore, expression.Operator, out var valueAfter, expression.IsPostfix, in expression.SourceInfo
         );
 
-        variable.SetValue(valueAfter, expression.SourceInfo);
+        variable.SetValue(in valueAfter, in expression.SourceInfo);
 
-        return expression.IsPostfix ? valueBefore : valueAfter;
+        result = expression.IsPostfix ? valueBefore : valueAfter;
     }
 
-    public RuntimeValue VisitNullCheckerExpression(NullCheckerExpression expression, Scope scope)
+    public void VisitNullCheckerExpression(
+        NullCheckerExpression expression,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
-        var runtimeValue = Evaluate(expression.Operand, scope);
+        EvaluateInternal(expression.Operand, scope, out var value);
 
-        return new BooleanValue(runtimeValue is NullValue);
+        result = value.Type == RuntimeType.Null ? RuntimeValue.True : RuntimeValue.False;
     }
 
-    public RuntimeValue VisitIdentifierExpression(IdentifierExpression expression, Scope scope)
+    public void VisitIdentifierExpression(
+        IdentifierExpression expression,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
         var variable = scope.GetVariable(
-            expression.Symbol, expression.SourceInfo, throwIfNotInitialized: true
+            expression.Symbol, in expression.SourceInfo, throwIfNotInitialized: true
         );
 
-        return variable.Value;
+        result = variable.GetValue(in expression.SourceInfo);
     }
 
-    public RuntimeValue VisitCodeBlockStatement(CodeBlockStatement codeBlock, Scope scope)
+    public void VisitCodeBlockStatement(
+        CodeBlockStatement codeBlock,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
-        var codeBlockScope = new LocalScope(scope);
+        var codeBlockScope = Scope.CreateLocalScope(scope);
 
         foreach (var stmt in codeBlock.Body)
         {
-            Evaluate(stmt, codeBlockScope);
+            EvaluateInternal(stmt, codeBlockScope, out _);
+
+            if (_executionContext.HasAnyPendingSignal())
+            {
+                break;
+            }
         }
 
-        return new VoidValue();
+        result = RuntimeValue.Void;
     }
 
-    public RuntimeValue VisitIfElseStatement(IfElseStatement ifElse, Scope scope)
+    public void VisitIfElseStatement(
+        IfElseStatement ifElse,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
         if (GetValidBooleanValue(ifElse.Condition, scope))
         {
-            Evaluate(ifElse.Then, scope);
+            EvaluateInternal(ifElse.Then, scope, out _);
         }
         else if (ifElse.Else is not null)
         {
-            Evaluate(ifElse.Else, scope);
+            EvaluateInternal(ifElse.Else, scope, out _);
         }
 
-        return new VoidValue();
+        result = RuntimeValue.Void;
     }
 
-    public RuntimeValue VisitLoopStatement(LoopStatement loopStmt, Scope scope)
+    public void VisitLoopStatement(
+        LoopStatement loopStmt,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
-        var outerLoopScope = new LocalScope(scope);
+        var outerLoopScope = Scope.CreateLocalScope(scope);
 
-        foreach (var stmt in loopStmt.Initialization)
+        if (loopStmt.Initialization != null)
         {
-            Evaluate(stmt, outerLoopScope);
+            EvaluateInternal(loopStmt.Initialization, outerLoopScope, out _);
         }
 
         _executionContext.EnterLoop();
@@ -316,121 +387,161 @@ internal class Interpreter: IStatementVisitor<Scope, RuntimeValue>
                 }
             }
 
-            try
+
+            var currentIterationScope = Scope.CreateLocalScope(outerLoopScope);
+            EvaluateInternal(loopStmt.Body, currentIterationScope, out _);
+
+            if (_executionContext.HasPending(ContextSignal.Break))
             {
-                var currentIterationScope = new LocalScope(outerLoopScope);
-                Evaluate(loopStmt.Body, currentIterationScope);
-            }
-            catch (BreakException)
-            {
+                _executionContext.ConsumeBreak();
                 break;
             }
-            catch (ContinueException)
+            else if (_executionContext.HasPending(ContextSignal.Continue))
             {
+                _executionContext.ConsumeContinue();
             }
-            catch
+            else if (_executionContext.HasAnyPendingSignal())
             {
-                _executionContext.ExitLoop(loopStmt.SourceInfo);
-                throw;
+                break;
             }
 
             if (loopStmt.Update is not null)
             {
-                Evaluate(loopStmt.Update, outerLoopScope);
+                EvaluateInternal(loopStmt.Update, outerLoopScope, out _);
             }
         }
 
-        _executionContext.ExitLoop(loopStmt.SourceInfo);
+        _executionContext.ExitLoop(in loopStmt.SourceInfo);
 
-        return new VoidValue();
+        result = RuntimeValue.Void;
     }
 
-    public RuntimeValue VisitBreakStatement(BreakStatement breakStmt, Scope scope)
+    public void VisitBreakStatement(
+        BreakStatement breakStmt,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
         if (!_executionContext.IsInLoop())
         {
-            throw new UnexpectedStatementException(
+            ThrowHelper.Throw<UnexpectedStatementException>(
                 "Cannot use break outside of a loop",
-                breakStmt.SourceInfo
+                in breakStmt.SourceInfo
             );
         }
 
-        throw new BreakException(breakStmt.SourceInfo);
+        result = RuntimeValue.Void;
+        _executionContext.SignalBreak();
     }
 
-    public RuntimeValue VisitContinueStatement(ContinueStatement continueStmt, Scope scope)
+    public void VisitContinueStatement(
+        ContinueStatement continueStmt,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
         if (!_executionContext.IsInLoop())
         {
-            throw new UnexpectedStatementException(
+            ThrowHelper.Throw<UnexpectedStatementException>(
                 "Cannot use continue outside of a loop",
-                continueStmt.SourceInfo
+                in continueStmt.SourceInfo
             );
         }
 
-        throw new ContinueException(continueStmt.SourceInfo);
+        result = RuntimeValue.Void;
+        _executionContext.SignalContinue();
     }
 
-    public RuntimeValue VisitReturnStatement(ReturnStatement statement, Scope scope)
+    public void VisitReturnStatement(
+        ReturnStatement statement,
+        Scope scope,
+        out RuntimeValue result
+    )
     {
         if (!_executionContext.IsInFunction())
         {
-            throw new UnexpectedStatementException(
+            ThrowHelper.Throw<UnexpectedStatementException>(
                 "Cannot use return outside of a function",
-                statement.SourceInfo
+                in statement.SourceInfo
             );
         }
 
-        RuntimeValue returnedValue = (statement.ReturnedValue is null)
-                                        ? new VoidValue()
-                                        : Evaluate(statement.ReturnedValue, scope);
+        ReturnedValue? returnedValue;
+        
+        if (statement.ReturnedValue != null)
+        {
+            EvaluateInternal(statement.ReturnedValue, scope, out var returnValue);
+            returnedValue = new ReturnedValue(in returnValue, in statement.SourceInfo);
+        }
+        else
+        {
+            returnedValue = null;
+        }
 
-        throw new ReturnException(returnedValue, statement.SourceInfo);
+        result = RuntimeValue.Void;
+        _executionContext.SignalReturn(in returnedValue);
     }
 
-    public RuntimeValue VisitRuntimeValueExpression(RuntimeValueExpression expression, Scope state)
+    public void VisitRuntimeValueExpression(
+        RuntimeValueExpression expression,
+        Scope state,
+        out RuntimeValue result)
     {
-        return expression.Value;
+        result = expression.Value;
     }
 
-    public RuntimeValue VisitBooleanLiteralExpression(BooleanLiteralExpression expression, Scope state)
+    public void VisitBooleanLiteralExpression(
+        BooleanLiteralExpression expression,
+        Scope state,
+        out RuntimeValue result)
     {
-        return new BooleanValue(expression.BoolValue);
+        result = expression.BoolValue ? RuntimeValue.True : RuntimeValue.False;
     }
 
-    public RuntimeValue VisitDecimalLiteralExpression(DecimalLiteralExpression expression, Scope state)
+    public void VisitDecimalLiteralExpression(
+        DecimalLiteralExpression expression,
+        Scope state,
+        out RuntimeValue result)
     {
-        return new DecimalValue(expression.DecValue);
+        result = new RuntimeValue(expression.DecValue);
     }
 
-    public RuntimeValue VisitIntegerLiteralExpression(IntegerLiteralExpression expression, Scope state)
+    public void VisitIntegerLiteralExpression(
+        IntegerLiteralExpression expression,
+        Scope state,
+        out RuntimeValue result)
     {
-        return new IntegerValue(expression.IntValue);
+        result = new RuntimeValue(expression.IntValue);
     }
 
-    public RuntimeValue VisitNullLiteralExpression(NullLiteralExpression expression, Scope state)
+    public void VisitNullLiteralExpression(
+        NullLiteralExpression expression,
+        Scope state,
+        out RuntimeValue result)
     {
-        return new NullValue();
+        result = RuntimeValue.Null;
     }
 
-    public RuntimeValue VisitStringLiteralExpression(StringLiteralExpression expression, Scope state)
+    public void VisitStringLiteralExpression(
+        StringLiteralExpression expression,
+        Scope state,
+        out RuntimeValue result)
     {
-        return new StringValue(expression.StrValue);
+        result = new RuntimeValue(expression.StrValue);
     }
 
     private bool GetValidBooleanValue(Expression condition, Scope scope)
     {
-        var conditionResult = Evaluate(condition, scope);
+        EvaluateInternal(condition, scope, out var conditionResult);
 
-        if (conditionResult is not BooleanValue)
+        if (conditionResult.Type != RuntimeType.Boolean)
         {
-            throw new UnexpectedTypeException(
-                conditionResult.GetType().Name,
-                nameof(BooleanValue),
-                condition.SourceInfo
+            ThrowHelper.Throw<UnexpectedTypeException>(
+                $"Expected: {RuntimeType.Boolean}. Found: {conditionResult.GetType().Name}",
+                in condition.SourceInfo
             );
         }
 
-        return (conditionResult as BooleanValue)!.BoolValue;
+        return conditionResult.AsBoolean();
     }
 }

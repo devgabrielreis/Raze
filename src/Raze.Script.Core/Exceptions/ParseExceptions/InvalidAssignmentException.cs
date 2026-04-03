@@ -2,10 +2,19 @@
 
 namespace Raze.Script.Core.Exceptions.ParseExceptions;
 
-public class InvalidAssignmentException : ParseException
+public sealed class InvalidAssignmentException
+    : ParseException, IThrowableByThrowHelper<InvalidAssignmentException>
 {
-    internal InvalidAssignmentException(string message, SourceInfo source)
+    private InvalidAssignmentException(string message, SourceInfo source)
         : base(message, source, nameof(InvalidAssignmentException))
     {
+    }
+
+    static InvalidAssignmentException IThrowableByThrowHelper<InvalidAssignmentException>.Create(
+        string message,
+        ref readonly SourceInfo source
+    )
+    {
+        return new InvalidAssignmentException(message, source);
     }
 }

@@ -1,6 +1,4 @@
-﻿using Raze.Script.Core;
-using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Runtime.Values;
+﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 namespace Raze.Tests.Core;
 
@@ -14,11 +12,7 @@ public class ArithmeticTests
     [InlineData("(10 + +3)", 13)]
     public void Evaluate_Expressions_RespectsPrecedence(string expression, int expectedValue)
     {
-        var result = RazeScript.Evaluate(expression, "Raze.Tests");
-
-        Assert.IsType<IntegerValue>(result);
-
-        Assert.Equal(expectedValue, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(expression, expectedValue);
     }
 
     [Theory]
@@ -31,11 +25,7 @@ public class ArithmeticTests
     [InlineData("(true || false) && false", false)]
     public void Evaluate_ComparisonExpressions_RespectsPrecedence(string expression, bool expectedValue)
     {
-        var result = RazeScript.Evaluate(expression, "Raze.Tests");
-
-        Assert.IsType<BooleanValue>(result);
-
-        Assert.Equal(expectedValue, (result as BooleanValue)!.BoolValue);
+        RazeAssert.EvaluatesToBoolean(expression, expectedValue);
     }
 
     [Theory]
@@ -46,9 +36,6 @@ public class ArithmeticTests
     [InlineData("100.0 % 0.0")]
     public void Evaluate_DivisionByZero_ThrowsDivisionByZeroException(string expression)
     {
-        Assert.Throws<DivisionByZeroException>(() =>
-        {
-            RazeScript.Evaluate(expression, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<DivisionByZeroException>(expression);
     }
 }

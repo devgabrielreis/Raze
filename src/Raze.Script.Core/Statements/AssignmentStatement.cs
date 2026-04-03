@@ -4,20 +4,24 @@ using Raze.Script.Core.Statements.Expressions;
 
 namespace Raze.Script.Core.Statements;
 
-internal class AssignmentStatement : Statement
+internal sealed class AssignmentStatement : Statement
 {
-    public IdentifierExpression Target { get; private set; }
-    public Expression Value { get; private set; }
+    internal readonly IdentifierExpression Target;
+    internal readonly Expression Value;
 
-    public AssignmentStatement(IdentifierExpression target, Expression value, SourceInfo source)
-        : base(source)
+    internal AssignmentStatement(IdentifierExpression target, Expression value, ref readonly SourceInfo source)
+        : base(in source, true)
     {
         Target = target;
         Value = value;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitAssignmentStatement(this, state);
+        visitor.VisitAssignmentStatement(this, state, out result);
     }
 }

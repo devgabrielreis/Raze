@@ -2,10 +2,19 @@
 
 namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
-public class UnexpectedReturnType : RuntimeException
+public sealed class UnexpectedReturnType
+    : RuntimeException, IThrowableByThrowHelper<UnexpectedReturnType>
 {
-    internal UnexpectedReturnType(string message, SourceInfo source)
+    private UnexpectedReturnType(string message, SourceInfo source)
         : base(message, source, nameof(UnexpectedReturnType))
     {
+    }
+
+    static UnexpectedReturnType IThrowableByThrowHelper<UnexpectedReturnType>.Create(
+        string message,
+        ref readonly SourceInfo source
+    )
+    {
+        return new UnexpectedReturnType(message, source);
     }
 }

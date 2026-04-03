@@ -1,7 +1,5 @@
 ﻿using Raze.Script.Core;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Runtime.Scopes;
-using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Tests.Core.Variables;
 
@@ -12,20 +10,16 @@ public class IntegerVariableTests
     [InlineData("var integer? test = null", "test", null)]
     public void Evaluate_IntegerVariableDeclaration_ReturnsExpectedValue(string expression, string varname, int? expected)
     {
-        var scope = new InterpreterScope();
-        RazeScript.Evaluate(expression, "Raze.Tests", scope);
-
-        var result = RazeScript.Evaluate(varname, "Raze.Tests", scope);
+        var scope = RazeScript.CreateInterpreterScope();
+        RazeAssert.EvaluatesToVoid(expression, scope);
 
         if (expected is null)
         {
-            Assert.IsType<NullValue>(result);
+            RazeAssert.EvaluatesToNull(varname, scope);
         }
         else
         {
-            Assert.IsType<IntegerValue>(result);
-
-            Assert.Equal((Int128)expected!, (result as IntegerValue)!.IntValue);
+            RazeAssert.EvaluatesToInteger(varname, expected.Value, scope);
         }
     }
 
@@ -36,10 +30,7 @@ public class IntegerVariableTests
     [InlineData("const integer test = null")]
     public void Evaluate_WrongIntegerVariableTypeAssignment_ThrowsVariableTypeException(string expression)
     {
-        Assert.Throws<VariableTypeException>(() =>
-        {
-            var result = RazeScript.Evaluate(expression, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<VariableTypeException>(expression);
     }
 
     [Theory]
@@ -56,15 +47,9 @@ public class IntegerVariableTests
             {(isPostfix ? $"test{op}" : $"{op}test")}
         ";
 
-        var scope = new InterpreterScope();
-        var result = RazeScript.Evaluate(script, "Raze.Tests", scope);
+        var scope = RazeScript.CreateInterpreterScope();
 
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(expressionResult, (result as IntegerValue)!.IntValue);
-
-        result = RazeScript.Evaluate("test", "Raze.Tests", scope);
-
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(variableAfterValue, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, expressionResult, scope);
+        RazeAssert.EvaluatesToInteger("test", variableAfterValue, scope);
     }
 }

@@ -3,18 +3,22 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements.Expressions;
 
-internal class NullCheckerExpression : Expression
+internal sealed class NullCheckerExpression : Expression
 {
-    internal IdentifierExpression Operand { get; private set; }
+    internal readonly IdentifierExpression Operand;
 
-    internal NullCheckerExpression(IdentifierExpression operand, SourceInfo source)
-        : base(source)
+    internal NullCheckerExpression(IdentifierExpression operand, ref readonly SourceInfo source)
+        : base(in source, true)
     {
         Operand = operand;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitNullCheckerExpression(this, state);
+        visitor.VisitNullCheckerExpression(this, state, out result);
     }
 }

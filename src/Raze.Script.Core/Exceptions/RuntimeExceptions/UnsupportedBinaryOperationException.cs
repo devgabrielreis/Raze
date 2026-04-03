@@ -2,14 +2,23 @@
 
 namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
-public class UnsupportedBinaryOperationException : RuntimeException
+public sealed class UnsupportedBinaryOperationException
+    : RuntimeException, IThrowableByThrowHelper<UnsupportedBinaryOperationException>
 {
-    internal UnsupportedBinaryOperationException(string leftType, string rightType, string op, SourceInfo source)
+    private UnsupportedBinaryOperationException(string message, SourceInfo source)
         : base(
-            $"{leftType} {op} {rightType}",
+            message,
             source,
             nameof(UnsupportedBinaryOperationException)
         )
     {
+    }
+
+    static UnsupportedBinaryOperationException IThrowableByThrowHelper<UnsupportedBinaryOperationException>.Create(
+        string message,
+        ref readonly SourceInfo source
+    )
+    {
+        return new UnsupportedBinaryOperationException(message, source);
     }
 }

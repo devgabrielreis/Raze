@@ -1,5 +1,4 @@
-﻿using Raze.Script.Core;
-using Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 namespace Raze.Tests.Core.Types;
@@ -17,23 +16,13 @@ public class FunctionTypeTests
             var function<integer, decimal> myVar = myFunc;
         ";
 
-        Assert.Throws<VariableTypeException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<VariableTypeException>(script);
     }
 
     [Fact]
     public void Evaluate_FunctionTypeWithoutGenerics_ThrowsInvalidTypeDeclarationException()
     {
-        Assert.Throws<InvalidTypeDeclarationException>(() =>
-        {
-            RazeScript.Evaluate("var function myVar", "Raze.Tests");
-        });
-
-        Assert.Throws<InvalidTypeDeclarationException>(() =>
-        {
-            RazeScript.Evaluate("var function<> myVar", "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<InvalidTypeDeclarationException>("var function myVar");
+        RazeAssert.ReturnsError<InvalidTypeDeclarationException>("var function<> myVar");
     }
 }

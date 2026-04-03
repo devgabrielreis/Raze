@@ -3,18 +3,22 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements.Expressions;
 
-internal class IdentifierExpression : Expression
+internal sealed class IdentifierExpression : Expression
 {
-    public string Symbol { get; private set; }
+    internal readonly string Symbol;
 
-    public IdentifierExpression(string symbol, SourceInfo source)
-        : base(source)
+    internal IdentifierExpression(string symbol, ref readonly SourceInfo source)
+        : base(in source, true)
     {
         Symbol = symbol;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitIdentifierExpression(this, state);
+        visitor.VisitIdentifierExpression(this, state, out result);
     }
 }

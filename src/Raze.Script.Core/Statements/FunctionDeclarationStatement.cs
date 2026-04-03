@@ -5,26 +5,24 @@ using Raze.Script.Core.Runtime.Types;
 
 namespace Raze.Script.Core.Statements;
 
-internal class FunctionDeclarationStatement : Statement
+internal sealed class FunctionDeclarationStatement : Statement
 {
-    public string Identifier { get; private set; }
+    internal readonly string Identifier;
 
-    public RuntimeType ReturnType { get; private set; }
+    internal readonly RuntimeType ReturnType;
 
-    public IReadOnlyList<ParameterSymbol> Parameters { get; private set; }
+    internal readonly IReadOnlyList<ParameterSymbol> Parameters;
 
-    public CodeBlockStatement Body { get; private set; }
+    internal readonly CodeBlockStatement Body;
 
-    public override bool RequireSemicolon => false;
-
-    public FunctionDeclarationStatement(
+    internal FunctionDeclarationStatement(
         string identifier,
         RuntimeType returnType,
         IReadOnlyList<ParameterSymbol> parameters,
         CodeBlockStatement body,
-        SourceInfo source
+        ref readonly SourceInfo source
     )
-        : base(source)
+        : base(in source, false)
     {
         Identifier = identifier;
         ReturnType = returnType;
@@ -32,8 +30,12 @@ internal class FunctionDeclarationStatement : Statement
         Body = body;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitFunctionDeclarationStatement(this, state);
+        visitor.VisitFunctionDeclarationStatement(this, state, out result);
     }
 }

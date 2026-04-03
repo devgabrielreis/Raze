@@ -1,7 +1,8 @@
 ﻿using Raze.Script.Core;
 using Raze.Script.Core.Exceptions;
-using Raze.Script.Core.Runtime.Scopes;
-using Raze.Script.Core.Runtime.Values;
+using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Result;
+using Raze.Script.Core.Runtime.Types;
 using System.Reflection;
 
 internal class Program
@@ -26,7 +27,7 @@ internal class Program
 
         Console.WriteLine();
 
-        InterpreterScope scope = new();
+        var scope = RazeScript.CreateInterpreterScope();
         var sources = new Dictionary<string, string>();
 
         while (true)
@@ -41,18 +42,15 @@ internal class Program
             var sourceName = $"interpreter-source-{sources.Count}";
             sources[sourceName] = command;
 
-            try
-            {
-                var result = RazeScript.Evaluate(command, sourceName, scope);
+            var result = RazeScript.Evaluate(command, sourceName, scope);
 
-                if (result is not VoidValue)
-                {
-                    Console.WriteLine(result);
-                }
-            }
-            catch (RazeException razeEx)
+            if (result is RazeSuccess success && success.ValueType != BaseType.Void)
             {
-                PrettyPrintRazeException(razeEx, sources);
+                Console.WriteLine(success.ValueString);
+            }
+            else if (result is RazeError error)
+            {
+                PrettyPrintRazeException(error.Error, sources);
             }
         }
     }
@@ -107,15 +105,15 @@ internal class Program
 
         Console.WriteLine($"At \"{ex.SourceInfo.Location}\".");
         
-        if (ex.SourceInfo.SourcePosition is not null)
+        if (ex.SourceInfo.SourcePosition is SourcePosition sourcePosition)
         {
-            Console.WriteLine($"Line {ex.SourceInfo.SourcePosition.Line}, column {ex.SourceInfo.SourcePosition.Column}.");
+            Console.WriteLine($"Line {sourcePosition.Line}, column {sourcePosition.Column}.");
             Console.WriteLine();
 
-            string errorLine = source.Split('\n')[ex.SourceInfo.SourcePosition.Line - 1];
+            string errorLine = source.Split('\n')[sourcePosition.Line - 1];
             Console.WriteLine(errorLine);
 
-            for (int i = 0; i < ex.SourceInfo.SourcePosition.Column - 1; i++)
+            for (int i = 0; i < sourcePosition.Column - 1; i++)
             {
                 Console.Write(errorLine[i] == '\t' ? '\t' : ' ');
             }

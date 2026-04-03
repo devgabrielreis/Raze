@@ -1,8 +1,6 @@
-﻿using Raze.Script.Core;
-using Raze.Script.Core.Exceptions.LexerExceptions;
+﻿using Raze.Script.Core.Exceptions.LexerExceptions;
+using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Runtime.Scopes;
-using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Tests.Core.Types;
 
@@ -11,11 +9,7 @@ public class StringTests
     [Fact]
     public void Evaluate_StringConcatenationExpression_ReturnsExpectedValue()
     {
-        var scope = new InterpreterScope();
-        var result = RazeScript.Evaluate("\"Hello\" + \" \" + \"World!\"", "Raze.Tests", scope);
-
-        Assert.IsType<StringValue>(result);
-        Assert.Equal("Hello World!", (result as StringValue)!.StrValue);
+        RazeAssert.EvaluatesToString("\"Hello\" + \" \" + \"World!\"", "Hello World!");
     }
 
     [Theory]
@@ -29,11 +23,7 @@ public class StringTests
     [InlineData("\"\" != \"\"", false)]
     public void Evaluate_StringComparisonExpression_ReturnsExpectedValue(string expression, bool expected)
     {
-        var scope = new InterpreterScope();
-        var result = RazeScript.Evaluate(expression, "Raze.Tests", scope);
-
-        Assert.IsType<BooleanValue>(result);
-        Assert.Equal(expected, (result as BooleanValue)!.BoolValue);
+        RazeAssert.EvaluatesToBoolean(expression, expected);
     }
 
     [Theory]
@@ -101,10 +91,7 @@ public class StringTests
     [InlineData("\"a\" || \"a\"")]
     public void Evaluate_InvalidStringBinaryOperations_ThrowUnsupportedBinaryOperationException(string expression)
     {
-        Assert.Throws<UnsupportedBinaryOperationException>(() =>
-        {
-            var result = RazeScript.Evaluate(expression, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnsupportedBinaryOperationException>(expression);
     }
 
     [Theory]
@@ -115,10 +102,7 @@ public class StringTests
     [InlineData("\"\\\\\"", '\\')]
     public void Evaluate_EscapeCharacter_ReturnsExpectedValue(string character, char expected)
     {
-        var result = RazeScript.Evaluate(character, "Raze.Tests");
-
-        Assert.IsType<StringValue>(result);
-        Assert.Equal(expected.ToString(), (result as StringValue)!.StrValue);
+        RazeAssert.EvaluatesToString(character, expected.ToString());
     }
 
     [Theory]
@@ -126,10 +110,7 @@ public class StringTests
     [InlineData("\"\\'\"")]
     public void Evaluate_InvalidEscapeSequence_ThrowsUnrecognizedEscapeSequenceException(string expression)
     {
-        Assert.Throws<UnrecognizedEscapeSequenceException>(() =>
-        {
-            RazeScript.Evaluate(expression, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnrecognizedEscapeSequenceException>(expression);
     }
 
     [Theory]
@@ -138,9 +119,13 @@ public class StringTests
     [InlineData("!\"teste\"")]
     public void Evaluate_InvalidStringUnaryOperations_ThrowUnsupportedUnaryOperationException(string expression)
     {
-        Assert.Throws<UnsupportedUnaryOperationException>(() =>
-        {
-            var result = RazeScript.Evaluate(expression, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnsupportedUnaryOperationException>(expression);
+    }
+
+    [Fact]
+    public void Evaluate_StringTypeWithGenerics_ThrowInvalidTypeDeclarationException()
+    {
+        RazeAssert.ReturnsError<InvalidTypeDeclarationException>("var string<integer> myVar");
+        RazeAssert.ReturnsError<InvalidTypeDeclarationException>("var string<> myVar");
     }
 }

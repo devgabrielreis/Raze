@@ -3,15 +3,19 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements;
 
-internal class BreakStatement : Statement
+internal sealed class BreakStatement : Statement
 {
-    public BreakStatement(SourceInfo source)
-        : base(source)
+    internal BreakStatement(ref readonly SourceInfo source)
+        : base(in source, true)
     {
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitBreakStatement(this, state);
+        visitor.VisitBreakStatement(this, state, out result);
     }
 }

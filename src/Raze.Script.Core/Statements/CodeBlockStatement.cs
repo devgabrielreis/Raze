@@ -3,20 +3,22 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements;
 
-internal class CodeBlockStatement : Statement
+internal sealed class CodeBlockStatement : Statement
 {
-    public IReadOnlyList<Statement> Body { get; private set; }
+    internal readonly IReadOnlyList<Statement> Body;
 
-    public override bool RequireSemicolon => false;
-
-    public CodeBlockStatement(IReadOnlyList<Statement> body, SourceInfo source)
-        : base(source)
+    internal CodeBlockStatement(IReadOnlyList<Statement> body, ref readonly SourceInfo source)
+        : base(in source, false)
     {
         Body = body;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitCodeBlockStatement(this, state);
+        visitor.VisitCodeBlockStatement(this, state, out result);
     }
 }

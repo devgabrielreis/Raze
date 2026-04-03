@@ -1,7 +1,4 @@
-﻿using Raze.Script.Core;
-using Raze.Script.Core.Runtime.Values;
-
-namespace Raze.Tests.Core.Variables;
+﻿namespace Raze.Tests.Core.Variables;
 
 public class FunctionVariableTests
 {
@@ -17,8 +14,6 @@ public class FunctionVariableTests
             myFuncVar(1);
         """;
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<StringValue>(result);
-        Assert.Equal("hello", (result as StringValue)!.StrValue);
+        RazeAssert.EvaluatesToString(script, "hello");
     }
 }

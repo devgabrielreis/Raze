@@ -2,10 +2,19 @@
 
 namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
-public class CorruptedContextStackException : RuntimeException
+public sealed class CorruptedContextStackException
+    : RuntimeException, IThrowableByThrowHelper<CorruptedContextStackException>
 {
-    internal CorruptedContextStackException(SourceInfo source)
-        : base(source, nameof(CorruptedContextStackException))
+    private CorruptedContextStackException(string message, SourceInfo source)
+        : base(message, source, nameof(CorruptedContextStackException))
     {
+    }
+
+    static CorruptedContextStackException IThrowableByThrowHelper<CorruptedContextStackException>.Create(
+        string message,
+        ref readonly SourceInfo source
+    )
+    {
+        return new CorruptedContextStackException(message, source);
     }
 }

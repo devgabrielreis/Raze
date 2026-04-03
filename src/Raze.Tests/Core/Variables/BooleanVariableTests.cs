@@ -1,7 +1,5 @@
 ﻿using Raze.Script.Core;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Runtime.Scopes;
-using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Tests.Core.Variables;
 
@@ -13,20 +11,16 @@ public class BooleanVariableTests
     [InlineData("var boolean? test = null", "test", null)]
     public void Evaluate_BooleanVariableDeclaration_ReturnsExpectedValue(string expression, string varname, bool? expected)
     {
-        var scope = new InterpreterScope();
-        RazeScript.Evaluate(expression, "Raze.Tests", scope);
-
-        var result = RazeScript.Evaluate(varname, "Raze.Tests", scope);
+        var scope = RazeScript.CreateInterpreterScope();
+        RazeAssert.EvaluatesToVoid(expression, scope);
 
         if (expected is null)
         {
-            Assert.IsType<NullValue>(result);
+            RazeAssert.EvaluatesToNull(varname, scope);
         }
         else
         {
-            Assert.IsType<BooleanValue>(result);
-
-            Assert.Equal(expected, (result as BooleanValue)!.BoolValue);
+            RazeAssert.EvaluatesToBoolean(varname, expected.Value, scope);
         }
     }
 
@@ -37,10 +31,7 @@ public class BooleanVariableTests
     [InlineData("const boolean test = null")]
     public void Evaluate_WrongBooleanVariableTypeAssignment_ThrowsVariableTypeException(string expression)
     {
-        Assert.Throws<VariableTypeException>(() =>
-        {
-            var result = RazeScript.Evaluate(expression, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<VariableTypeException>(expression);
     }
 
     [Theory]
@@ -55,9 +46,6 @@ public class BooleanVariableTests
             {(isPostfix ? $"test{op}" : $"{op}test")}
         ";
 
-        Assert.Throws<UnsupportedUnaryOperationException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnsupportedUnaryOperationException>(script);
     }
 }

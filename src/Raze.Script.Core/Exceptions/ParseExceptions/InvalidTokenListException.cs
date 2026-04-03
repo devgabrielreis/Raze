@@ -2,10 +2,19 @@
 
 namespace Raze.Script.Core.Exceptions.ParseExceptions;
 
-public class InvalidTokenListException : ParseException
+public sealed class InvalidTokenListException
+    : ParseException, IThrowableByThrowHelper<InvalidTokenListException>
 {
-    internal InvalidTokenListException(SourceInfo source)
-        : base("Invalid token list", source, nameof(InvalidTokenListException))
+    private InvalidTokenListException(string message, SourceInfo source)
+        : base(message, source, nameof(InvalidTokenListException))
     {
+    }
+
+    static InvalidTokenListException IThrowableByThrowHelper<InvalidTokenListException>.Create(
+        string message,
+        ref readonly SourceInfo source
+    )
+    {
+        return new InvalidTokenListException(message, source);
     }
 }

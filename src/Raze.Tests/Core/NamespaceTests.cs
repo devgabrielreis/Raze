@@ -1,7 +1,5 @@
-﻿using Raze.Script.Core;
-using Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Tests.Core;
 
@@ -18,10 +16,7 @@ public class NamespaceTests
             test::MY_STRING
         """;
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-
-        Assert.IsType<StringValue>(result);
-        Assert.Equal("test", (result as StringValue)!.StrValue);
+        RazeAssert.EvaluatesToString(script, "test");
     }
 
     [Fact]
@@ -37,10 +32,7 @@ public class NamespaceTests
             test::my_func(5)
         """;
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(10, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 10);
     }
 
     [Fact]
@@ -54,10 +46,7 @@ public class NamespaceTests
             test::my_string
         """;
 
-        Assert.Throws<ScopeDeclarationException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<ScopeDeclarationException>(script);
     }
 
     [Fact]
@@ -69,10 +58,7 @@ public class NamespaceTests
             }
         """;
 
-        Assert.Throws<ScopeDeclarationException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<ScopeDeclarationException>(script);
     }
 
     [Fact]
@@ -86,10 +72,7 @@ public class NamespaceTests
             }
         """;
 
-        Assert.Throws<ScopeDeclarationException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<ScopeDeclarationException>(script);
     }
 
     [Fact]
@@ -107,10 +90,7 @@ public class NamespaceTests
             first::MY_NUM + second::MY_NUM
         """;
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(8, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 8);
     }
 
     [Fact]
@@ -130,10 +110,7 @@ public class NamespaceTests
             second::sum(10)
         """;
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(13, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 13);
     }
 
     [Fact]
@@ -151,10 +128,7 @@ public class NamespaceTests
             main::MY_NUM1 + main::MY_NUM2
         """;
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(3, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 3);
     }
 
     [Fact]
@@ -170,10 +144,7 @@ public class NamespaceTests
             }
         """;
 
-        Assert.Throws<RedeclarationException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<RedeclarationException>(script);
     }
 
     [Fact]
@@ -197,10 +168,7 @@ public class NamespaceTests
             main::super_get_test()
         """;
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(7, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 7);
     }
 
     [Fact]
@@ -220,8 +188,7 @@ public class NamespaceTests
             main::call_later()
         """;
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.Equal(42, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 42);
     }
 
     [Fact]
@@ -240,8 +207,7 @@ public class NamespaceTests
             main::get_value()
         """;
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.Equal(20, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 20);
     }
 
     [Fact]
@@ -261,8 +227,7 @@ public class NamespaceTests
             main::get_test()
         """;
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.Equal(99, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 99);
     }
 
     [Fact]
@@ -274,10 +239,7 @@ public class NamespaceTests
             test::what
         """;
 
-        Assert.Throws<UndefinedIdentifierException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UndefinedIdentifierException>(script);
     }
 
     [Fact]
@@ -301,10 +263,7 @@ public class NamespaceTests
             first::better_sum(10, 5)
         """;
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(22, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger(script, 22);
     }
 
     [Fact]
@@ -316,9 +275,6 @@ public class NamespaceTests
             main::10
         """;
 
-        Assert.Throws<UnexpectedTokenException>(() =>
-        {
-            RazeScript.Evaluate(script, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UnexpectedTokenException>(script);
     }
 }

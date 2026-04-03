@@ -1,8 +1,6 @@
-﻿using System.Globalization;
-using Raze.Script.Core;
+﻿using Raze.Script.Core;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Runtime.Scopes;
-using Raze.Script.Core.Runtime.Values;
+using System.Globalization;
 
 namespace Raze.Tests.Core.Variables;
 
@@ -14,20 +12,17 @@ public class DecimalVariableTests
     public void Evaluate_DecimalVariableDeclaration_ReturnsExpectedValue(string expression, string varname, string? decimalStr)
     {
         decimal? expected = decimalStr is null ? null : decimal.Parse(decimalStr, CultureInfo.InvariantCulture);
-        var scope = new InterpreterScope();
-        RazeScript.Evaluate(expression, "Raze.Tests", scope);
 
-        var result = RazeScript.Evaluate(varname, "Raze.Tests", scope);
+        var scope = RazeScript.CreateInterpreterScope();
+        RazeAssert.EvaluatesToVoid(expression, scope);
 
         if (expected is null)
         {
-            Assert.IsType<NullValue>(result);
+            RazeAssert.EvaluatesToNull(varname, scope);
         }
         else
         {
-            Assert.IsType<DecimalValue>(result);
-
-            Assert.Equal(expected, (result as DecimalValue)!.DecValue);
+            RazeAssert.EvaluatesToDecimal(varname, expected.Value, scope);
         }
     }
 
@@ -38,10 +33,7 @@ public class DecimalVariableTests
     [InlineData("const decimal test = 5")]
     public void Evaluate_WrongDecimalVariableTypeAssignment_ThrowsVariableTypeException(string expression)
     {
-        Assert.Throws<VariableTypeException>(() =>
-        {
-            var result = RazeScript.Evaluate(expression, "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<VariableTypeException>(expression);
     }
 
     [Theory]
@@ -58,15 +50,12 @@ public class DecimalVariableTests
             {(isPostfix ? $"test{op}" : $"{op}test")}
         ";
 
-        var scope = new InterpreterScope();
-        var result = RazeScript.Evaluate(script, "Raze.Tests", scope);
+        var scope = RazeScript.CreateInterpreterScope();
 
-        Assert.IsType<DecimalValue>(result);
-        Assert.Equal(expressionResultStr, result.ToString());
+        decimal expressionResult = decimal.Parse(expressionResultStr, CultureInfo.InvariantCulture);
+        RazeAssert.EvaluatesToDecimal(script, expressionResult, scope);
 
-        result = RazeScript.Evaluate("test", "Raze.Tests", scope);
-
-        Assert.IsType<DecimalValue>(result);
-        Assert.Equal(variableAfterValueStr, result.ToString());
+        decimal variableAfterValue = decimal.Parse(variableAfterValueStr, CultureInfo.InvariantCulture);
+        RazeAssert.EvaluatesToDecimal("test", variableAfterValue, scope);
     }
 }

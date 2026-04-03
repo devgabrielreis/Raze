@@ -1,24 +1,14 @@
 ﻿using Raze.Script.Core.Constants;
+using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Exceptions.LexerExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Tokens;
-using Raze.Script.Core.Tokens.ControlStructures;
-using Raze.Script.Core.Tokens.Delimiters;
-using Raze.Script.Core.Tokens.Grouping;
-using Raze.Script.Core.Tokens.Literals;
-using Raze.Script.Core.Tokens.Operators;
-using Raze.Script.Core.Tokens.Operators.AdditiveOperators;
-using Raze.Script.Core.Tokens.Operators.EqualityOperators;
-using Raze.Script.Core.Tokens.Operators.MultiplicativeOperators;
-using Raze.Script.Core.Tokens.Operators.RelationalOperators;
-using Raze.Script.Core.Tokens.Primitives;
-using Raze.Script.Core.Tokens.VariableDeclaration;
 using Raze.Shared.Utils;
 using System.Text;
 
 namespace Raze.Script.Core.Engine;
 
-internal class Lexer
+internal sealed class Lexer
 {
     private readonly string _sourceCode;
     private readonly string _sourceLocation;
@@ -27,69 +17,71 @@ internal class Lexer
     private int _currentLine = 0;
     private int _currentColumn = 0;
 
-    private static readonly Dictionary<string, Func<SourceInfo, Token>> _keywordTokens = new()
+    private delegate Token TokenFactory(ref readonly SourceInfo s);
+
+    private static readonly Dictionary<string, TokenFactory> _keywordTokens = new()
     {
-        [Keywords.VARIABLE_DECLARATION]  = (SourceInfo s) => new VarToken(Keywords.VARIABLE_DECLARATION, s),
-        [Keywords.CONSTANT_DECLARATION]  = (SourceInfo s) => new ConstToken(Keywords.CONSTANT_DECLARATION, s),
-        [Keywords.NAMESPACE_DECLARATION] = (SourceInfo s) => new NamespaceDeclarationToken(Keywords.NAMESPACE_DECLARATION, s),
-        [Keywords.TRUE_LITERAL]          = (SourceInfo s) => new BooleanLiteralToken(Keywords.TRUE_LITERAL, s),
-        [Keywords.FALSE_LITERAL]         = (SourceInfo s) => new BooleanLiteralToken(Keywords.FALSE_LITERAL, s),
-        [Keywords.IF]                    = (SourceInfo s) => new IfToken(Keywords.IF, s),
-        [Keywords.ELSE]                  = (SourceInfo s) => new ElseToken(Keywords.ELSE, s),
-        [Keywords.FOR]                   = (SourceInfo s) => new ForToken(Keywords.FOR, s),
-        [Keywords.WHILE]                 = (SourceInfo s) => new WhileToken(Keywords.WHILE, s),
-        [Keywords.BREAK]                 = (SourceInfo s) => new BreakToken(Keywords.BREAK, s),
-        [Keywords.CONTINUE]              = (SourceInfo s) => new ContinueToken(Keywords.CONTINUE, s),
-        [Keywords.FUNCTION_DECLARATION]  = (SourceInfo s) => new FunctionDeclarationToken(Keywords.FUNCTION_DECLARATION, s),
-        [Keywords.RETURN]                = (SourceInfo s) => new ReturnToken(Keywords.RETURN, s),
-        [TypeNames.INTEGER_TYPE_NAME]    = (SourceInfo s) => new IntegerPrimitiveToken(TypeNames.INTEGER_TYPE_NAME, s),
-        [TypeNames.DECIMAL_TYPE_NAME]    = (SourceInfo s) => new DecimalPrimitiveToken(TypeNames.DECIMAL_TYPE_NAME, s),
-        [TypeNames.BOOLEAN_TYPE_NAME]    = (SourceInfo s) => new BooleanPrimitiveToken(TypeNames.BOOLEAN_TYPE_NAME, s),
-        [TypeNames.STRING_TYPE_NAME]     = (SourceInfo s) => new StringPrimitiveToken(TypeNames.STRING_TYPE_NAME, s),
-        [TypeNames.FUNCTION_TYPE_NAME]   = (SourceInfo s) => new FunctionPrimitiveToken(TypeNames.FUNCTION_TYPE_NAME, s),
-        [TypeNames.NULL_TYPE_NAME]       = (SourceInfo s) => new NullLiteralToken(TypeNames.NULL_TYPE_NAME, s),
-        [TypeNames.VOID_TYPE_NAME]       = (SourceInfo s) => new VoidPrimitiveToken(TypeNames.VOID_TYPE_NAME, s)
+        [Keywords.VARIABLE_DECLARATION]  = (ref readonly SourceInfo s) => new Token(TokenType.Var, Keywords.VARIABLE_DECLARATION, in s),
+        [Keywords.CONSTANT_DECLARATION]  = (ref readonly SourceInfo s) => new Token(TokenType.Const, Keywords.CONSTANT_DECLARATION, in s),
+        [Keywords.NAMESPACE_DECLARATION] = (ref readonly SourceInfo s) => new Token(TokenType.NamespaceDeclaration, Keywords.NAMESPACE_DECLARATION, in s),
+        [Keywords.TRUE_LITERAL]          = (ref readonly SourceInfo s) => new Token(TokenType.BooleanLiteral, Keywords.TRUE_LITERAL, in s),
+        [Keywords.FALSE_LITERAL]         = (ref readonly SourceInfo s) => new Token(TokenType.BooleanLiteral, Keywords.FALSE_LITERAL, in s),
+        [Keywords.IF]                    = (ref readonly SourceInfo s) => new Token(TokenType.If, Keywords.IF, in s),
+        [Keywords.ELSE]                  = (ref readonly SourceInfo s) => new Token(TokenType.Else, Keywords.ELSE, in s),
+        [Keywords.FOR]                   = (ref readonly SourceInfo s) => new Token(TokenType.For, Keywords.FOR, in s),
+        [Keywords.WHILE]                 = (ref readonly SourceInfo s) => new Token(TokenType.While, Keywords.WHILE, in s),
+        [Keywords.BREAK]                 = (ref readonly SourceInfo s) => new Token(TokenType.Break, Keywords.BREAK, in s),
+        [Keywords.CONTINUE]              = (ref readonly SourceInfo s) => new Token(TokenType.Continue, Keywords.CONTINUE, in s),
+        [Keywords.FUNCTION_DECLARATION]  = (ref readonly SourceInfo s) => new Token(TokenType.FunctionDeclaration, Keywords.FUNCTION_DECLARATION, in s),
+        [Keywords.RETURN]                = (ref readonly SourceInfo s) => new Token(TokenType.Return, Keywords.RETURN, in s),
+        [TypeNames.INTEGER_TYPE_NAME]    = (ref readonly SourceInfo s) => new Token(TokenType.IntegerTypeName, TypeNames.INTEGER_TYPE_NAME, in s),
+        [TypeNames.DECIMAL_TYPE_NAME]    = (ref readonly SourceInfo s) => new Token(TokenType.DecimalTypeName, TypeNames.DECIMAL_TYPE_NAME, in s),
+        [TypeNames.BOOLEAN_TYPE_NAME]    = (ref readonly SourceInfo s) => new Token(TokenType.BooleanTypeName, TypeNames.BOOLEAN_TYPE_NAME, in s),
+        [TypeNames.STRING_TYPE_NAME]     = (ref readonly SourceInfo s) => new Token(TokenType.StringTypeName, TypeNames.STRING_TYPE_NAME, in s),
+        [TypeNames.FUNCTION_TYPE_NAME]   = (ref readonly SourceInfo s) => new Token(TokenType.FunctionTypeName, TypeNames.FUNCTION_TYPE_NAME, in s),
+        [TypeNames.NULL_TYPE_NAME]       = (ref readonly SourceInfo s) => new Token(TokenType.NullLiteral, TypeNames.NULL_TYPE_NAME, in s),
+        [TypeNames.VOID_TYPE_NAME]       = (ref readonly SourceInfo s) => new Token(TokenType.VoidTypeName, TypeNames.VOID_TYPE_NAME, in s)
     };
 
-    private static readonly Dictionary<string, Func<SourceInfo, Token>>.AlternateLookup<ReadOnlySpan<char>> _keywordTokensSpanLookup
+    private static readonly Dictionary<string, TokenFactory>.AlternateLookup<ReadOnlySpan<char>> _keywordTokensSpanLookup
         = _keywordTokens.GetAlternateLookup<ReadOnlySpan<char>>();
 
-    private static readonly Dictionary<string, Func<SourceInfo, Token>> _operatorTokens = new()
+    private static readonly Dictionary<string, TokenFactory> _operatorTokens = new()
     {
-        [Operators.EQUAL]              = (SourceInfo s) => new EqualToken(Operators.EQUAL, s),
-        [Operators.NOT_EQUAL]          = (SourceInfo s) => new NotEqualToken(Operators.NOT_EQUAL, s),
-        [Operators.GREATER_OR_EQUAL]   = (SourceInfo s) => new GreaterOrEqualThanToken(Operators.GREATER_OR_EQUAL, s),
-        [Operators.LESS_OR_EQUAL]      = (SourceInfo s) => new LessOrEqualThanToken(Operators.LESS_OR_EQUAL, s),
-        [Operators.AND]                = (SourceInfo s) => new AndToken(Operators.AND, s),
-        [Operators.OR]                 = (SourceInfo s) => new OrToken(Operators.OR, s),
-        [Operators.INCREMENT]          = (SourceInfo s) => new IncrementToken(Operators.INCREMENT, s),
-        [Operators.DECREMENT]          = (SourceInfo s) => new DecrementToken(Operators.DECREMENT, s),
-        [Operators.NULL_CHECKER]       = (SourceInfo s) => new NullCheckerToken(Operators.NULL_CHECKER, s),
-        [Operators.PLUS_ASSIGN]        = (SourceInfo s) => new CompoundAssignmentToken(Operators.PLUS, Operators.PLUS_ASSIGN, s),
-        [Operators.MINUS_ASSIGN]       = (SourceInfo s) => new CompoundAssignmentToken(Operators.MINUS, Operators.MINUS_ASSIGN, s),
-        [Operators.MULTIPLY_ASSIGN]    = (SourceInfo s) => new CompoundAssignmentToken(Operators.MULTIPLICATION, Operators.MULTIPLY_ASSIGN, s),
-        [Operators.DIVIDE_ASSIGN]      = (SourceInfo s) => new CompoundAssignmentToken(Operators.DIVISION, Operators.DIVIDE_ASSIGN, s),
-        [Operators.MODULO_ASSIGN]      = (SourceInfo s) => new CompoundAssignmentToken(Operators.MODULO, Operators.MODULO_ASSIGN, s),
-        [Operators.SEMICOLON]          = (SourceInfo s) => new SemiColonToken(Operators.SEMICOLON, s),
-        [Operators.COMMA]              = (SourceInfo s) => new CommaToken(Operators.COMMA, s),
-        [Operators.OPEN_PARENTHESIS]   = (SourceInfo s) => new OpenParenthesisToken(Operators.OPEN_PARENTHESIS, s),
-        [Operators.CLOSE_PARENTHESIS]  = (SourceInfo s) => new CloseParenthesisToken(Operators.CLOSE_PARENTHESIS, s),
-        [Operators.OPEN_BRACES]        = (SourceInfo s) => new OpenBracesToken(Operators.OPEN_BRACES, s),
-        [Operators.CLOSE_BRACES]       = (SourceInfo s) => new CloseBracesToken(Operators.CLOSE_BRACES, s),
-        [Operators.ASSIGNMENT]         = (SourceInfo s) => new AssignmentToken(Operators.ASSIGNMENT, s),
-        [Operators.PLUS]               = (SourceInfo s) => new AdditionToken(Operators.PLUS, s),
-        [Operators.MINUS]              = (SourceInfo s) => new SubtractionToken(Operators.MINUS, s),
-        [Operators.MULTIPLICATION]     = (SourceInfo s) => new MultiplicationToken(Operators.MULTIPLICATION, s),
-        [Operators.DIVISION]           = (SourceInfo s) => new DivisionToken(Operators.DIVISION, s),
-        [Operators.MODULO]             = (SourceInfo s) => new ModuloToken(Operators.MODULO, s),
-        [Operators.GREATER_THAN]       = (SourceInfo s) => new GreaterThanToken(Operators.GREATER_THAN, s),
-        [Operators.LESS_THAN]          = (SourceInfo s) => new LessThanToken(Operators.LESS_THAN, s),
-        [Operators.QUESTION_MARK]      = (SourceInfo s) => new QuestionMarkToken(Operators.QUESTION_MARK, s),
-        [Operators.NOT]                = (SourceInfo s) => new NotToken(Operators.NOT, s),
-        [Operators.NAMESPACE_ACCESSOR] = (SourceInfo s) => new NamespaceAccessorToken(Operators.NAMESPACE_ACCESSOR, s)
+        [Operators.EQUAL]              = (ref readonly SourceInfo s) => new Token(TokenType.Equal, Operators.EQUAL, in s),
+        [Operators.NOT_EQUAL]          = (ref readonly SourceInfo s) => new Token(TokenType.NotEqual, Operators.NOT_EQUAL, in s),
+        [Operators.GREATER_OR_EQUAL]   = (ref readonly SourceInfo s) => new Token(TokenType.GreaterEqual, Operators.GREATER_OR_EQUAL, in s),
+        [Operators.LESS_OR_EQUAL]      = (ref readonly SourceInfo s) => new Token(TokenType.LessEqual, Operators.LESS_OR_EQUAL, in s),
+        [Operators.AND]                = (ref readonly SourceInfo s) => new Token(TokenType.And, Operators.AND, in s),
+        [Operators.OR]                 = (ref readonly SourceInfo s) => new Token(TokenType.Or, Operators.OR, in s),
+        [Operators.INCREMENT]          = (ref readonly SourceInfo s) => new Token(TokenType.Increment, Operators.INCREMENT, in s),
+        [Operators.DECREMENT]          = (ref readonly SourceInfo s) => new Token(TokenType.Decrement, Operators.DECREMENT, in s),
+        [Operators.NULL_CHECKER]       = (ref readonly SourceInfo s) => new Token(TokenType.NullChecker, Operators.NULL_CHECKER, in s),
+        [Operators.PLUS_ASSIGN]        = (ref readonly SourceInfo s) => new Token(TokenType.AdditionAssignment, Operators.PLUS_ASSIGN, in s),
+        [Operators.MINUS_ASSIGN]       = (ref readonly SourceInfo s) => new Token(TokenType.SubtractionAssignment, Operators.MINUS_ASSIGN, in s),
+        [Operators.MULTIPLY_ASSIGN]    = (ref readonly SourceInfo s) => new Token(TokenType.MultiplicationAssignment, Operators.MULTIPLY_ASSIGN, in s),
+        [Operators.DIVIDE_ASSIGN]      = (ref readonly SourceInfo s) => new Token(TokenType.DivisionAssignment, Operators.DIVIDE_ASSIGN, in s),
+        [Operators.MODULO_ASSIGN]      = (ref readonly SourceInfo s) => new Token(TokenType.ModuloAssignment, Operators.MODULO_ASSIGN, in s),
+        [Operators.SEMICOLON]          = (ref readonly SourceInfo s) => new Token(TokenType.SemiColon, Operators.SEMICOLON, in s),
+        [Operators.COMMA]              = (ref readonly SourceInfo s) => new Token(TokenType.Comma, Operators.COMMA, in s),
+        [Operators.OPEN_PARENTHESIS]   = (ref readonly SourceInfo s) => new Token(TokenType.OpenParenthesis, Operators.OPEN_PARENTHESIS, in s),
+        [Operators.CLOSE_PARENTHESIS]  = (ref readonly SourceInfo s) => new Token(TokenType.CloseParenthesis, Operators.CLOSE_PARENTHESIS, in s),
+        [Operators.OPEN_BRACES]        = (ref readonly SourceInfo s) => new Token(TokenType.OpenBraces, Operators.OPEN_BRACES, in s),
+        [Operators.CLOSE_BRACES]       = (ref readonly SourceInfo s) => new Token(TokenType.CloseBraces, Operators.CLOSE_BRACES, in s),
+        [Operators.ASSIGNMENT]         = (ref readonly SourceInfo s) => new Token(TokenType.Assignment, Operators.ASSIGNMENT, in s),
+        [Operators.PLUS]               = (ref readonly SourceInfo s) => new Token(TokenType.Plus, Operators.PLUS, in s),
+        [Operators.MINUS]              = (ref readonly SourceInfo s) => new Token(TokenType.Minus, Operators.MINUS, in s),
+        [Operators.MULTIPLICATION]     = (ref readonly SourceInfo s) => new Token(TokenType.Multiplication, Operators.MULTIPLICATION, in s),
+        [Operators.DIVISION]           = (ref readonly SourceInfo s) => new Token(TokenType.Division, Operators.DIVISION, in s),
+        [Operators.MODULO]             = (ref readonly SourceInfo s) => new Token(TokenType.Modulo, Operators.MODULO, in s),
+        [Operators.GREATER_THAN]       = (ref readonly SourceInfo s) => new Token(TokenType.GreaterThan, Operators.GREATER_THAN, in s),
+        [Operators.LESS_THAN]          = (ref readonly SourceInfo s) => new Token(TokenType.LessThan, Operators.LESS_THAN, in s),
+        [Operators.QUESTION_MARK]      = (ref readonly SourceInfo s) => new Token(TokenType.QuestionMark, Operators.QUESTION_MARK, in s),
+        [Operators.NOT]                = (ref readonly SourceInfo s) => new Token(TokenType.Not, Operators.NOT, in s),
+        [Operators.NAMESPACE_ACCESSOR] = (ref readonly SourceInfo s) => new Token(TokenType.NamespaceAccessor, Operators.NAMESPACE_ACCESSOR, in s)
     };
 
-    private static readonly Dictionary<string, Func<SourceInfo, Token>>.AlternateLookup<ReadOnlySpan<char>> _operatorTokensSpanLookup
+    private static readonly Dictionary<string, TokenFactory>.AlternateLookup<ReadOnlySpan<char>> _operatorTokensSpanLookup
         = _operatorTokens.GetAlternateLookup<ReadOnlySpan<char>>();
 
     private static readonly int _maxOperatorLength = _operatorTokens.Keys.Max(k => k.Length);
@@ -100,15 +92,18 @@ internal class Lexer
         _sourceLocation = sourceLocation;
     }
 
-    public static IList<Token> Tokenize(string sourceCode, string sourceLocation)
+    public static List<Token> Tokenize(string sourceCode, string sourceLocation)
     {
         var lexer = new Lexer(sourceCode, sourceLocation);
         return lexer.TokenizeInternal();
     }
 
-    private IList<Token> TokenizeInternal()
+    private List<Token> TokenizeInternal()
     {
-        List<Token> tokens = [];
+        var estimatedTokenQuantity = _sourceCode.Length / 3;
+        estimatedTokenQuantity = Math.Max(256, estimatedTokenQuantity);
+
+        var tokens = new List<Token>(estimatedTokenQuantity);
 
         while (!HasEnded())
         {
@@ -121,7 +116,9 @@ internal class Lexer
             tokens.Add(ProcessCurrentToken());
         }
 
-        tokens.Add(new EOFToken(GetCurrentSourceInfo()));
+        var tokenSource = GetCurrentSourceInfo();
+
+        tokens.Add(new Token(TokenType.EOF, string.Empty, in tokenSource));
 
         return tokens;
     }
@@ -202,7 +199,7 @@ internal class Lexer
             {
                 var source = GetCurrentSourceInfo();
                 Advance(length);
-                return operatorFunc(source);
+                return operatorFunc(in source);
             }
         }
 
@@ -226,7 +223,11 @@ internal class Lexer
             return ProcessString();
         }
 
-        throw new UnexpectedCharacterException(Current(), GetCurrentSourceInfo());
+        var errorSource = GetCurrentSourceInfo();
+        return ThrowHelper.Throw<UnexpectedCharacterException, Token>(
+            $"Unexpected character found: {Current()}",
+            in errorSource
+        );
     }
 
     private Token ProcessIdentifier()
@@ -243,13 +244,13 @@ internal class Lexer
 
         if (_keywordTokensSpanLookup.TryGetValue(identifierSpan, out var keywordFunc))
         {
-            return keywordFunc(sourceStart);
+            return keywordFunc(in sourceStart);
         }
 
-        return new IdentifierToken(identifierSpan.ToString(), sourceStart);
+        return new Token(TokenType.Identifier, identifierSpan.ToString(), in sourceStart);
     }
 
-    private LiteralToken ProcessNumber()
+    private Token ProcessNumber()
     {
         var sourceStart = GetCurrentSourceInfo();
         var numberStart = _currentIndex;
@@ -262,7 +263,11 @@ internal class Lexer
             {
                 if (hasDot)
                 {
-                    throw new UnexpectedCharacterException(Current(), GetCurrentSourceInfo());
+                    var errorSource = GetCurrentSourceInfo();
+                    ThrowHelper.Throw<UnexpectedCharacterException>(
+                        $"Unexpected character found: {Current()}",
+                        in errorSource
+                    );
                 }
 
                 hasDot = true;
@@ -275,15 +280,21 @@ internal class Lexer
 
         if (number[^1] == '.')
         {
-            throw new UnexpectedCharacterException('.', GetCurrentSourceInfo(0, -1));
+            var errorSource = GetCurrentSourceInfo(0, -1);
+            ThrowHelper.Throw<UnexpectedCharacterException>(
+                "Unexpected character found: .",
+                in errorSource
+            );
         }
 
-        return hasDot
-                ? new DecimalLiteralToken(number.ToString(), sourceStart)
-                : new IntegerLiteralToken(number.ToString(), sourceStart);
+        var tokenType = hasDot
+                ? TokenType.DecimalLiteral
+                : TokenType.IntegerLiteral;
+
+        return new Token(tokenType, number.ToString(), in sourceStart);
     }
 
-    private StringLiteralToken ProcessString()
+    private Token ProcessString()
     {
         var strBuilder = new StringBuilder(50);
         var sourceStart = GetCurrentSourceInfo();
@@ -291,14 +302,16 @@ internal class Lexer
 
         if (HasEnded())
         {
-            throw new InvalidStringException("\"" + StringUtils.UnescapeString(strBuilder.ToString()), sourceStart);
+            var invalidString = "\"" + StringUtils.UnescapeString(strBuilder.ToString());
+            ThrowHelper.Throw<InvalidStringException>($"Invalid string declaration: {invalidString}", in sourceStart);
         }
 
         while (Current() != '"')
         {
             if (Current() == '\n' || Peek() is null)
             {
-                throw new InvalidStringException("\"" + StringUtils.UnescapeString(strBuilder.ToString()), sourceStart);
+                var invalidString = "\"" + StringUtils.UnescapeString(strBuilder.ToString());
+                ThrowHelper.Throw<InvalidStringException>($"Invalid string declaration: {invalidString}", in sourceStart);
             }
 
             if (Current() == '\\')
@@ -307,7 +320,8 @@ internal class Lexer
 
                 if (Peek() is null)
                 {
-                    throw new InvalidStringException("\"" + StringUtils.UnescapeString(strBuilder.ToString()), sourceStart);
+                    var invalidString = "\"" + StringUtils.UnescapeString(strBuilder.ToString());
+                    ThrowHelper.Throw<InvalidStringException>($"Invalid string declaration: {invalidString}", in sourceStart);
                 }
             }
             else
@@ -320,7 +334,7 @@ internal class Lexer
 
         Advance();
 
-        return new StringLiteralToken(strBuilder.ToString(), sourceStart);
+        return new Token(TokenType.StringLiteral, strBuilder.ToString(), in sourceStart);
     }
 
     private bool CurrentIsValidIdentifierChar(bool isFirstChar)
@@ -342,14 +356,24 @@ internal class Lexer
     {
         Advance();
 
-        return Current() switch
+        switch (Current())
         {
-            '"'  => '"',
-            'n'  => '\n',
-            't'  => '\t',
-            'r'  => '\r',
-            '\\' => '\\',
-            _    => throw new UnrecognizedEscapeSequenceException("\\" + Current(), GetCurrentSourceInfo(0, -1)),
-        };
+            case '"':
+                return '"';
+            case 'n':
+                return '\n';
+            case 't':
+                return '\t';
+            case 'r':
+                return '\r';
+            case '\\':
+                return '\\';
+            default:
+                var errorSource = GetCurrentSourceInfo(0, -1);
+                return ThrowHelper.Throw<UnrecognizedEscapeSequenceException, char>(
+                    "\\" + Current(),
+                    in errorSource
+                );
+        }
     }
 }

@@ -3,16 +3,19 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 
-internal class NullLiteralExpression : LiteralExpression
+internal sealed class NullLiteralExpression : LiteralExpression
 {
-    public override object? Value => null;
-    public NullLiteralExpression(SourceInfo source)
-        : base(source)
+    internal NullLiteralExpression(ref readonly SourceInfo source)
+        : base(in source, true)
     {
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitNullLiteralExpression(this, state);
+        visitor.VisitNullLiteralExpression(this, state, out result);
     }
 }

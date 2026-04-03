@@ -1,15 +1,18 @@
 ﻿using Raze.Script.Core.Metadata;
+using System.Runtime.InteropServices;
 
 namespace Raze.Script.Core.Tokens;
 
-internal abstract class Token
+[StructLayout(LayoutKind.Auto)]
+internal readonly struct Token
 {
-    public string Lexeme { get; private set; }
+    internal readonly TokenType Type;
+    internal readonly string Lexeme;
+    internal readonly SourceInfo SourceInfo;
 
-    public SourceInfo SourceInfo { get; private set; }
-
-    public Token(string lexeme, SourceInfo source)
+    internal Token(TokenType type, string lexeme, ref readonly SourceInfo source)
     {
+        Type = type;
         Lexeme = lexeme;
         SourceInfo = source;
     }

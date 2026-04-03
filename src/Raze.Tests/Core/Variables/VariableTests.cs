@@ -1,8 +1,6 @@
 ﻿using Raze.Script.Core;
 using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
-using Raze.Script.Core.Runtime.Scopes;
-using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Tests.Core.Variables;
 
@@ -11,47 +9,34 @@ public class VariableTests
     [Fact]
     public void Evaluate_VariableAssignment_CreatesCopy()
     {
-        var scope = new InterpreterScope();
+        var scope = RazeScript.CreateInterpreterScope();
 
-        RazeScript.Evaluate("var integer a = 10", "Raze.Tests", scope);
-        RazeScript.Evaluate("var integer b = a", "Raze.Tests", scope);
-        RazeScript.Evaluate("a = 20", "Raze.Tests", scope);
-        var result = RazeScript.Evaluate("b", "Raze.Tests", scope);
+        RazeAssert.EvaluatesToVoid("var integer a = 10", scope);
+        RazeAssert.EvaluatesToVoid("var integer b = a", scope);
+        RazeAssert.EvaluatesToVoid("a = 20", scope);
 
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(10, (result as IntegerValue)!.IntValue);
+        RazeAssert.EvaluatesToInteger("b", 10, scope);
     }
 
     [Fact]
     public void Evaluate_ConstantAssignment_ThrowsConstantAssignmentException()
     {
-        var scope = new InterpreterScope();
+        var scope = RazeScript.CreateInterpreterScope();
 
-        RazeScript.Evaluate("const integer test = 10", "Raze.Tests", scope);
-
-        Assert.Throws<ConstantAssignmentException>(() =>
-        {
-            RazeScript.Evaluate("test = 11", "Raze.Tests", scope);
-        });
+        RazeAssert.EvaluatesToVoid("const integer test = 10", scope);
+        RazeAssert.ReturnsError<ConstantAssignmentException>("test = 11", scope);
     }
 
     [Fact]
     public void Evaluate_AccessingUninitializedVariable_ThrowsUninitializedVariableException()
     {
-        var scope = new InterpreterScope();
+        var scope = RazeScript.CreateInterpreterScope();
 
-        RazeScript.Evaluate("var integer variable", "Raze.Tests", scope);
-        RazeScript.Evaluate("var integer? nullableVariable", "Raze.Tests", scope);
+        RazeAssert.EvaluatesToVoid("var integer variable", scope);
+        RazeAssert.EvaluatesToVoid("var integer? nullableVariable", scope);
 
-        Assert.Throws<UninitializedVariableException>(() =>
-        {
-            RazeScript.Evaluate("variable", "Raze.Tests", scope);
-        });
-
-        Assert.Throws<UninitializedVariableException>(() =>
-        {
-            RazeScript.Evaluate("nullableVariable", "Raze.Tests", scope);
-        });
+        RazeAssert.ReturnsError<UninitializedVariableException>("variable", scope);
+        RazeAssert.ReturnsError<UninitializedVariableException>("nullableVariable", scope);
     }
 
     [Fact]
@@ -63,41 +48,26 @@ public class VariableTests
             a
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<IntegerValue>(result);
-        Assert.Equal(80, ((IntegerValue)result).IntValue);
+        RazeAssert.EvaluatesToInteger(script, 80);
     }
 
     [Fact]
     public void Evaluate_UninitializedConstant_ThrowsUninitializedConstantException()
     {
-        Assert.Throws<UninitializedConstantException>(() =>
-        {
-            RazeScript.Evaluate("const integer constant", "Raze.Tests");
-        });
-
-        Assert.Throws<UninitializedConstantException>(() =>
-        {
-            RazeScript.Evaluate("const integer? nullableConstant", "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<UninitializedConstantException>("const integer constant");
+        RazeAssert.ReturnsError<UninitializedConstantException>("const integer? nullableConstant");
     }
 
     [Fact]
     public void Evaluate_AssigningNullToNonNullableVariable_ThrowsVariableTypeException()
     {
-        Assert.Throws<VariableTypeException>(() =>
-        {
-            RazeScript.Evaluate("var integer variable = null", "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<VariableTypeException>("var integer variable = null");
     }
 
     [Fact]
     public void Evaluate_DeclaringVoidTypeVariable_ThrowsInvalidSymbolDeclarationException()
     {
-        Assert.Throws<InvalidSymbolDeclarationException>(() =>
-        {
-            RazeScript.Evaluate("var void variable", "Raze.Tests");
-        });
+        RazeAssert.ReturnsError<InvalidSymbolDeclarationException>("var void variable");
     }
 
     [Fact]
@@ -107,47 +77,67 @@ public class VariableTests
             var decimal? my_var = 10.0;
             my_var??
         ";
-
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<BooleanValue>(result);
-        Assert.False(((BooleanValue)result).BoolValue);
+        RazeAssert.EvaluatesToBoolean(script, false);
 
         script = @"
             var integer? my_var = null;
             my_var??
         ";
-
-        result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<BooleanValue>(result);
-        Assert.True(((BooleanValue)result).BoolValue);
+        RazeAssert.EvaluatesToBoolean(script, true);
 
         script = @"
             var boolean my_var = true;
             my_var??
         ";
-
-        result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.IsType<BooleanValue>(result);
-        Assert.False(((BooleanValue)result).BoolValue);
+        RazeAssert.EvaluatesToBoolean(script, false);
     }
 
     [Theory]
-    [InlineData("integer", "10", "+=", "10", "20")]
-    [InlineData("integer", "10", "-=", "10", "0")]
-    [InlineData("integer", "10", "*=", "10", "100")]
-    [InlineData("integer", "10", "/=", "2", "5")]
-    [InlineData("integer", "10", "%=", "3", "1")]
+    [InlineData(10, "+=", 10, 20)]
+    [InlineData(10, "-=", 10, 0)]
+    [InlineData(10, "*=", 10, 100)]
+    [InlineData(10, "/=", 2, 5)]
+    [InlineData(10, "%=", 3, 1)]
     public void Evaluate_CompoundAssignmentOperation_ExecutesCorrespondingOperation(
-        string variableType, string startValueStr, string op, string rightSideValue, string expectedResultStr
+        int startValue, string op, int rightSideValue, int expectedResult
     )
     {
         var script = $@"
-            var {variableType} test = {startValueStr};
+            var integer test = {startValue};
             test {op} {rightSideValue};
             test;
         ";
 
-        var result = RazeScript.Evaluate(script, "Raze.Tests");
-        Assert.Equal(expectedResultStr, result.ToString());
+        RazeAssert.EvaluatesToInteger(script, expectedResult);
+    }
+
+    [Theory]
+    [InlineData("+=")]
+    [InlineData("-=")]
+    [InlineData("*=")]
+    [InlineData("/=")]
+    [InlineData("%=")]
+    public void Evaluate_DeclaringVaribleWithCompoundAssignmentOperator_ThrowsUnexpectedTokenException(string op)
+    {
+        var script = $"""
+            var integer test {op} 10
+        """;
+
+        RazeAssert.ReturnsError<UnexpectedTokenException>(script);
+    }
+
+    [Theory]
+    [InlineData("+=")]
+    [InlineData("-=")]
+    [InlineData("*=")]
+    [InlineData("/=")]
+    [InlineData("%=")]
+    public void Evaluate_DeclaringConstantWithCompoundAssignmentOperator_ThrowsUnexpectedTokenException(string op)
+    {
+        var script = $"""
+            const integer test {op} 10
+        """;
+
+        RazeAssert.ReturnsError<UnexpectedTokenException>(script);
     }
 }

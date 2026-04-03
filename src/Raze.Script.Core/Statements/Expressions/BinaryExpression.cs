@@ -3,22 +3,26 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements.Expressions;
 
-internal class BinaryExpression : Expression
+internal sealed class BinaryExpression : Expression
 {
-    public Expression Left { get; private set; }
-    public string Operator { get; private set; }
-    public Expression Right { get; private set; }
+    internal readonly Expression Left;
+    internal readonly string Operator;
+    internal readonly Expression Right;
 
-    public BinaryExpression(Expression left, string op, Expression right, SourceInfo source)
-        : base(source)
+    internal BinaryExpression(Expression left, string op, Expression right, ref readonly SourceInfo source)
+        : base(in source, true)
     {
         Left = left;
         Operator = op;
         Right = right;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitBinaryExpression(this, state);
+        visitor.VisitBinaryExpression(this, state, out result);
     }
 }

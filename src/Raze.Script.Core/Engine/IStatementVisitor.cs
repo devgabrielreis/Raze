@@ -6,51 +6,51 @@ namespace Raze.Script.Core.Engine;
 
 internal interface IStatementVisitor<TState, TResult>
 {
-    public TResult VisitProgramExpression(ProgramExpression program, TState state);
+    public void VisitProgramExpression(ProgramExpression program, TState state, out TResult result);
 
-    public TResult VisitNamespaceDeclarationStatement(NamespaceDeclarationStatement statement, TState state);
+    public void VisitNamespaceDeclarationStatement(NamespaceDeclarationStatement statement, TState state, out TResult result);
 
-    public TResult VisitNamespaceAccessExpression(NamespaceAccessExpression expression, TState state);
+    public void VisitNamespaceAccessExpression(NamespaceAccessExpression expression, TState state, out TResult result);
 
-    public TResult VisitVariableDeclarationStatement(VariableDeclarationStatement statement, TState state);
+    public void VisitVariableDeclarationStatement(VariableDeclarationStatement statement, TState state, out TResult result);
 
-    public TResult VisitReturnStatement(ReturnStatement statement, TState state);
+    public void VisitReturnStatement(ReturnStatement statement, TState state, out TResult result);
 
-    public TResult VisitLoopStatement(LoopStatement statement, TState state);
+    public void VisitLoopStatement(LoopStatement statement, TState state, out TResult result);
 
-    public TResult VisitIfElseStatement(IfElseStatement statement, TState state);
+    public void VisitIfElseStatement(IfElseStatement statement, TState state, out TResult result);
 
-    public TResult VisitFunctionDeclarationStatement(FunctionDeclarationStatement statement, TState state);
+    public void VisitFunctionDeclarationStatement(FunctionDeclarationStatement statement, TState state, out TResult result);
 
-    public TResult VisitContinueStatement(ContinueStatement statement, TState state);
+    public void VisitContinueStatement(ContinueStatement statement, TState state, out TResult result);
 
-    public TResult VisitCodeBlockStatement(CodeBlockStatement statement, TState state);
+    public void VisitCodeBlockStatement(CodeBlockStatement statement, TState state, out TResult result);
 
-    public TResult VisitBreakStatement(BreakStatement statement, TState state);
+    public void VisitBreakStatement(BreakStatement statement, TState state, out TResult result);
 
-    public TResult VisitAssignmentStatement(AssignmentStatement statement, TState state);
+    public void VisitAssignmentStatement(AssignmentStatement statement, TState state, out TResult result);
 
-    public TResult VisitRuntimeValueExpression(RuntimeValueExpression expression, TState state);
+    public void VisitRuntimeValueExpression(RuntimeValueExpression expression, TState state, out TResult result);
 
-    public TResult VisitIdentifierExpression(IdentifierExpression expression, TState state);
+    public void VisitIdentifierExpression(IdentifierExpression expression, TState state, out TResult result);
 
-    public TResult VisitCallExpression(CallExpression expression, TState state);
+    public void VisitCallExpression(CallExpression expression, TState state, out TResult result);
 
-    public TResult VisitBinaryExpression(BinaryExpression expression, TState state);
+    public void VisitBinaryExpression(BinaryExpression expression, TState state, out TResult result);
 
-    public TResult VisitUnarySimpleExpression(UnarySimpleExpression expression, TState state);
+    public void VisitUnarySimpleExpression(UnarySimpleExpression expression, TState state, out TResult result);
 
-    public TResult VisitUnaryMutationExpression(UnaryMutationExpression expression, TState state);
+    public void VisitUnaryMutationExpression(UnaryMutationExpression expression, TState state, out TResult result);
 
-    public TResult VisitNullCheckerExpression(NullCheckerExpression expression, TState state);
+    public void VisitNullCheckerExpression(NullCheckerExpression expression, TState state, out TResult result);
 
-    public TResult VisitBooleanLiteralExpression(BooleanLiteralExpression expression, TState state);
+    public void VisitBooleanLiteralExpression(BooleanLiteralExpression expression, TState state, out TResult result);
 
-    public TResult VisitDecimalLiteralExpression(DecimalLiteralExpression expression, TState state);
+    public void VisitDecimalLiteralExpression(DecimalLiteralExpression expression, TState state, out TResult result);
 
-    public TResult VisitIntegerLiteralExpression(IntegerLiteralExpression expression, TState state);
+    public void VisitIntegerLiteralExpression(IntegerLiteralExpression expression, TState state, out TResult result);
 
-    public TResult VisitNullLiteralExpression(NullLiteralExpression expression, TState state);
+    public void VisitNullLiteralExpression(NullLiteralExpression expression, TState state, out TResult result);
 
-    public TResult VisitStringLiteralExpression(StringLiteralExpression expression, TState state);
+    public void VisitStringLiteralExpression(StringLiteralExpression expression, TState state, out TResult result);
 }

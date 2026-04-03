@@ -3,22 +3,28 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements.Expressions;
 
-internal class NamespaceAccessExpression : Expression
+internal sealed class NamespaceAccessExpression : Expression
 {
-    public IdentifierExpression NamespaceIdentifier { get; private set; }
-    public IdentifierExpression MemberIdentifier { get; private set; }
+    internal readonly IdentifierExpression NamespaceIdentifier;
+    internal readonly IdentifierExpression MemberIdentifier;
 
-    public NamespaceAccessExpression(
-        IdentifierExpression namespaceIdentifier, IdentifierExpression memberIdentifier ,SourceInfo source
+    internal NamespaceAccessExpression(
+        IdentifierExpression namespaceIdentifier,
+        IdentifierExpression memberIdentifier,
+        ref readonly SourceInfo source
     )
-        : base(source)
+        : base(in source, true)
     {
         NamespaceIdentifier = namespaceIdentifier;
         MemberIdentifier = memberIdentifier;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitNamespaceAccessExpression(this, state);
+        visitor.VisitNamespaceAccessExpression(this, state, out result);
     }
 }

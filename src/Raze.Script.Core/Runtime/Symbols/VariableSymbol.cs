@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core.Exceptions;
+using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Types;
@@ -6,56 +7,84 @@ using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Script.Core.Runtime.Symbols;
 
-public class VariableSymbol : Symbol
+internal sealed class VariableSymbol
 {
-    public RuntimeValue Value => IsInitialized
-                                    ? _value!
-                                    : throw new UninitializedVariableException(new SourceInfo("RazeInternals"));
+    internal readonly bool IsConstant;
 
-    public bool IsConstant { get; private set; }
+    internal bool IsInitialized { get; private set; }
 
-    public bool IsInitialized => _value != null;
+    internal readonly RuntimeType Type;
 
-    public RuntimeType Type { get; private set; }
+    private RuntimeValue _value;
 
-    private RuntimeValue? _value;
-
-    public VariableSymbol(RuntimeValue? value, RuntimeType type, bool isConstant, SourceInfo source)
+    internal VariableSymbol(
+        RuntimeValue? value,
+        RuntimeType type,
+        bool isConstant,
+        ref readonly SourceInfo source
+    )
     {
-        if (type is VoidType)
+        if (type == RuntimeType.Void || type == RuntimeType.Null)
         {
-            throw new InvalidSymbolDeclarationException("Variable cannot have void type", source);
+            ThrowHelper.Throw<InvalidSymbolDeclarationException>(
+                $"Variable cannot have {type} type",
+                in source
+            );
         }
 
-        _value = null;
         Type = type;
         IsConstant = false;
+        IsInitialized = false;
 
         if (value != null)
         {
-            SetValue(value, source);
+            var refValue = value.Value;
+            SetValue(in refValue, in source);
         }
 
         IsConstant = isConstant;
 
         if (isConstant && !IsInitialized)
         {
-            throw new UninitializedConstantException(source);
+            ThrowHelper.Throw<UninitializedConstantException>(
+                "Cannot declare a constant without an initializer",
+                in source
+            );
         }
     }
 
-    public void SetValue(RuntimeValue newValue, SourceInfo source)
+    internal ref readonly RuntimeValue GetValue(ref readonly SourceInfo source)
+    {
+        if (!IsInitialized)
+        {
+            ThrowHelper.Throw<UninitializedVariableException>(
+                "Trying to access variable before its initialization",
+                in source
+            );
+        }
+
+        return ref _value;
+    }
+
+    internal void SetValue(ref readonly RuntimeValue newValue, ref readonly SourceInfo source)
     {
         if (IsConstant)
         {
-            throw new ConstantAssignmentException(source);
+            ThrowHelper.Throw<ConstantAssignmentException>(
+                "Cannot modify a constant value",
+                in source
+            );
         }
 
-        if (!Type.AcceptValue(newValue))
+        if (!Type.IsCompatibleWith(in newValue))
         {
-            throw new VariableTypeException(newValue.TypeName, Type.TypeName, source);
+            ThrowHelper.Throw<VariableTypeException>(
+                $"Trying to assign type {newValue.Type} to variable of type {Type}",
+                in source
+            );
         }
 
-        _value = newValue.Clone() as RuntimeValue;
+        _value = newValue;
+        IsInitialized = true;
     }
 }

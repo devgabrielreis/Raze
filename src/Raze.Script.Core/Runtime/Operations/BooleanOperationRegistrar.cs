@@ -1,30 +1,31 @@
 ﻿using Raze.Script.Core.Constants;
 using Raze.Script.Core.Metadata;
+using Raze.Script.Core.Runtime.Types;
 using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Script.Core.Runtime.Operations;
 
-internal class BooleanOperationRegistrar : IOperationRegistrar
+internal sealed class BooleanOperationRegistrar : IOperationRegistrar
 {
     public static void RegisterBinaryOperations(OperationDispatcher dispatcher)
     {
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, Operators.EQUAL, TypeNames.BOOLEAN_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.Boolean, Operators.EQUAL, RuntimeType.Boolean),
             EqualBoolean
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, Operators.NOT_EQUAL, TypeNames.BOOLEAN_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.Boolean, Operators.NOT_EQUAL, RuntimeType.Boolean),
             NotEqualBoolean
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, Operators.AND, TypeNames.BOOLEAN_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.Boolean, Operators.AND, RuntimeType.Boolean),
             AndBoolean
         );
 
         dispatcher.RegisterBinaryOperation(
-            new BinaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, Operators.OR, TypeNames.BOOLEAN_TYPE_NAME),
+            new BinaryOperationKey(RuntimeType.Boolean, Operators.OR, RuntimeType.Boolean),
             OrBoolean
         );
     }
@@ -32,48 +33,90 @@ internal class BooleanOperationRegistrar : IOperationRegistrar
     public static void RegisterUnaryOperations(OperationDispatcher dispatcher)
     {
         dispatcher.RegisterUnaryOperation(
-            new UnaryOperationKey(TypeNames.BOOLEAN_TYPE_NAME, Operators.NOT, IsPostfix: false),
+            new UnaryOperationKey(RuntimeType.Boolean, Operators.NOT, IsPostfix: false),
             Not
         );
     }
 
-    private static RuntimeValue EqualBoolean(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void EqualBoolean(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((BooleanValue)left).BoolValue;
-        var rightValue = ((BooleanValue)right).BoolValue;
+        var leftValue = left.AsBoolean();
+        var rightValue = right.AsBoolean();
 
-        return new BooleanValue(leftValue == rightValue);
+        var resultValue = leftValue == rightValue;
+
+        result = (resultValue)
+                ? RuntimeValue.True
+                : RuntimeValue.False;
     }
 
-    private static RuntimeValue NotEqualBoolean(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void NotEqualBoolean(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((BooleanValue)left).BoolValue;
-        var rightValue = ((BooleanValue)right).BoolValue;
+        var leftValue = left.AsBoolean();
+        var rightValue = right.AsBoolean();
 
-        return new BooleanValue(leftValue != rightValue);
+        var resultValue = leftValue != rightValue;
+
+        result = (resultValue)
+                ? RuntimeValue.True
+                : RuntimeValue.False;
     }
 
-    private static RuntimeValue AndBoolean(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void AndBoolean(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((BooleanValue)left).BoolValue;
-        var rightValue = ((BooleanValue)right).BoolValue;
+        var leftValue = left.AsBoolean();
+        var rightValue = right.AsBoolean();
 
-        return new BooleanValue(leftValue && rightValue);
+        var resultValue = leftValue && rightValue;
+
+        result = (resultValue)
+                ? RuntimeValue.True
+                : RuntimeValue.False;
     }
 
-    private static RuntimeValue OrBoolean(RuntimeValue left, RuntimeValue right, SourceInfo source)
+    private static void OrBoolean(
+        ref readonly RuntimeValue left,
+        ref readonly RuntimeValue right,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        var leftValue = ((BooleanValue)left).BoolValue;
-        var rightValue = ((BooleanValue)right).BoolValue;
+        var leftValue = left.AsBoolean();
+        var rightValue = right.AsBoolean();
 
-        return new BooleanValue(leftValue || rightValue);
+        var resultValue = leftValue || rightValue;
+
+        result = (resultValue)
+                ? RuntimeValue.True
+                : RuntimeValue.False;
     }
 
-    private static RuntimeValue Not(RuntimeValue operand, SourceInfo source)
+    private static void Not(
+        ref readonly RuntimeValue operand,
+        out RuntimeValue result,
+        ref readonly SourceInfo source
+    )
     {
-        bool value = (((BooleanValue)operand).BoolValue);
+        bool value = operand.AsBoolean();
         value = !value;
 
-        return new BooleanValue(value);
+        result = (value)
+                ? RuntimeValue.True
+                : RuntimeValue.False;
     }
 }

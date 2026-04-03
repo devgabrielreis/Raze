@@ -3,22 +3,28 @@ using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements;
 
-internal class NamespaceDeclarationStatement : Statement
+internal sealed class NamespaceDeclarationStatement : Statement
 {
-    public string Identifier { get; private set; }
-    public CodeBlockStatement DeclarationBlock { get; private set; }
+    internal readonly string Identifier;
+    internal readonly CodeBlockStatement DeclarationBlock;
 
-    public override bool RequireSemicolon => false;
-
-    public NamespaceDeclarationStatement(string identifier, CodeBlockStatement declarationBlock, SourceInfo source)
-        : base(source)
+    internal NamespaceDeclarationStatement(
+        string identifier,
+        CodeBlockStatement declarationBlock,
+        ref readonly SourceInfo source
+    )
+        : base(in source, false)
     {
         Identifier = identifier;
         DeclarationBlock = declarationBlock;
     }
 
-    internal override TResult AcceptVisitor<TState, TResult>(IStatementVisitor<TState, TResult> visitor, TState state)
+    internal override void AcceptVisitor<TState, TResult>(
+        IStatementVisitor<TState, TResult> visitor,
+        TState state,
+        out TResult result
+    )
     {
-        return visitor.VisitNamespaceDeclarationStatement(this, state);
+        visitor.VisitNamespaceDeclarationStatement(this, state, out result);
     }
 }

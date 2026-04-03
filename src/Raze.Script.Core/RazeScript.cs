@@ -1,7 +1,7 @@
 ﻿using Raze.Script.Core.Engine;
+using Raze.Script.Core.Exceptions;
+using Raze.Script.Core.Result;
 using Raze.Script.Core.Runtime.Scopes;
-using Raze.Script.Core.Runtime.Values;
-using Raze.Script.Core.Statements.Expressions;
 using System.Reflection;
 
 namespace Raze.Script.Core;
@@ -12,25 +12,29 @@ public static class RazeScript
                                              .GetName()
                                              .Version!;
 
-    public static RuntimeValue Evaluate(string source, string sourceLocation, Scope? scope = null)
+    public static Scope CreateInterpreterScope()
+    {
+        return Scope.CreateInterpreterScope();
+    }
+
+    public static RazeResult Evaluate(string source, string sourceLocation, Scope? scope = null)
     {
         if (scope is null)
         {
-            scope = new InterpreterScope();
+            scope = Scope.CreateInterpreterScope();
         }
 
-        var program = BuildProgramExpression(source, sourceLocation);
+        try
+        {
+            var tokens = Lexer.Tokenize(source, sourceLocation);
+            var program = Parser.Parse(tokens, sourceLocation);
+            var result = Interpreter.Evaluate(program, scope);
 
-        var result = new Interpreter().Evaluate(program, scope);
-
-        return result;
-    }
-
-    private static ProgramExpression BuildProgramExpression(string source, string sourceLocation)
-    {
-        var tokens = Lexer.Tokenize(source, sourceLocation);
-        var program = Parser.Parse(tokens, sourceLocation);
-
-        return program;
+            return new RazeSuccess(result);
+        }
+        catch (RazeException razeEx)
+        {
+            return new RazeError(razeEx);
+        }
     }
 }
