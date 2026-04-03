@@ -160,7 +160,7 @@ public sealed class Scope
     [MethodImpl(MethodImplOptions.NoInlining)]
     private void ThrowScopeDeclarationException(string invalidSymbolType, ref readonly SourceInfo source)
     {
-        throw new ScopeDeclarationException(invalidSymbolType, _kind, source);
+        throw new ScopeDeclarationException($"Cannot declare {invalidSymbolType} on {_kind.ToLower()} scope", source);
     }
 
     [DoesNotReturn]
@@ -176,7 +176,7 @@ public sealed class Scope
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void ThrowUndefinedIdentifierException(string name, ref readonly SourceInfo source)
     {
-        throw new UndefinedIdentifierException(name, source);
+        throw new UndefinedIdentifierException($"Undefined identifier: {name}", source);
     }
 
     [DoesNotReturn]
@@ -184,6 +184,6 @@ public sealed class Scope
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void ThrowUninitializedVariableException(ref readonly SourceInfo source)
     {
-        throw new UninitializedVariableException(source);
+        throw new UninitializedVariableException("Trying to access variable before its initialization", source);
     }
 }

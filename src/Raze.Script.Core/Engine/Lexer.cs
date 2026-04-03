@@ -222,7 +222,10 @@ internal sealed class Lexer
             return ProcessString();
         }
 
-        throw new UnexpectedCharacterException(Current(), GetCurrentSourceInfo());
+        throw new UnexpectedCharacterException(
+            $"Unexpected character found: {Current()}",
+            GetCurrentSourceInfo()
+        );
     }
 
     private Token ProcessIdentifier()
@@ -258,7 +261,10 @@ internal sealed class Lexer
             {
                 if (hasDot)
                 {
-                    throw new UnexpectedCharacterException(Current(), GetCurrentSourceInfo());
+                    throw new UnexpectedCharacterException(
+                        $"Unexpected character found: {Current()}",
+                        GetCurrentSourceInfo()
+                    );
                 }
 
                 hasDot = true;
@@ -271,7 +277,10 @@ internal sealed class Lexer
 
         if (number[^1] == '.')
         {
-            throw new UnexpectedCharacterException('.', GetCurrentSourceInfo(0, -1));
+            throw new UnexpectedCharacterException(
+                "Unexpected character found: .",
+                GetCurrentSourceInfo(0, -1)
+            );
         }
 
         var tokenType = hasDot
@@ -289,14 +298,16 @@ internal sealed class Lexer
 
         if (HasEnded())
         {
-            throw new InvalidStringException("\"" + StringUtils.UnescapeString(strBuilder.ToString()), sourceStart);
+            var invalidString = "\"" + StringUtils.UnescapeString(strBuilder.ToString());
+            throw new InvalidStringException($"Invalid string declaration: {invalidString}", sourceStart);
         }
 
         while (Current() != '"')
         {
             if (Current() == '\n' || Peek() is null)
             {
-                throw new InvalidStringException("\"" + StringUtils.UnescapeString(strBuilder.ToString()), sourceStart);
+                var invalidString = "\"" + StringUtils.UnescapeString(strBuilder.ToString());
+                throw new InvalidStringException($"Invalid string declaration: {invalidString}", sourceStart);
             }
 
             if (Current() == '\\')
@@ -305,7 +316,8 @@ internal sealed class Lexer
 
                 if (Peek() is null)
                 {
-                    throw new InvalidStringException("\"" + StringUtils.UnescapeString(strBuilder.ToString()), sourceStart);
+                    var invalidString = "\"" + StringUtils.UnescapeString(strBuilder.ToString());
+                    throw new InvalidStringException($"Invalid string declaration: {invalidString}", sourceStart);
                 }
             }
             else

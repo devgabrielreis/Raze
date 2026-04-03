@@ -4,8 +4,8 @@ namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public sealed class UnexpectedTypeException : RuntimeException
 {
-    internal UnexpectedTypeException(string foundType, string expectedType, SourceInfo source)
-        : base($"Expected: {expectedType}. Found: {foundType}", source, nameof(UnexpectedTypeException))
+    internal UnexpectedTypeException(string message, SourceInfo source)
+        : base(message, source, nameof(UnexpectedTypeException))
     {
     }
 }

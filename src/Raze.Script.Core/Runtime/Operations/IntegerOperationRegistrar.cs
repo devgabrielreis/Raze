@@ -341,6 +341,6 @@ internal sealed class IntegerOperationRegistrar : IOperationRegistrar
     [StackTraceHidden]
     private static void ThrowDivisionByZeroException(ref readonly SourceInfo source)
     {
-        throw new DivisionByZeroException(source);
+        throw new DivisionByZeroException("Cannot divide by 0", source);
     }
 }

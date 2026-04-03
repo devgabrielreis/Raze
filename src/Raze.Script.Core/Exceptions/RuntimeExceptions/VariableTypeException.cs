@@ -4,8 +4,8 @@ namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public sealed class VariableTypeException : RuntimeException
 {
-    internal VariableTypeException(string foundType, string variableType, SourceInfo source)
-        : base($"Trying to assign type {foundType} to variable of type {variableType}", source, nameof(VariableTypeException))
+    internal VariableTypeException(string message, SourceInfo source)
+        : base(message, source, nameof(VariableTypeException))
     {
     }
 }

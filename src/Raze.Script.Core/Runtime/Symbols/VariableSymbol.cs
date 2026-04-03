@@ -88,7 +88,7 @@ internal sealed class VariableSymbol
     [StackTraceHidden]
     private static void ThrowUninitializedConstantException(ref readonly SourceInfo source)
     {
-        throw new UninitializedConstantException(source);
+        throw new UninitializedConstantException("Cannot declare a constant without an initializer", source);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -96,7 +96,7 @@ internal sealed class VariableSymbol
     [StackTraceHidden]
     private static void ThrowConstantAssignmentException(ref readonly SourceInfo source)
     {
-        throw new ConstantAssignmentException(source);
+        throw new ConstantAssignmentException("Cannot modify a constant value", source);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -104,7 +104,7 @@ internal sealed class VariableSymbol
     [StackTraceHidden]
     private void ThrowVariableTypeException(ref readonly RuntimeValue value, ref readonly SourceInfo source)
     {
-        throw new VariableTypeException(value.Type.ToString(), Type.ToString(), source);
+        throw new VariableTypeException($"Trying to assign type {value.Type} to variable of type {Type}", source);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -112,6 +112,6 @@ internal sealed class VariableSymbol
     [StackTraceHidden]
     private static void ThrowUninitializedVariableException(ref readonly SourceInfo source)
     {
-        throw new UninitializedVariableException(source);
+        throw new UninitializedVariableException("Trying to access variable before its initialization", source);
     }
 }

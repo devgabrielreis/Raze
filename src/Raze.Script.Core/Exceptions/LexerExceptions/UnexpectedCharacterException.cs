@@ -4,8 +4,8 @@ namespace Raze.Script.Core.Exceptions.LexerExceptions;
 
 public sealed class UnexpectedCharacterException : LexerException
 {
-    internal UnexpectedCharacterException(char c, SourceInfo source)
-        : base($"Unexpected character found: {c}", source, nameof(UnexpectedCharacterException))
+    internal UnexpectedCharacterException(string message, SourceInfo source)
+        : base(message, source, nameof(UnexpectedCharacterException))
     {
     }
 }

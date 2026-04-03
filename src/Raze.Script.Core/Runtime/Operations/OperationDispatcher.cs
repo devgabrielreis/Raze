@@ -117,7 +117,8 @@ internal sealed class OperationDispatcher
     )
     {
         throw new UnsupportedBinaryOperationException(
-            left.Type.ToString(), right.Type.ToString(), op, source
+            $"Cannot perform {left.Type} {op} {right.Type}",
+            source
         );
     }
 
@@ -131,8 +132,9 @@ internal sealed class OperationDispatcher
         ref readonly SourceInfo source
     )
     {
+        var operation = isPostfix ? $"{operand.Type}{op}" : $"{op}{operand.Type}";
         throw new UnsupportedUnaryOperationException(
-            op, operand.Type.ToString(), isPostfix, source
+            $"Cannot perform {operation}", source
         );
     }
 }

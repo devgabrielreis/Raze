@@ -4,8 +4,8 @@ namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public sealed class DivisionByZeroException : RuntimeException
 {
-    internal DivisionByZeroException(SourceInfo source)
-        : base(source, nameof(DivisionByZeroException))
+    internal DivisionByZeroException(string message, SourceInfo source)
+        : base(message, source, nameof(DivisionByZeroException))
     {
     }
 }

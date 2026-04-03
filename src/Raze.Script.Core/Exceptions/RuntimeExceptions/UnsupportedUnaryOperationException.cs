@@ -4,9 +4,9 @@ namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public sealed class UnsupportedUnaryOperationException : RuntimeException
 {
-    internal UnsupportedUnaryOperationException(string op, string valueType, bool isPostFix, SourceInfo source)
+    internal UnsupportedUnaryOperationException(string message, SourceInfo source)
         : base(
-            isPostFix ? $"{valueType}{op}" : $"{op}{valueType}",
+            message,
             source,
             nameof(UnsupportedUnaryOperationException)
         )

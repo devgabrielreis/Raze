@@ -119,6 +119,6 @@ internal sealed class ExecutionContext
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void ThrowCorruptedContextStackException(ref readonly SourceInfo source)
     {
-        throw new CorruptedContextStackException(source);
+        throw new CorruptedContextStackException("Current context does not match expected execution state", source);
     }
 }

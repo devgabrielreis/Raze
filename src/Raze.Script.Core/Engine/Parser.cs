@@ -27,7 +27,7 @@ internal sealed class Parser
     {
         if (tokens.Length == 0 || tokens[^1].Type != TokenType.EOF)
         {
-            throw new InvalidTokenListException(new SourceInfo(sourceLocation));
+            throw new InvalidTokenListException("List is empty or does not end with EOF", new SourceInfo(sourceLocation));
         }
 
         _tokens = tokens;

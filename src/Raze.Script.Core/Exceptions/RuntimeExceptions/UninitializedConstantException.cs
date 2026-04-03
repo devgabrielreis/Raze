@@ -4,8 +4,8 @@ namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public sealed class UninitializedConstantException : RuntimeException
 {
-    internal UninitializedConstantException(SourceInfo source)
-        : base($"Cannot declare a constant without an initializer", source, nameof(UninitializedConstantException))
+    internal UninitializedConstantException(string message, SourceInfo source)
+        : base(message, source, nameof(UninitializedConstantException))
     {
     }
 }

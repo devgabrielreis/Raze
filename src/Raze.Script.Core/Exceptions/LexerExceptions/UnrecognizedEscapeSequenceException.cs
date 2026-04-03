@@ -4,8 +4,8 @@ namespace Raze.Script.Core.Exceptions.LexerExceptions;
 
 public sealed class UnrecognizedEscapeSequenceException : LexerException
 {
-    internal UnrecognizedEscapeSequenceException(string escapeSequence, SourceInfo source)
-        : base(escapeSequence, source, nameof(UnrecognizedEscapeSequenceException))
+    internal UnrecognizedEscapeSequenceException(string message, SourceInfo source)
+        : base(message, source, nameof(UnrecognizedEscapeSequenceException))
     {
     }
 }

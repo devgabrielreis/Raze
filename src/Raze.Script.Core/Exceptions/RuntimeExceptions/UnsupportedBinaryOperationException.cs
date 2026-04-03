@@ -4,9 +4,9 @@ namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public sealed class UnsupportedBinaryOperationException : RuntimeException
 {
-    internal UnsupportedBinaryOperationException(string leftType, string rightType, string op, SourceInfo source)
+    internal UnsupportedBinaryOperationException(string message, SourceInfo source)
         : base(
-            $"{leftType} {op} {rightType}",
+            message,
             source,
             nameof(UnsupportedBinaryOperationException)
         )

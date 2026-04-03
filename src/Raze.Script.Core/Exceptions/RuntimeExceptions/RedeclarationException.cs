@@ -4,8 +4,8 @@ namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public sealed class RedeclarationException : RuntimeException
 {
-    internal RedeclarationException(string error, SourceInfo source)
-        : base(error, source, nameof(RedeclarationException))
+    internal RedeclarationException(string message, SourceInfo source)
+        : base(message, source, nameof(RedeclarationException))
     {
     }
 }

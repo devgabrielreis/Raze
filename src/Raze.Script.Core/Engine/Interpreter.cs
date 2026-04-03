@@ -10,6 +10,7 @@ using Raze.Script.Core.Runtime.Values;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
+using System.Reflection.Metadata;
 
 namespace Raze.Script.Core.Engine;
 
@@ -536,8 +537,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         if (conditionResult.Type != RuntimeType.Boolean)
         {
             throw new UnexpectedTypeException(
-                conditionResult.GetType().Name,
-                RuntimeType.Boolean.ToString(),
+                $"Expected: {RuntimeType.Boolean}. Found: {conditionResult.GetType().Name}",
                 condition.SourceInfo
             );
         }
