@@ -92,13 +92,13 @@ internal sealed class Lexer
         _sourceLocation = sourceLocation;
     }
 
-    public static Token[] Tokenize(string sourceCode, string sourceLocation)
+    public static List<Token> Tokenize(string sourceCode, string sourceLocation)
     {
         var lexer = new Lexer(sourceCode, sourceLocation);
         return lexer.TokenizeInternal();
     }
 
-    private Token[] TokenizeInternal()
+    private List<Token> TokenizeInternal()
     {
         var estimatedTokenQuantity = _sourceCode.Length / 3;
         estimatedTokenQuantity = Math.Max(256, estimatedTokenQuantity);
@@ -120,7 +120,7 @@ internal sealed class Lexer
 
         tokens.Add(new Token(TokenType.EOF, string.Empty, in tokenSource));
 
-        return tokens.ToArray();
+        return tokens;
     }
 
     private SourceInfo GetCurrentSourceInfo(int lineOffset = 0, int columnOffset = 0)

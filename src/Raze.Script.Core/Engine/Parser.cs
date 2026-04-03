@@ -22,25 +22,25 @@ internal sealed class Parser
 
     private ref readonly Token CurrentToken => ref _currentToken;
 
-    private Parser(Token[] tokens, string sourceLocation)
+    private Parser(IReadOnlyList<Token> tokens, string sourceLocation)
     {
-        if (tokens.Length == 0 || tokens[^1].Type != TokenType.EOF)
+        if (tokens.Count == 0 || tokens[^1].Type != TokenType.EOF)
         {
             var errorSource = new SourceInfo(sourceLocation);
             ThrowHelper.Throw<InvalidTokenListException>(
-                "List is empty or does not end with EOF",
+                "Token list is empty or does not end with EOF",
                 in errorSource
             );
         }
 
-        _tokens = tokens;
+        _tokens = tokens.ToArray();
         _sourceLocation = sourceLocation;
 
         _currentIndex = 0;
         _currentToken = _tokens[0];
     }
 
-    public static ProgramExpression Parse(Token[] tokens, string sourceLocation)
+    public static ProgramExpression Parse(IReadOnlyList<Token> tokens, string sourceLocation)
     {
         var parser = new Parser(tokens, sourceLocation);
         return parser.ParseInternal();
