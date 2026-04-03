@@ -2,6 +2,8 @@
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Symbols;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Runtime.Scopes;
 
@@ -87,18 +89,7 @@ public sealed class Scope
 
         if (variable is null)
         {
-            if (TryGetNamespace(name) != null)
-            {
-                ThrowHelper.Throw<UnexpectedStatementException>(
-                    $"{name} is a namespace, but it is being used as a value",
-                    in source
-                );
-            }
-
-            ThrowHelper.Throw<UndefinedIdentifierException>(
-                $"Undefined identifier: {name}",
-                in source
-            );
+            HandleUndefinedSymbol(name, "a value", in source);
         }
 
         if (throwIfNotInitialized && !variable.IsInitialized)
@@ -152,10 +143,7 @@ public sealed class Scope
 
         if (namespaceSymbol is null)
         {
-            ThrowHelper.Throw<UndefinedIdentifierException>(
-                $"Undefined identifier: {name}",
-                in source
-            );
+            HandleUndefinedSymbol(name, "a namespace", in source);
         }
 
         return namespaceSymbol;
@@ -179,5 +167,32 @@ public sealed class Scope
     private bool Can(ScopePermissions permission)
     {
         return _permissions.HasFlag(permission);
+    }
+
+    [DoesNotReturn]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void HandleUndefinedSymbol(string name, string wasBeingUsedAs, ref readonly SourceInfo source)
+    {
+        if (TryGetNamespace(name) != null)
+        {
+            ThrowHelper.Throw<UnexpectedStatementException>(
+                $"{name} is a namespace, but it is being used as {wasBeingUsedAs}",
+                in source
+            );
+        }
+
+        if (TryGetVariable(name) is VariableSymbol variableSymbol)
+        {
+            var varType = variableSymbol.IsConstant ? "constant" : "variable";
+            ThrowHelper.Throw<UnexpectedStatementException>(
+                $"{name} is a {varType}, but it is being used as {wasBeingUsedAs}",
+                in source
+            );
+        }
+
+        ThrowHelper.Throw<UndefinedIdentifierException>(
+            $"Undefined identifier: {name}",
+            in source
+        );
     }
 }
