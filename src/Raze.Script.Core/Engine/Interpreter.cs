@@ -370,9 +370,9 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     {
         var outerLoopScope = Scope.CreateLocalScope(scope);
 
-        foreach (var stmt in loopStmt.Initialization)
+        if (loopStmt.Initialization != null)
         {
-            EvaluateInternal(stmt, outerLoopScope, out _);
+            EvaluateInternal(loopStmt.Initialization, outerLoopScope, out _);
         }
 
         _executionContext.EnterLoop();

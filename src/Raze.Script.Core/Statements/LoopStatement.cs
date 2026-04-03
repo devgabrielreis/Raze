@@ -6,7 +6,7 @@ namespace Raze.Script.Core.Statements;
 
 internal sealed class LoopStatement : Statement
 {
-    internal readonly IReadOnlyList<Statement> Initialization;
+    internal readonly Statement? Initialization;
 
     internal readonly Expression? Condition;
     
@@ -15,7 +15,7 @@ internal sealed class LoopStatement : Statement
     internal readonly CodeBlockStatement Body;
 
     internal LoopStatement(
-        List<Statement> initialization,
+        Statement? initialization,
         Expression? condition,
         Statement? update,
         CodeBlockStatement body,

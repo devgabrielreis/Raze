@@ -262,15 +262,13 @@ internal sealed class Parser
         Expect(TokenType.OpenParenthesis);
         Advance();
 
-        List<Statement> initialization = [];
+        Statement? initialization = null;
 
         if (CurrentToken.Type != TokenType.SemiColon)
         {
-            initialization.Add(
-                CurrentToken.Type == TokenType.Var
-                    ? ParseVariableDeclaration()
-                    : ParseAssignmentStatement()
-            );
+            initialization = CurrentToken.Type == TokenType.Var
+                            ? ParseVariableDeclaration()
+                            : ParseAssignmentStatement();
         }
 
         Expect(TokenType.SemiColon);
@@ -317,7 +315,7 @@ internal sealed class Parser
 
         CodeBlockStatement body = ParseCodeBlock();
 
-        return new LoopStatement([], condition, null, body, in sourceStart);
+        return new LoopStatement(null, condition, null, body, in sourceStart);
     }
 
     private VariableDeclarationStatement ParseVariableDeclaration()
