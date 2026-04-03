@@ -42,7 +42,7 @@ public sealed class Scope
 
     internal static Scope CreateInterpreterScope()
     {
-        return new Scope(null, ScopePermissions.All, "InterpreterScope");
+        return new Scope(null, ScopePermissions.All, "Interpreter");
     }
 
     internal static Scope CreateLocalScope(Scope parent)
@@ -50,13 +50,13 @@ public sealed class Scope
         return new Scope(
             parent,
             ScopePermissions.DeclareConstants | ScopePermissions.DeclareVariables,
-            "LocalScope"
+            "Local"
         );
     }
 
     internal static Scope CreateNamespaceScope(Scope parent)
     {
-        return new Scope(parent, ScopePermissions.DeclareConstants, "NamespaceScope");
+        return new Scope(parent, ScopePermissions.DeclareConstants, "Namespace");
     }
 
     internal void DeclareVariable(string name, VariableSymbol variable, ref readonly SourceInfo source)
