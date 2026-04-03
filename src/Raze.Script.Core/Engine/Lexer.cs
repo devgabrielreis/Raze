@@ -1,4 +1,5 @@
 ﻿using Raze.Script.Core.Constants;
+using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Exceptions.LexerExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Tokens;
@@ -222,9 +223,10 @@ internal sealed class Lexer
             return ProcessString();
         }
 
-        throw new UnexpectedCharacterException(
+        var errorSource = GetCurrentSourceInfo();
+        return ThrowHelper.Throw<UnexpectedCharacterException, Token>(
             $"Unexpected character found: {Current()}",
-            GetCurrentSourceInfo()
+            in errorSource
         );
     }
 
@@ -261,9 +263,10 @@ internal sealed class Lexer
             {
                 if (hasDot)
                 {
-                    throw new UnexpectedCharacterException(
+                    var errorSource = GetCurrentSourceInfo();
+                    ThrowHelper.Throw<UnexpectedCharacterException>(
                         $"Unexpected character found: {Current()}",
-                        GetCurrentSourceInfo()
+                        in errorSource
                     );
                 }
 
@@ -277,9 +280,10 @@ internal sealed class Lexer
 
         if (number[^1] == '.')
         {
-            throw new UnexpectedCharacterException(
+            var errorSource = GetCurrentSourceInfo(0, -1);
+            ThrowHelper.Throw<UnexpectedCharacterException>(
                 "Unexpected character found: .",
-                GetCurrentSourceInfo(0, -1)
+                in errorSource
             );
         }
 
@@ -299,7 +303,7 @@ internal sealed class Lexer
         if (HasEnded())
         {
             var invalidString = "\"" + StringUtils.UnescapeString(strBuilder.ToString());
-            throw new InvalidStringException($"Invalid string declaration: {invalidString}", sourceStart);
+            ThrowHelper.Throw<InvalidStringException>($"Invalid string declaration: {invalidString}", in sourceStart);
         }
 
         while (Current() != '"')
@@ -307,7 +311,7 @@ internal sealed class Lexer
             if (Current() == '\n' || Peek() is null)
             {
                 var invalidString = "\"" + StringUtils.UnescapeString(strBuilder.ToString());
-                throw new InvalidStringException($"Invalid string declaration: {invalidString}", sourceStart);
+                ThrowHelper.Throw<InvalidStringException>($"Invalid string declaration: {invalidString}", in sourceStart);
             }
 
             if (Current() == '\\')
@@ -317,7 +321,7 @@ internal sealed class Lexer
                 if (Peek() is null)
                 {
                     var invalidString = "\"" + StringUtils.UnescapeString(strBuilder.ToString());
-                    throw new InvalidStringException($"Invalid string declaration: {invalidString}", sourceStart);
+                    ThrowHelper.Throw<InvalidStringException>($"Invalid string declaration: {invalidString}", in sourceStart);
                 }
             }
             else
@@ -352,14 +356,24 @@ internal sealed class Lexer
     {
         Advance();
 
-        return Current() switch
+        switch (Current())
         {
-            '"'  => '"',
-            'n'  => '\n',
-            't'  => '\t',
-            'r'  => '\r',
-            '\\' => '\\',
-            _    => throw new UnrecognizedEscapeSequenceException("\\" + Current(), GetCurrentSourceInfo(0, -1)),
-        };
+            case '"':
+                return '"';
+            case 'n':
+                return '\n';
+            case 't':
+                return '\t';
+            case 'r':
+                return '\r';
+            case '\\':
+                return '\\';
+            default:
+                var errorSource = GetCurrentSourceInfo(0, -1);
+                return ThrowHelper.Throw<UnrecognizedEscapeSequenceException, char>(
+                    "\\" + Current(),
+                    in errorSource
+                );
+        }
     }
 }

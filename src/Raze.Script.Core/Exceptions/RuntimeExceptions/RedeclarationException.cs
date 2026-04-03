@@ -2,10 +2,19 @@
 
 namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
-public sealed class RedeclarationException : RuntimeException
+public sealed class RedeclarationException
+    : RuntimeException, IThrowableByThrowHelper<RedeclarationException>
 {
-    internal RedeclarationException(string message, SourceInfo source)
+    private RedeclarationException(string message, SourceInfo source)
         : base(message, source, nameof(RedeclarationException))
     {
+    }
+
+    static RedeclarationException IThrowableByThrowHelper<RedeclarationException>.Create(
+        string message,
+        ref readonly SourceInfo source
+    )
+    {
+        return new RedeclarationException(message, source);
     }
 }

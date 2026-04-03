@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core.Exceptions;
+using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Context;
@@ -10,7 +11,6 @@ using Raze.Script.Core.Runtime.Values;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
-using System.Reflection.Metadata;
 
 namespace Raze.Script.Core.Engine;
 
@@ -153,8 +153,8 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
         if (value.Type.Base != BaseType.UserFunction)
         {
-            throw new InvalidCallExpressionException(
-                $"Cannot call {value.Type}", callExpression.SourceInfo
+            ThrowHelper.Throw<InvalidCallExpressionException>(
+                $"Cannot call {value.Type}", in callExpression.SourceInfo
             );
         }
 
@@ -169,8 +169,8 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
                                 ? $"Function expects {parameters.Count} arguments, but {callExpression.ArgumentList.Count} were given"
                                 : $"Function expects between {minExpectedArguments} and {parameters.Count} arguments, but {callExpression.ArgumentList.Count} were given";
 
-            throw new InvalidParameterListException(
-                message, callExpression.SourceInfo
+            ThrowHelper.Throw<InvalidParameterListException>(
+                message, in callExpression.SourceInfo
             );
         }
 
@@ -194,9 +194,9 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
             if (!function.Parameters[i].Type.IsCompatibleWith(in argumentValue))
             {
-                throw new InvalidParameterListException(
+                ThrowHelper.Throw<InvalidParameterListException>(
                     $"Parameter {function.Parameters[i].Identifier} expects type {function.Parameters[i].Type}, but {argumentValue.Type} was given",
-                    argumentSource
+                    in argumentSource
                 );
             }
 
@@ -228,9 +228,9 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
         if (!function.ReturnType.IsCompatibleWith(in returnedValue))
         {
-            throw new UnexpectedReturnType(
+            ThrowHelper.Throw<UnexpectedReturnType>(
                 $"Function was expected to return {function.ReturnType} but {returnedValue.Type} was returned",
-                returnedValueSource
+                in returnedValueSource
             );
         }
 
@@ -424,9 +424,9 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     {
         if (!_executionContext.IsInLoop())
         {
-            throw new UnexpectedStatementException(
+            ThrowHelper.Throw<UnexpectedStatementException>(
                 "Cannot use break outside of a loop",
-                breakStmt.SourceInfo
+                in breakStmt.SourceInfo
             );
         }
 
@@ -442,9 +442,9 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     {
         if (!_executionContext.IsInLoop())
         {
-            throw new UnexpectedStatementException(
+            ThrowHelper.Throw<UnexpectedStatementException>(
                 "Cannot use continue outside of a loop",
-                continueStmt.SourceInfo
+                in continueStmt.SourceInfo
             );
         }
 
@@ -460,9 +460,9 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     {
         if (!_executionContext.IsInFunction())
         {
-            throw new UnexpectedStatementException(
+            ThrowHelper.Throw<UnexpectedStatementException>(
                 "Cannot use return outside of a function",
-                statement.SourceInfo
+                in statement.SourceInfo
             );
         }
 
@@ -536,9 +536,9 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
         if (conditionResult.Type != RuntimeType.Boolean)
         {
-            throw new UnexpectedTypeException(
+            ThrowHelper.Throw<UnexpectedTypeException>(
                 $"Expected: {RuntimeType.Boolean}. Found: {conditionResult.GetType().Name}",
-                condition.SourceInfo
+                in condition.SourceInfo
             );
         }
 

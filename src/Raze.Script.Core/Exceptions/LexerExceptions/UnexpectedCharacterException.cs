@@ -2,10 +2,19 @@
 
 namespace Raze.Script.Core.Exceptions.LexerExceptions;
 
-public sealed class UnexpectedCharacterException : LexerException
+public sealed class UnexpectedCharacterException
+    : LexerException, IThrowableByThrowHelper<UnexpectedCharacterException>
 {
-    internal UnexpectedCharacterException(string message, SourceInfo source)
+    private UnexpectedCharacterException(string message, SourceInfo source)
         : base(message, source, nameof(UnexpectedCharacterException))
     {
+    }
+
+    static UnexpectedCharacterException IThrowableByThrowHelper<UnexpectedCharacterException>.Create(
+        string message,
+        ref readonly SourceInfo source
+    )
+    {
+        return new UnexpectedCharacterException(message, source);
     }
 }

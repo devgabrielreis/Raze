@@ -2,10 +2,19 @@
 
 namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
-public sealed class DivisionByZeroException : RuntimeException
+public sealed class DivisionByZeroException
+    : RuntimeException, IThrowableByThrowHelper<DivisionByZeroException>
 {
-    internal DivisionByZeroException(string message, SourceInfo source)
+    private DivisionByZeroException(string message, SourceInfo source)
         : base(message, source, nameof(DivisionByZeroException))
     {
+    }
+
+    static DivisionByZeroException IThrowableByThrowHelper<DivisionByZeroException>.Create(
+        string message,
+        ref readonly SourceInfo source
+    )
+    {
+        return new DivisionByZeroException(message, source);
     }
 }

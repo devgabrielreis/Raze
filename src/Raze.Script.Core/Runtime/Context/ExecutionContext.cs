@@ -1,8 +1,7 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Exceptions;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Runtime.Context;
 
@@ -108,17 +107,12 @@ internal sealed class ExecutionContext
     {
         if (_contextStack.Count == 0 || _contextStack.Peek() != context)
         {
-            ThrowCorruptedContextStackException(in source);
+            ThrowHelper.Throw<CorruptedContextStackException>(
+                "Current context does not match expected execution state",
+                in source
+            );
         }
 
         _contextStack.Pop();
-    }
-
-    [DoesNotReturn]
-    [StackTraceHidden]
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void ThrowCorruptedContextStackException(ref readonly SourceInfo source)
-    {
-        throw new CorruptedContextStackException("Current context does not match expected execution state", source);
     }
 }

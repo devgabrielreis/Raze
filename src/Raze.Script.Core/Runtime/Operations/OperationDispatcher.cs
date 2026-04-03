@@ -1,10 +1,8 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Exceptions;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Types;
 using Raze.Script.Core.Runtime.Values;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Runtime.Operations;
 
@@ -62,7 +60,10 @@ internal sealed class OperationDispatcher
 
         if (!_binaryOperations.TryGetValue(key, out var operationFunc))
         {
-            ThrowUnsupportedBinaryOperationException(in left, op, in right, in source);
+            ThrowHelper.Throw<UnsupportedBinaryOperationException>(
+                $"Cannot perform {left.Type} {op} {right.Type}",
+                in source
+            );
         }
 
         operationFunc(in left, in right, out target, in source);
@@ -80,7 +81,10 @@ internal sealed class OperationDispatcher
 
         if (!_unaryOperations.TryGetValue(key, out var operationFunc))
         {
-            ThrowUnsupportedUnaryOperationException(in operand, op, isPostfix, in source);
+            var operation = isPostfix ? $"{operand.Type}{op}" : $"{op}{operand.Type}";
+            ThrowHelper.Throw<UnsupportedUnaryOperationException>(
+                $"Cannot perform {operation}", in source
+            );
         }
 
         operationFunc(in operand, out target, in source);
@@ -104,37 +108,5 @@ internal sealed class OperationDispatcher
         }
 
         _unaryOperations.Add(key, operation);
-    }
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    [DoesNotReturn]
-    [StackTraceHidden]
-    private static void ThrowUnsupportedBinaryOperationException(
-        ref readonly RuntimeValue left,
-        string op,
-        ref readonly RuntimeValue right,
-        ref readonly SourceInfo source
-    )
-    {
-        throw new UnsupportedBinaryOperationException(
-            $"Cannot perform {left.Type} {op} {right.Type}",
-            source
-        );
-    }
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    [DoesNotReturn]
-    [StackTraceHidden]
-    private static void ThrowUnsupportedUnaryOperationException(
-        ref readonly RuntimeValue operand,
-        string op,
-        bool isPostfix,
-        ref readonly SourceInfo source
-    )
-    {
-        var operation = isPostfix ? $"{operand.Type}{op}" : $"{op}{operand.Type}";
-        throw new UnsupportedUnaryOperationException(
-            $"Cannot perform {operation}", source
-        );
     }
 }

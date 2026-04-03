@@ -1,11 +1,9 @@
 ﻿using Raze.Script.Core.Constants;
+using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Types;
 using Raze.Script.Core.Runtime.Values;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Runtime.Operations;
 
@@ -153,7 +151,10 @@ internal sealed class DecimalOperationRegistrar : IOperationRegistrar
 
         if (rightValue == 0.0m)
         {
-            ThrowDivisionByZeroException(in source);
+            ThrowHelper.Throw<DivisionByZeroException>(
+                "Cannot perform division by zero",
+                in source
+            );
         }
 
         result = new RuntimeValue(leftValue / rightValue);
@@ -171,7 +172,10 @@ internal sealed class DecimalOperationRegistrar : IOperationRegistrar
 
         if (rightValue == 0.0m)
         {
-            ThrowDivisionByZeroException(in source);
+            ThrowHelper.Throw<DivisionByZeroException>(
+                "Cannot perform modulo operation by zero",
+                in source
+            );
         }
 
         result = new RuntimeValue(leftValue % rightValue);
@@ -324,13 +328,5 @@ internal sealed class DecimalOperationRegistrar : IOperationRegistrar
         value--;
 
         result = new RuntimeValue(value);
-    }
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    [DoesNotReturn]
-    [StackTraceHidden]
-    private static void ThrowDivisionByZeroException(ref readonly SourceInfo source)
-    {
-        throw new DivisionByZeroException("Cannot divide by 0", source);
     }
 }

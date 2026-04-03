@@ -2,14 +2,23 @@
 
 namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
-public sealed class UnsupportedUnaryOperationException : RuntimeException
+public sealed class UnsupportedUnaryOperationException
+    : RuntimeException, IThrowableByThrowHelper<UnsupportedUnaryOperationException>
 {
-    internal UnsupportedUnaryOperationException(string message, SourceInfo source)
+    private UnsupportedUnaryOperationException(string message, SourceInfo source)
         : base(
             message,
             source,
             nameof(UnsupportedUnaryOperationException)
         )
     {
+    }
+
+    static UnsupportedUnaryOperationException IThrowableByThrowHelper<UnsupportedUnaryOperationException>.Create(
+        string message,
+        ref readonly SourceInfo source
+    )
+    {
+        return new UnsupportedUnaryOperationException(message, source);
     }
 }

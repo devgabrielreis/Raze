@@ -1,9 +1,7 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Exceptions;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Symbols;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Runtime.Scopes;
 
@@ -68,13 +66,18 @@ public sealed class Scope
         if (!Can(permissionNeeded))
         {
             var variableKind = variable.IsConstant ? "constant" : "variable";
-
-            ThrowScopeDeclarationException(variableKind, in source);
+            ThrowHelper.Throw<ScopeDeclarationException>(
+                $"Cannot declare {variableKind} on {_kind.ToLower()} scope",
+                in source
+            );
         }
 
         if (!_variables.TryAdd(name, variable))
         {
-            ThrowRedeclarationException($"The variable {name} is already declared", in source);
+            ThrowHelper.Throw<RedeclarationException>(
+                $"The variable {name} is already declared",
+                in source
+            );
         }
     }
 
@@ -84,12 +87,18 @@ public sealed class Scope
 
         if (variable is null)
         {
-            ThrowUndefinedIdentifierException(name, in source);
+            ThrowHelper.Throw<UndefinedIdentifierException>(
+                $"Undefined identifier: {name}",
+                in source
+            );
         }
 
         if (throwIfNotInitialized && !variable.IsInitialized)
         {
-            ThrowUninitializedVariableException(in source);
+            ThrowHelper.Throw<UninitializedVariableException>(
+                "Trying to access variable before its initialization",
+                in source
+            );
         }
 
         return variable;
@@ -114,12 +123,18 @@ public sealed class Scope
     {
         if (!Can(ScopePermissions.DeclareNamespaces))
         {
-            ThrowScopeDeclarationException("namespace", in source);
+            ThrowHelper.Throw<ScopeDeclarationException>(
+                $"Cannot declare namespace on {_kind.ToLower()} scope",
+                in source
+            );
         }
 
         if (!_namespaces.TryAdd(name, namespaceSymbol))
         {
-            ThrowRedeclarationException($"The namespace {name} is already declared", in source);
+            ThrowHelper.Throw<RedeclarationException>(
+                $"The namespace {name} is already declared",
+                in source
+            );
         }
     }
 
@@ -129,7 +144,10 @@ public sealed class Scope
 
         if (namespaceSymbol is null)
         {
-            ThrowUndefinedIdentifierException(name, in source);
+            ThrowHelper.Throw<UndefinedIdentifierException>(
+                $"Undefined identifier: {name}",
+                in source
+            );
         }
 
         return namespaceSymbol;
@@ -153,37 +171,5 @@ public sealed class Scope
     private bool Can(ScopePermissions permission)
     {
         return _permissions.HasFlag(permission);
-    }
-
-    [DoesNotReturn]
-    [StackTraceHidden]
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private void ThrowScopeDeclarationException(string invalidSymbolType, ref readonly SourceInfo source)
-    {
-        throw new ScopeDeclarationException($"Cannot declare {invalidSymbolType} on {_kind.ToLower()} scope", source);
-    }
-
-    [DoesNotReturn]
-    [StackTraceHidden]
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void ThrowRedeclarationException(string message, ref readonly SourceInfo source)
-    {
-        throw new RedeclarationException(message, source);
-    }
-
-    [DoesNotReturn]
-    [StackTraceHidden]
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void ThrowUndefinedIdentifierException(string name, ref readonly SourceInfo source)
-    {
-        throw new UndefinedIdentifierException($"Undefined identifier: {name}", source);
-    }
-
-    [DoesNotReturn]
-    [StackTraceHidden]
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void ThrowUninitializedVariableException(ref readonly SourceInfo source)
-    {
-        throw new UninitializedVariableException("Trying to access variable before its initialization", source);
     }
 }

@@ -2,10 +2,19 @@
 
 namespace Raze.Script.Core.Exceptions.LexerExceptions;
 
-public sealed class InvalidStringException : LexerException
+public sealed class InvalidStringException
+    : LexerException, IThrowableByThrowHelper<InvalidStringException>
 {
-    internal InvalidStringException(string message, SourceInfo source)
+    private InvalidStringException(string message, SourceInfo source)
         : base(message, source, nameof(InvalidStringException))
     {
+    }
+
+    static InvalidStringException IThrowableByThrowHelper<InvalidStringException>.Create(
+        string message,
+        ref readonly SourceInfo source
+    )
+    {
+        return new InvalidStringException(message, source);
     }
 }

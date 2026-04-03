@@ -1,11 +1,9 @@
-﻿using Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core.Exceptions;
+using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Types;
 using Raze.Script.Core.Runtime.Values;
 using Raze.Script.Core.Statements.Expressions;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Runtime.Symbols;
 
@@ -48,7 +46,10 @@ internal sealed class ParameterSymbol
     {
         if (type == RuntimeType.Void || type == RuntimeType.Null)
         {
-            ThrowConstantAssignmentException(type, in source);
+            ThrowHelper.Throw<InvalidSymbolDeclarationException>(
+                $"Parameter cannot have {type} type",
+                in source
+            );
         }
 
         IsConstant = isConstant;
@@ -61,13 +62,5 @@ internal sealed class ParameterSymbol
     internal bool HasDefaultValue()
     {
         return DefaultValue is not null;
-    }
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    [DoesNotReturn]
-    [StackTraceHidden]
-    private static void ThrowConstantAssignmentException(RuntimeType type, ref readonly SourceInfo source)
-    {
-        throw new InvalidSymbolDeclarationException($"Parameter cannot have {type} type", source);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core.Exceptions;
+using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Symbols;
 using Raze.Script.Core.Runtime.Types;
@@ -6,8 +7,6 @@ using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 using Raze.Script.Core.Tokens;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 
@@ -27,7 +26,11 @@ internal sealed class Parser
     {
         if (tokens.Length == 0 || tokens[^1].Type != TokenType.EOF)
         {
-            throw new InvalidTokenListException("List is empty or does not end with EOF", new SourceInfo(sourceLocation));
+            var errorSource = new SourceInfo(sourceLocation);
+            ThrowHelper.Throw<InvalidTokenListException>(
+                "List is empty or does not end with EOF",
+                in errorSource
+            );
         }
 
         _tokens = tokens;
@@ -70,61 +73,37 @@ internal sealed class Parser
         return new ProgramExpression(programBody, in source);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Expect(TokenType expected)
     {
         if (CurrentToken.Type != expected)
         {
-            ThrowUnexpectedTokenException(expected.GetFriendlyName());
+            ThrowHelper.Throw<UnexpectedTokenException>(
+                $"Unexpected token found. Expected: {expected.GetFriendlyName()}. Found: {CurrentToken.Type.GetFriendlyName()}. Value: {CurrentToken.Lexeme}",
+                in CurrentToken.SourceInfo
+            );
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Expect(TokenType expected1, TokenType expected2)
     {
         if (CurrentToken.Type != expected1 && CurrentToken.Type != expected2)
         {
-            ThrowUnexpectedTokenException<object>($"{expected1.GetFriendlyName()} or {expected2.GetFriendlyName()}");
+            ThrowHelper.Throw<UnexpectedTokenException>(
+                $"Unexpected token found. Expected: {expected1.GetFriendlyName()} or {expected2.GetFriendlyName()}. Found: {CurrentToken.Type.GetFriendlyName()}. Value: {CurrentToken.Lexeme}",
+                in CurrentToken.SourceInfo
+            );
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Expect(Func<TokenType, bool> condition, string expectedPrettyStr)
     {
         if (!condition(CurrentToken.Type))
         {
-            ThrowUnexpectedTokenException(expectedPrettyStr);
+            ThrowHelper.Throw<UnexpectedTokenException>(
+                $"Unexpected token found. Expected: {expectedPrettyStr}. Found: {CurrentToken.Type.GetFriendlyName()}. Value: {CurrentToken.Lexeme}",
+                in CurrentToken.SourceInfo
+            );
         }
-    }
-
-    [DoesNotReturn]
-    [StackTraceHidden]
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private void ThrowUnexpectedTokenException(string? expectedPrettyStr, Token? token = null)
-    {
-        throw CreateUnexpectedTokenException(expectedPrettyStr, (token is null ? CurrentToken : token.Value));
-    }
-
-    [DoesNotReturn]
-    [StackTraceHidden]
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private T ThrowUnexpectedTokenException<T>(string? expectedPrettyStr, Token? token = null)
-    {
-        throw CreateUnexpectedTokenException(expectedPrettyStr, (token is null ? CurrentToken : token.Value));
-    }
-
-    [StackTraceHidden]
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private static UnexpectedTokenException CreateUnexpectedTokenException(string? expectedPrettyStr, Token token)
-    {
-        var message = expectedPrettyStr == null
-            ? $"Unexpected token found. Found: {token.Type.GetFriendlyName()}. Value: {token.Lexeme}"
-            : $"Unexpected token found. Expected: {expectedPrettyStr}. Found: {token.Type.GetFriendlyName()}. Value: {token.Lexeme}";
-
-        return new UnexpectedTokenException(
-            message,
-            token.SourceInfo
-        );
     }
 
     private void Advance(int howMuch = 1)
@@ -264,7 +243,10 @@ internal sealed class Parser
             {
                 TokenType.OpenBraces => ParseCodeBlock(),
                 TokenType.If         => ParseIfElse(),
-                _ => ThrowUnexpectedTokenException<Statement>(null)
+                _ => ThrowHelper.Throw<UnexpectedTokenException, Statement>(
+                        $"Unexpected token found. Expected: {TokenType.OpenBraces.GetFriendlyName()} or {TokenType.If.GetFriendlyName()}. Found: {CurrentToken.Type.GetFriendlyName()}. Value: {CurrentToken.Lexeme}",
+                        in CurrentToken.SourceInfo
+                    )
             };
         }
 
@@ -419,8 +401,8 @@ internal sealed class Parser
             }
             else if (isDefaultParameterRequired)
             {
-                throw new InvalidParameterListException(
-                    "A non-default parameter cannot appear after a default parameter", sourceStart
+                ThrowHelper.Throw<InvalidParameterListException>(
+                    "A non-default parameter cannot appear after a default parameter", in sourceStart
                 );
             }
 
@@ -461,7 +443,10 @@ internal sealed class Parser
         {
             if (typeToken.Type != TokenType.FunctionTypeName)
             {
-                throw new InvalidTypeDeclarationException("This type cannot have generics", CurrentToken.SourceInfo);
+                ThrowHelper.Throw<InvalidTypeDeclarationException>(
+                    "This type cannot have generics",
+                    in CurrentToken.SourceInfo
+                );
             }
 
             generics = ParseGenerics();
@@ -469,9 +454,9 @@ internal sealed class Parser
 
         if (generics.Count == 0 && typeToken.Type == TokenType.FunctionTypeName)
         {
-            throw new InvalidTypeDeclarationException(
+            ThrowHelper.Throw<InvalidTypeDeclarationException>(
                 "Function type requires at least one generic",
-                typeToken.SourceInfo
+                in typeToken.SourceInfo
             );
         }
 
@@ -480,7 +465,10 @@ internal sealed class Parser
         {
             if (typeToken.Type == TokenType.VoidTypeName)
             {
-                throw new InvalidTypeDeclarationException("void cannot be nullable", CurrentToken!.SourceInfo);
+                ThrowHelper.Throw<InvalidTypeDeclarationException>(
+                    "void cannot be nullable",
+                    in CurrentToken!.SourceInfo
+                );
             }
 
             isNullable = true;
@@ -495,7 +483,10 @@ internal sealed class Parser
             TokenType.StringTypeName   => (isNullable) ? RuntimeType.NullableString : RuntimeType.String,
             TokenType.VoidTypeName     => RuntimeType.Void,
             TokenType.FunctionTypeName => TypeFactory.GetType(BaseType.UserFunction, isNullable, generics.ToArray()),
-            _ => ThrowUnexpectedTokenException<RuntimeType>("type name", typeToken)
+            _ => ThrowHelper.Throw<UnexpectedTokenException, RuntimeType>(
+                $"Unexpected token found. Expected: type name. Found: {typeToken.Type.GetFriendlyName()}. Value: {typeToken.Lexeme}",
+                in typeToken.SourceInfo
+            )
         };
     }
 
@@ -550,7 +541,7 @@ internal sealed class Parser
 
         if (left is not IdentifierExpression)
         {
-            throw new InvalidAssignmentException("Invalid assignment target", left.SourceInfo);
+            ThrowHelper.Throw<InvalidAssignmentException>("Invalid assignment target", in left.SourceInfo);
         }
 
         if (op.Type.IsCompoundAssignmentOperator())
@@ -618,9 +609,9 @@ internal sealed class Parser
 
             if (operand is not IdentifierExpression identifier)
             {
-                throw new InvalidOperandException(
+                return ThrowHelper.Throw<InvalidOperandException, Expression>(
                     $"The {op.Lexeme} operator can only be applied to identifiers",
-                    op.SourceInfo
+                    in op.SourceInfo
                 );
             }
 
@@ -649,9 +640,9 @@ internal sealed class Parser
 
                 if (expr is not IdentifierExpression)
                 {
-                    throw new InvalidOperandException(
+                    ThrowHelper.Throw<InvalidOperandException>(
                         $"The {op.Lexeme} operator can only be applied to identifiers",
-                        op.SourceInfo
+                        in op.SourceInfo
                     );
                 }
 
@@ -684,7 +675,10 @@ internal sealed class Parser
 
                 if (CurrentToken.Type == TokenType.CloseParenthesis)
                 {
-                    ThrowUnexpectedTokenException(null);
+                    ThrowHelper.Throw<UnexpectedTokenException>(
+                        $"Unexpected token found. Expected: expression. Found: {CurrentToken.Type.GetFriendlyName()}. Value: {CurrentToken.Lexeme}",
+                        in CurrentToken.SourceInfo
+                    );
                 }
             }
         }
@@ -715,9 +709,9 @@ internal sealed class Parser
 
         if (namespaceIdentifier is not IdentifierExpression)
         {
-            throw new InvalidOperandException(
+            ThrowHelper.Throw<InvalidOperandException>(
                 $"The {op.Lexeme} operator can only be applied to identifiers",
-                op.SourceInfo
+                in op.SourceInfo
             );
         }
 
@@ -772,7 +766,10 @@ internal sealed class Parser
                 return ParseParenthesis();
 
             default:
-                return ThrowUnexpectedTokenException<Expression>(null);
+                return ThrowHelper.Throw<UnexpectedTokenException, Expression>(
+                    $"Unexpected token found. Found: {CurrentToken.Type.GetFriendlyName()}. Value: {CurrentToken.Lexeme}",
+                    in CurrentToken.SourceInfo
+                );
         }
     }
 

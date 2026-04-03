@@ -1,11 +1,9 @@
-﻿using Raze.Script.Core.Exceptions.ParseExceptions;
+﻿using Raze.Script.Core.Exceptions;
+using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Types;
 using Raze.Script.Core.Runtime.Values;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Runtime.Symbols;
 
@@ -28,7 +26,10 @@ internal sealed class VariableSymbol
     {
         if (type == RuntimeType.Void || type == RuntimeType.Null)
         {
-            ThrowInvalidSymbolDeclarationException(type, in source);
+            ThrowHelper.Throw<InvalidSymbolDeclarationException>(
+                $"Variable cannot have {type} type",
+                in source
+            );
         }
 
         Type = type;
@@ -45,7 +46,10 @@ internal sealed class VariableSymbol
 
         if (isConstant && !IsInitialized)
         {
-            ThrowUninitializedConstantException(in source);
+            ThrowHelper.Throw<UninitializedConstantException>(
+                "Cannot declare a constant without an initializer",
+                in source
+            );
         }
     }
 
@@ -53,7 +57,10 @@ internal sealed class VariableSymbol
     {
         if (!IsInitialized)
         {
-            ThrowUninitializedVariableException(in source);
+            ThrowHelper.Throw<UninitializedVariableException>(
+                "Trying to access variable before its initialization",
+                in source
+            );
         }
 
         return ref _value;
@@ -63,55 +70,21 @@ internal sealed class VariableSymbol
     {
         if (IsConstant)
         {
-            ThrowConstantAssignmentException(in source);
+            ThrowHelper.Throw<ConstantAssignmentException>(
+                "Cannot modify a constant value",
+                in source
+            );
         }
 
         if (!Type.IsCompatibleWith(in newValue))
         {
-            ThrowVariableTypeException(in newValue, in source);
+            ThrowHelper.Throw<VariableTypeException>(
+                $"Trying to assign type {newValue.Type} to variable of type {Type}",
+                in source
+            );
         }
 
         _value = newValue;
         IsInitialized = true;
-    }
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    [DoesNotReturn]
-    [StackTraceHidden]
-    private static void ThrowInvalidSymbolDeclarationException(RuntimeType type, ref readonly SourceInfo source)
-    {
-        throw new InvalidSymbolDeclarationException($"Variable cannot have {type} type", source);
-    }
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    [DoesNotReturn]
-    [StackTraceHidden]
-    private static void ThrowUninitializedConstantException(ref readonly SourceInfo source)
-    {
-        throw new UninitializedConstantException("Cannot declare a constant without an initializer", source);
-    }
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    [DoesNotReturn]
-    [StackTraceHidden]
-    private static void ThrowConstantAssignmentException(ref readonly SourceInfo source)
-    {
-        throw new ConstantAssignmentException("Cannot modify a constant value", source);
-    }
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    [DoesNotReturn]
-    [StackTraceHidden]
-    private void ThrowVariableTypeException(ref readonly RuntimeValue value, ref readonly SourceInfo source)
-    {
-        throw new VariableTypeException($"Trying to assign type {value.Type} to variable of type {Type}", source);
-    }
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    [DoesNotReturn]
-    [StackTraceHidden]
-    private static void ThrowUninitializedVariableException(ref readonly SourceInfo source)
-    {
-        throw new UninitializedVariableException("Trying to access variable before its initialization", source);
     }
 }
