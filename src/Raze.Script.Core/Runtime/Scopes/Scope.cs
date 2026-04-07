@@ -54,7 +54,7 @@ public sealed class Scope
         );
     }
 
-    internal static Scope CreateNamespaceScope(Scope parent)
+    internal static Scope CreateNamespaceScope(Scope? parent)
     {
         return new Scope(parent, ScopePermissions.DeclareConstants, "Namespace");
     }
