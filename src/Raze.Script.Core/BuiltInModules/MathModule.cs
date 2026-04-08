@@ -5,10 +5,11 @@ namespace Raze.Script.Core.BuiltInModules;
 
 internal static class MathModule
 {
+    internal const string Name = "math";
+
     internal static void Build(ModuleBuilder builder)
     {
         builder
-            .HasName("math")
             .HasConstant(constantBuilder =>
             {
                 constantBuilder

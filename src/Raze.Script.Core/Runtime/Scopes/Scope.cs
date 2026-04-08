@@ -118,7 +118,12 @@ public sealed class Scope
         return null;
     }
 
-    internal void DeclareNamespace(string name, NamespaceSymbol namespaceSymbol, ref readonly SourceInfo source)
+    internal void DeclareNamespace(
+        string name,
+        NamespaceSymbol namespaceSymbol,
+        ref readonly SourceInfo source,
+        bool throwIfAlreadyDeclared = true
+    )
     {
         if (!Can(ScopePermissions.DeclareNamespaces))
         {
@@ -130,6 +135,11 @@ public sealed class Scope
 
         if (!_namespaces.TryAdd(name, namespaceSymbol))
         {
+            if (!throwIfAlreadyDeclared)
+            {
+                return;
+            }
+
             ThrowHelper.Throw<RedeclarationException>(
                 $"The namespace {name} is already declared",
                 in source

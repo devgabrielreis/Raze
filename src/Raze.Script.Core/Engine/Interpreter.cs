@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions;
+﻿using Raze.Script.Core.BuiltInModules;
+using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
@@ -59,6 +60,14 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result
     )
     {
+        if (BuiltInModuleManager.HasModule(statement.Identifier))
+        {
+            ThrowHelper.Throw<RedeclarationException>(
+                "Cannot create a namespace with the same name as a default module",
+                in statement.SourceInfo
+            );
+        }
+
         Scope namespaceScope;
 
         if (scope.TryGetNamespace(statement.Identifier) is NamespaceSymbol namespaceSymbol)
@@ -77,6 +86,32 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         {
             EvaluateInternal(stmt, namespaceScope, out _);
         }
+
+        result = RuntimeValue.Void;
+    }
+
+    public void VisitImportStatement(
+        ImportStatement statement,
+        Scope scope,
+        out RuntimeValue result
+    )
+    {
+        var module = BuiltInModuleManager.TryGetModule(statement.ModuleName);
+
+        if (module == null)
+        {
+            ThrowHelper.Throw<UndefinedIdentifierException>(
+                $"The module \"{statement.ModuleName}\" was not found",
+                in statement.SourceInfo
+            );
+        }
+
+        scope.DeclareNamespace(
+            statement.ModuleName,
+            module,
+            in statement.SourceInfo,
+            throwIfAlreadyDeclared: false
+        );
 
         result = RuntimeValue.Void;
     }

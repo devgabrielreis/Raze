@@ -24,6 +24,7 @@ internal sealed class Lexer
         [Keywords.VARIABLE_DECLARATION]  = (ref readonly SourceInfo s) => new Token(TokenType.Var, Keywords.VARIABLE_DECLARATION, in s),
         [Keywords.CONSTANT_DECLARATION]  = (ref readonly SourceInfo s) => new Token(TokenType.Const, Keywords.CONSTANT_DECLARATION, in s),
         [Keywords.NAMESPACE_DECLARATION] = (ref readonly SourceInfo s) => new Token(TokenType.NamespaceDeclaration, Keywords.NAMESPACE_DECLARATION, in s),
+        [Keywords.IMPORT]                = (ref readonly SourceInfo s) => new Token(TokenType.Import, Keywords.IMPORT, in s),
         [Keywords.TRUE_LITERAL]          = (ref readonly SourceInfo s) => new Token(TokenType.BooleanLiteral, Keywords.TRUE_LITERAL, in s),
         [Keywords.FALSE_LITERAL]         = (ref readonly SourceInfo s) => new Token(TokenType.BooleanLiteral, Keywords.FALSE_LITERAL, in s),
         [Keywords.IF]                    = (ref readonly SourceInfo s) => new Token(TokenType.If, Keywords.IF, in s),

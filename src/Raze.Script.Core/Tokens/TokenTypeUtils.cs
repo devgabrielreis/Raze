@@ -29,6 +29,7 @@ internal static class TokenTypeUtils
             TokenType.Identifier => "identifier",
 
             TokenType.NamespaceDeclaration => "namespace declaration keyword",
+            TokenType.Import               => "import keyword",
             TokenType.FunctionDeclaration  => "function declaration keyword",
             TokenType.Return               => "return keyword",
             TokenType.Const                => "constant declaration keyword",

@@ -122,6 +122,7 @@ internal sealed class Parser
         return CurrentToken.Type switch
         {
             TokenType.NamespaceDeclaration => ParseNamespaceDeclaration(),
+            TokenType.Import               => ParseImportStatement(),
             TokenType.Var                  => ParseVariableDeclaration(),
             TokenType.Const                => ParseVariableDeclaration(),
             TokenType.FunctionDeclaration  => ParseFunctionDeclaration(),
@@ -150,6 +151,19 @@ internal sealed class Parser
         var body = ParseCodeBlock();
 
         return new NamespaceDeclarationStatement(identifier, body, in source);
+    }
+
+    private ImportStatement ParseImportStatement()
+    {
+        Expect(TokenType.Import);
+        var source = CurrentToken.SourceInfo;
+        Advance();
+
+        Expect(TokenType.Identifier);
+        var moduleName = CurrentToken.Lexeme;
+        Advance();
+
+        return new ImportStatement(moduleName, in source);
     }
 
     private BreakStatement ParseBreakStatement()

@@ -6,27 +6,13 @@ namespace Raze.Script.Core.Builders;
 
 internal sealed class ModuleBuilder
 {
-    private string? _moduleName;
+    private string _moduleName;
     private Dictionary<string, VariableSymbol> _members;
 
-    internal ModuleBuilder()
+    internal ModuleBuilder(string moduleName)
     {
-        _moduleName = null;
-        _members = [];
-    }
-
-    internal ModuleBuilder HasName(string moduleName)
-    {
-        if (_moduleName != null)
-        {
-            throw new InvalidOperationException(
-                $"Module name is already set to \"{_moduleName}\". It cannot be changed to \"{moduleName}\""
-            );
-        }
-
         _moduleName = moduleName;
-
-        return this;
+        _members = [];
     }
 
     internal ModuleBuilder HasConstant(Action<ConstantBuilder> builderFunction)
@@ -49,11 +35,6 @@ internal sealed class ModuleBuilder
 
     internal NamespaceSymbol Build()
     {
-        if (_moduleName is null)
-        {
-            throw new InvalidOperationException($"Module name must be set by calling \"{nameof(HasName)}()\"");
-        }
-
         var source = new SourceInfo($"{_moduleName} builder");
         var moduleScope = Scope.CreateNamespaceScope(null);
 
