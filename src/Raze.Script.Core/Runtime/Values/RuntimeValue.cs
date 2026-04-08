@@ -1,6 +1,7 @@
 ﻿using Raze.Script.Core.Constants;
 using Raze.Script.Core.Runtime.Types;
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -131,7 +132,7 @@ internal readonly struct RuntimeValue
         return Type.Base switch
         {
             BaseType.Integer      => _integerValue.ToString(),
-            BaseType.Decimal      => _decimalValue.ToString(),
+            BaseType.Decimal      => _decimalValue.ToString(CultureInfo.InvariantCulture),
             BaseType.Boolean      => _boolValue ? Keywords.TRUE_LITERAL : Keywords.FALSE_LITERAL,
             BaseType.String       => $"\"{(string)_refValue!}\"",
             BaseType.UserFunction => Type.ToString(),
