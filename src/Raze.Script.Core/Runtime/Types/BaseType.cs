@@ -9,7 +9,7 @@ public enum BaseType : byte
     String,
     //Array,
     UserFunction,
-    //BuiltInFunction,
+    SystemFunction,
 
     //Object,
 

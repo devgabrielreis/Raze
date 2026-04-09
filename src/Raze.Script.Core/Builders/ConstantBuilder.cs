@@ -74,16 +74,7 @@ internal sealed class ConstantBuilder
             throw new InvalidOperationException($"Constant value is already set to \"{_value}\". It cannot be changed");
         }
 
-        var runtimeValue = value switch
-        {
-            Int128 intValue  => new RuntimeValue(intValue),
-            decimal decValue => new RuntimeValue(decValue),
-            string strValue  => new RuntimeValue(strValue),
-            bool boolValue   => boolValue ? RuntimeValue.True : RuntimeValue.False,
-            _ => throw new InvalidOperationException(
-                "The type of the value must be one of: Int128, decimal, bool, string"
-            )
-        };
+        RuntimeValueUtils.ValueToRuntimeValue(value, out var runtimeValue);
 
         if (!_type!.IsCompatibleWith(in runtimeValue))
         {

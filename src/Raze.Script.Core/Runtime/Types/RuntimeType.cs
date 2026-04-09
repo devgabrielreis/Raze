@@ -50,14 +50,15 @@ internal sealed class RuntimeType
     {
         var typeName = Base switch
         {
-            BaseType.Integer => TypeNames.INTEGER_TYPE_NAME,
-            BaseType.Decimal => TypeNames.DECIMAL_TYPE_NAME,
-            BaseType.Boolean => TypeNames.BOOLEAN_TYPE_NAME,
-            BaseType.String => TypeNames.STRING_TYPE_NAME,
-            BaseType.UserFunction => $"{TypeNames.FUNCTION_TYPE_NAME}<{GetGenericsString()}>",
-            BaseType.Null => TypeNames.NULL_TYPE_NAME,
-            BaseType.Void => TypeNames.VOID_TYPE_NAME,
-            _ => $"<{Base}>"
+            BaseType.Integer        => TypeNames.INTEGER_TYPE_NAME,
+            BaseType.Decimal        => TypeNames.DECIMAL_TYPE_NAME,
+            BaseType.Boolean        => TypeNames.BOOLEAN_TYPE_NAME,
+            BaseType.String         => TypeNames.STRING_TYPE_NAME,
+            BaseType.UserFunction   => $"{TypeNames.FUNCTION_TYPE_NAME}<{GetGenericsString()}>",
+            BaseType.SystemFunction => $"{TypeNames.FUNCTION_TYPE_NAME}<{GetGenericsString()}>",
+            BaseType.Null           => TypeNames.NULL_TYPE_NAME,
+            BaseType.Void           => TypeNames.VOID_TYPE_NAME,
+            _                       => $"<{Base}>"
         };
 
         if (IsNullable && Base != BaseType.Null)

@@ -71,6 +71,19 @@ internal readonly struct RuntimeValue
         _refValue = userFunctionValue;
     }
 
+    internal RuntimeValue(SystemFunctionValue systemFunctionValue)
+    {
+        _integerValue = default;
+        _decimalValue = default;
+        _boolValue = default;
+
+        var generics = systemFunctionValue.Parameters.Select(p => p.Type).ToList();
+        generics.Add(systemFunctionValue.ReturnType);
+
+        Type = TypeFactory.GetType(BaseType.SystemFunction, false, generics.ToArray());
+        _refValue = systemFunctionValue;
+    }
+
     private RuntimeValue(bool boolValue)
     {
         _refValue = null;
@@ -126,19 +139,27 @@ internal readonly struct RuntimeValue
         return (UserFunctionValue)_refValue!;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal SystemFunctionValue AsSystemFunction()
+    {
+        Debug.Assert(Type.Base == BaseType.SystemFunction);
+        return (SystemFunctionValue)_refValue!;
+    }
+
     [MethodImpl(MethodImplOptions.NoInlining)]
     public override string ToString()
     {
         return Type.Base switch
         {
-            BaseType.Integer      => _integerValue.ToString(),
-            BaseType.Decimal      => _decimalValue.ToString(CultureInfo.InvariantCulture),
-            BaseType.Boolean      => _boolValue ? Keywords.TRUE_LITERAL : Keywords.FALSE_LITERAL,
-            BaseType.String       => $"\"{(string)_refValue!}\"",
-            BaseType.UserFunction => Type.ToString(),
-            BaseType.Null         => TypeNames.NULL_TYPE_NAME,
-            BaseType.Void         => TypeNames.VOID_TYPE_NAME,
-            _                     => $"<{Type}>"
+            BaseType.Integer        => _integerValue.ToString(),
+            BaseType.Decimal        => _decimalValue.ToString(CultureInfo.InvariantCulture),
+            BaseType.Boolean        => _boolValue ? Keywords.TRUE_LITERAL : Keywords.FALSE_LITERAL,
+            BaseType.String         => $"\"{(string)_refValue!}\"",
+            BaseType.UserFunction   => Type.ToString(),
+            BaseType.SystemFunction => Type.ToString(),
+            BaseType.Null           => TypeNames.NULL_TYPE_NAME,
+            BaseType.Void           => TypeNames.VOID_TYPE_NAME,
+            _                       => $"<{Type}>"
         };
     }
 }
