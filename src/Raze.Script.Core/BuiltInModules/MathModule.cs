@@ -142,6 +142,120 @@ internal static class MathModule
                             .HasType(TypeBuilder.Decimal);
                     })
                     .HasBody(MaxDecimal);
+            })
+            .HasFunction(functionBuilder =>
+            {
+                functionBuilder
+                    .HasName("minInteger")
+                    .HasReturnType(TypeBuilder.Integer)
+                    .HasParameter(parameterBuilder =>
+                    {
+                        parameterBuilder
+                            .HasName("num1")
+                            .HasType(TypeBuilder.Integer);
+                    })
+                    .HasParameter(parameterBuilder =>
+                    {
+                        parameterBuilder
+                            .HasName("num2")
+                            .HasType(TypeBuilder.Integer);
+                    })
+                    .HasBody(MinInteger);
+            })
+            .HasFunction(functionBuilder =>
+            {
+                functionBuilder
+                    .HasName("minDecimal")
+                    .HasReturnType(TypeBuilder.Decimal)
+                    .HasParameter(parameterBuilder =>
+                    {
+                        parameterBuilder
+                            .HasName("num1")
+                            .HasType(TypeBuilder.Decimal);
+                    })
+                    .HasParameter(parameterBuilder =>
+                    {
+                        parameterBuilder
+                            .HasName("num2")
+                            .HasType(TypeBuilder.Decimal);
+                    })
+                    .HasBody(MinDecimal);
+            })
+            .HasFunction(functionBuilder =>
+            {
+                functionBuilder
+                    .HasName("absInteger")
+                    .HasReturnType(TypeBuilder.Integer)
+                    .HasParameter(parameterBuilder =>
+                    {
+                        parameterBuilder
+                            .HasName("num")
+                            .HasType(TypeBuilder.Integer);
+                    })
+                    .HasBody(AbsInteger);
+            })
+            .HasFunction(functionBuilder =>
+            {
+                functionBuilder
+                    .HasName("absDecimal")
+                    .HasReturnType(TypeBuilder.Decimal)
+                    .HasParameter(parameterBuilder =>
+                    {
+                        parameterBuilder
+                            .HasName("num")
+                            .HasType(TypeBuilder.Decimal);
+                    })
+                    .HasBody(AbsDecimal);
+            })
+            .HasFunction(functionBuilder =>
+            {
+                functionBuilder
+                    .HasName("clampInteger")
+                    .HasReturnType(TypeBuilder.Integer)
+                    .HasParameter(parameterBuilder =>
+                    {
+                        parameterBuilder
+                            .HasName("value")
+                            .HasType(TypeBuilder.Integer);
+                    })
+                    .HasParameter(parameterBuilder =>
+                    {
+                        parameterBuilder
+                            .HasName("min")
+                            .HasType(TypeBuilder.Integer);
+                    })
+                    .HasParameter(parameterBuilder =>
+                    {
+                        parameterBuilder
+                            .HasName("max")
+                            .HasType(TypeBuilder.Integer);
+                    })
+                    .HasBody(ClampInteger);
+            })
+            .HasFunction(functionBuilder =>
+            {
+                functionBuilder
+                    .HasName("clampDecimal")
+                    .HasReturnType(TypeBuilder.Decimal)
+                    .HasParameter(parameterBuilder =>
+                    {
+                        parameterBuilder
+                            .HasName("value")
+                            .HasType(TypeBuilder.Decimal);
+                    })
+                    .HasParameter(parameterBuilder =>
+                    {
+                        parameterBuilder
+                            .HasName("min")
+                            .HasType(TypeBuilder.Decimal);
+                    })
+                    .HasParameter(parameterBuilder =>
+                    {
+                        parameterBuilder
+                            .HasName("max")
+                            .HasType(TypeBuilder.Decimal);
+                    })
+                    .HasBody(ClampDecimal);
             });
     }
 
@@ -197,6 +311,79 @@ internal static class MathModule
         var num2 = (decimal)parameters.Get("num2")!;
 
         decimal result = (num1 > num2) ? num1 : num2;
+
+        return RazeFunctionReturnValue.FromValue(result);
+    }
+
+    private static RazeFunctionReturnValue MinInteger(RazeFunctionParameters parameters)
+    {
+        var num1 = (Int128)parameters.Get("num1")!;
+        var num2 = (Int128)parameters.Get("num2")!;
+
+        Int128 result = (num1 < num2) ? num1 : num2;
+
+        return RazeFunctionReturnValue.FromValue(result);
+    }
+
+    private static RazeFunctionReturnValue MinDecimal(RazeFunctionParameters parameters)
+    {
+        var num1 = (decimal)parameters.Get("num1")!;
+        var num2 = (decimal)parameters.Get("num2")!;
+
+        decimal result = (num1 < num2) ? num1 : num2;
+
+        return RazeFunctionReturnValue.FromValue(result);
+    }
+
+    private static RazeFunctionReturnValue AbsInteger(RazeFunctionParameters parameters)
+    {
+        var num = (Int128)parameters.Get("num")!;
+
+        var result = (num < 0) ? (num * -1) : num;
+
+        return RazeFunctionReturnValue.FromValue(result);
+    }
+
+    private static RazeFunctionReturnValue AbsDecimal(RazeFunctionParameters parameters)
+    {
+        var num = (decimal)parameters.Get("num")!;
+
+        decimal result = (decimal)Math.Abs(num);
+
+        return RazeFunctionReturnValue.FromValue(result);
+    }
+
+    private static RazeFunctionReturnValue ClampInteger(RazeFunctionParameters parameters)
+    {
+        var value = (Int128)parameters.Get("value")!;
+        var min = (Int128)parameters.Get("min")!;
+        var max = (Int128)parameters.Get("max")!;
+
+        Int128 result;
+
+        if (value < min)
+        {
+            result = min;
+        }
+        else if (value > max)
+        {
+            result = max;
+        }
+        else
+        {
+            result = value;
+        }
+
+        return RazeFunctionReturnValue.FromValue(result);
+    }
+
+    private static RazeFunctionReturnValue ClampDecimal(RazeFunctionParameters parameters)
+    {
+        var value = (decimal)parameters.Get("value")!;
+        var min = (decimal)parameters.Get("min")!;
+        var max = (decimal)parameters.Get("max")!;
+
+        decimal result =  Math.Clamp(value, min, max);
 
         return RazeFunctionReturnValue.FromValue(result);
     }
