@@ -164,7 +164,7 @@ internal readonly struct RuntimeValue
         return Type.Base switch
         {
             BaseType.Integer        => _integerValue.ToString(),
-            BaseType.Decimal        => _decimalValue.ToString(CultureInfo.InvariantCulture),
+            BaseType.Decimal        => GetDecimalString(),
             BaseType.Boolean        => _boolValue ? Keywords.TRUE_LITERAL : Keywords.FALSE_LITERAL,
             BaseType.String         => $"\"{(string)_refValue!}\"",
             BaseType.UserFunction   => Type.ToString(),
@@ -173,5 +173,19 @@ internal readonly struct RuntimeValue
             BaseType.Void           => TypeNames.VOID_TYPE_NAME,
             _                       => $"<{Type}>"
         };
+    }
+
+    private string GetDecimalString()
+    {
+        Debug.Assert(Type == RuntimeType.Decimal);
+
+        var decimalStr = _decimalValue.ToString(CultureInfo.InvariantCulture);
+
+        if (!decimalStr.Contains('.'))
+        {
+            decimalStr += ".0";
+        }
+
+        return decimalStr;
     }
 }
