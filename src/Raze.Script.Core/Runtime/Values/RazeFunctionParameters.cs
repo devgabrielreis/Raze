@@ -11,7 +11,7 @@ internal sealed class RazeFunctionParameters
         _parameters = [];
     }
 
-    internal void Add(string name, object value)
+    internal void Add(string name, object? value)
     {
         if (!_parameters.TryAdd(name, value))
         {

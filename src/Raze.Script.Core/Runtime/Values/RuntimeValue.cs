@@ -104,6 +104,18 @@ internal readonly struct RuntimeValue
         Type = type;
     }
 
+    internal object? AsObject()
+    {
+        return Type.Base switch
+        {
+            BaseType.Integer => AsInteger(),
+            BaseType.Decimal => AsDecimal(),
+            BaseType.Boolean => AsBoolean(),
+            BaseType.String  => AsString(),
+            _                => _refValue
+        };
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal Int128 AsInteger()
     {

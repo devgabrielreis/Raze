@@ -186,90 +186,22 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     {
         EvaluateInternal(callExpression.Caller, scope, out var value);
 
-        if (value.Type.Base != BaseType.UserFunction)
+        switch (value.Type.Base)
         {
-            ThrowHelper.Throw<InvalidCallExpressionException>(
-                $"Cannot call {value.Type}", in callExpression.SourceInfo
-            );
-        }
-
-        var function = value.AsUserFunction();
-
-        var parameters = function.Parameters;
-        int minExpectedArguments = parameters.Count(p => !p.HasDefaultValue());
-
-        if (callExpression.ArgumentList.Count < minExpectedArguments || callExpression.ArgumentList.Count > parameters.Count)
-        {
-            string message = minExpectedArguments == parameters.Count
-                                ? $"Function expects {parameters.Count} arguments, but {callExpression.ArgumentList.Count} were given"
-                                : $"Function expects between {minExpectedArguments} and {parameters.Count} arguments, but {callExpression.ArgumentList.Count} were given";
-
-            ThrowHelper.Throw<InvalidParameterListException>(
-                message, in callExpression.SourceInfo
-            );
-        }
-
-        var functionScope = Scope.CreateLocalScope(function.Scope);
-
-        for (int i = 0; i < function.Parameters.Count; i++)
-        {
-            RuntimeValue argumentValue;
-            SourceInfo argumentSource;
-
-            if (i < callExpression.ArgumentList.Count)
-            {
-                EvaluateInternal(callExpression.ArgumentList[i], scope, out argumentValue);
-                argumentSource = callExpression.ArgumentList[i].SourceInfo;
-            }
-            else
-            {
-                EvaluateInternal(function.Parameters[i].DefaultValue!, function.Scope, out argumentValue);
-                argumentSource = function.Parameters[i].SourceInfo;
-            }
-
-            if (!function.Parameters[i].Type.IsCompatibleWith(in argumentValue))
-            {
-                ThrowHelper.Throw<InvalidParameterListException>(
-                    $"Parameter {function.Parameters[i].Identifier} expects type {function.Parameters[i].Type}, but {argumentValue.Type} was given",
-                    in argumentSource
+            case BaseType.UserFunction:
+                CallUserFunction(callExpression, value.AsUserFunction(), scope, out result);
+                break;
+            case BaseType.SystemFunction:
+                CallSystemFunction(callExpression, value.AsSystemFunction(), scope, out result);
+                break;
+            default:
+                ThrowHelper.Throw<InvalidCallExpressionException, RuntimeValue>(
+                    $"Cannot call {value.Type}",
+                    in callExpression.SourceInfo,
+                    out result
                 );
-            }
-
-            var variable = new VariableSymbol(argumentValue, function.Parameters[i].Type, function.Parameters[i].IsConstant, ref argumentSource);
-
-            functionScope.DeclareVariable(function.Parameters[i].Identifier, variable, in argumentSource);
+                break;
         }
-
-        RuntimeValue returnedValue = RuntimeValue.Void;
-        SourceInfo returnedValueSource;
-
-        _executionContext.EnterFunction();
-
-        EvaluateInternal(function.Body, functionScope, out _);
-        returnedValueSource = function.Body.SourceInfo;
-
-        if (_executionContext.HasPending(ContextSignal.Return))
-        {
-            _executionContext.ConsumeReturn(out var returnedSignal);
-
-            if (returnedSignal != null)
-            {
-                returnedValue = returnedSignal.Value.Value;
-                returnedValueSource = returnedSignal.Value.Source;
-            }
-        }
-
-        _executionContext.ExitFunction(in returnedValueSource);
-
-        if (!function.ReturnType.IsCompatibleWith(in returnedValue))
-        {
-            ThrowHelper.Throw<UnexpectedReturnType>(
-                $"Function was expected to return {function.ReturnType} but {returnedValue.Type} was returned",
-                in returnedValueSource
-            );
-        }
-
-        result = returnedValue;
     }
 
     public void VisitAssignmentStatement(
@@ -578,5 +510,149 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         }
 
         return conditionResult.AsBoolean();
+    }
+
+    private void CallUserFunction(
+        CallExpression callExpression,
+        UserFunctionValue userFunction,
+        Scope scope,
+        out RuntimeValue result
+    )
+    {
+        var parameters = userFunction.Parameters;
+        ValidateFunctionParameter(callExpression, parameters);
+
+        var functionScope = Scope.CreateLocalScope(userFunction.Scope);
+
+        for (int i = 0; i < userFunction.Parameters.Count; i++)
+        {
+            RuntimeValue argumentValue;
+            SourceInfo argumentSource;
+
+            if (i < callExpression.ArgumentList.Count)
+            {
+                EvaluateInternal(callExpression.ArgumentList[i], scope, out argumentValue);
+                argumentSource = callExpression.ArgumentList[i].SourceInfo;
+            }
+            else
+            {
+                EvaluateInternal(userFunction.Parameters[i].DefaultValue!, userFunction.Scope, out argumentValue);
+                argumentSource = userFunction.Parameters[i].SourceInfo;
+            }
+
+            if (!userFunction.Parameters[i].Type.IsCompatibleWith(in argumentValue))
+            {
+                ThrowHelper.Throw<InvalidParameterListException>(
+                    $"Parameter {userFunction.Parameters[i].Identifier} expects type {userFunction.Parameters[i].Type}, but {argumentValue.Type} was given",
+                    in argumentSource
+                );
+            }
+
+            var variable = new VariableSymbol(argumentValue, userFunction.Parameters[i].Type, userFunction.Parameters[i].IsConstant, ref argumentSource);
+
+            functionScope.DeclareVariable(userFunction.Parameters[i].Identifier, variable, in argumentSource);
+        }
+
+        RuntimeValue returnedValue = RuntimeValue.Void;
+        SourceInfo returnedValueSource;
+
+        _executionContext.EnterFunction();
+
+        EvaluateInternal(userFunction.Body, functionScope, out _);
+        returnedValueSource = userFunction.Body.SourceInfo;
+
+        if (_executionContext.HasPending(ContextSignal.Return))
+        {
+            _executionContext.ConsumeReturn(out var returnedSignal);
+
+            if (returnedSignal != null)
+            {
+                returnedValue = returnedSignal.Value.Value;
+                returnedValueSource = returnedSignal.Value.Source;
+            }
+        }
+
+        _executionContext.ExitFunction(in returnedValueSource);
+
+        if (!userFunction.ReturnType.IsCompatibleWith(in returnedValue))
+        {
+            ThrowHelper.Throw<UnexpectedReturnType>(
+                $"Function was expected to return {userFunction.ReturnType} but {returnedValue.Type} was returned",
+                in returnedValueSource
+            );
+        }
+
+        result = returnedValue;
+    }
+
+    private void CallSystemFunction(
+        CallExpression callExpression,
+        SystemFunctionValue systemFunction,
+        Scope scope,
+        out RuntimeValue result
+    )
+    {
+        var parameters = systemFunction.Parameters;
+        ValidateFunctionParameter(callExpression, parameters);
+
+        var functionParameters = new RazeFunctionParameters();
+
+        for (int i = 0; i < systemFunction.Parameters.Count; i++)
+        {
+            RuntimeValue argumentValue;
+            SourceInfo argumentSource;
+
+            if (i < callExpression.ArgumentList.Count)
+            {
+                EvaluateInternal(callExpression.ArgumentList[i], scope, out argumentValue);
+                argumentSource = callExpression.ArgumentList[i].SourceInfo;
+            }
+            else
+            {
+                EvaluateInternal(systemFunction.Parameters[i].DefaultValue!, scope, out argumentValue);
+                argumentSource = callExpression.SourceInfo;
+            }
+
+            if (!systemFunction.Parameters[i].Type.IsCompatibleWith(in argumentValue))
+            {
+                ThrowHelper.Throw<InvalidParameterListException>(
+                    $"Parameter {systemFunction.Parameters[i].Identifier} expects type {systemFunction.Parameters[i].Type}, but {argumentValue.Type} was given",
+                    in argumentSource
+                );
+            }
+
+            functionParameters.Add(systemFunction.Parameters[i].Identifier, argumentValue.AsObject());
+        }
+
+        var returnValueWrapper = systemFunction.Body(functionParameters);
+
+        if (!systemFunction.ReturnType.IsCompatibleWith(in returnValueWrapper.Value))
+        {
+            ThrowHelper.Throw<UnexpectedReturnType>(
+                $"Function was expected to return {systemFunction.ReturnType} but {returnValueWrapper.Value.Type} was returned",
+                in callExpression.SourceInfo
+            );
+        }
+
+        result = returnValueWrapper.Value;
+    }
+
+    private static void ValidateFunctionParameter(
+        CallExpression callExpression,
+        IReadOnlyList<ParameterSymbol> functionParameters
+    )
+    {
+        int minExpectedArguments = functionParameters.Count(p => !p.HasDefaultValue());
+
+        if (callExpression.ArgumentList.Count < minExpectedArguments || callExpression.ArgumentList.Count > functionParameters.Count)
+        {
+            string message = minExpectedArguments == functionParameters.Count
+                                ? $"Function expects {functionParameters.Count} arguments, but {callExpression.ArgumentList.Count} were given"
+                                : $"Function expects between {minExpectedArguments} and {functionParameters.Count} arguments, but {callExpression.ArgumentList.Count} were given";
+
+            ThrowHelper.Throw<InvalidParameterListException>(
+                message, in callExpression.SourceInfo
+            );
+        }
     }
 }
