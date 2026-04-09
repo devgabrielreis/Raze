@@ -24,7 +24,7 @@
             <Keywords name="Folders in comment, open"></Keywords>
             <Keywords name="Folders in comment, middle"></Keywords>
             <Keywords name="Folders in comment, close"></Keywords>
-            <Keywords name="Keywords1">def var const namespace</Keywords>
+            <Keywords name="Keywords1">def var const namespace import</Keywords>
             <Keywords name="Keywords2">integer boolean function decimal string void</Keywords>
             <Keywords name="Keywords3">return if while for else break continue</Keywords>
             <Keywords name="Keywords4"></Keywords>
