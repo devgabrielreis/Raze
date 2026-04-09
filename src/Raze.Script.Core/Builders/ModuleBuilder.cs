@@ -34,6 +34,24 @@ internal sealed class ModuleBuilder
         return this;
     }
 
+    internal ModuleBuilder HasFunction(Action<SystemFunctionBuilder> builderFunction)
+    {
+        var functionBuilder = new SystemFunctionBuilder();
+
+        builderFunction(functionBuilder);
+
+        var function = functionBuilder.Build();
+
+        if (!_members.TryAdd(functionBuilder.FunctionName, function))
+        {
+            ThrowHelper.ThrowInvalidOperationException(
+                $"A member with the name \"{functionBuilder.FunctionName}\" has already been defined in this module"
+            );
+        }
+
+        return this;
+    }
+
     internal NamespaceSymbol Build()
     {
         var source = new SourceInfo($"{_moduleName} builder");

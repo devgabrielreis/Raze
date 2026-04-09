@@ -1,5 +1,6 @@
 ﻿using Raze.Script.Core.Builders;
 using Raze.Script.Core.Builders.Types;
+using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Script.Core.BuiltInModules;
 
@@ -51,6 +52,28 @@ internal static class MathModule
                     .HasName("MIN_DECIMAL")
                     .HasType(TypeBuilder.Decimal)
                     .HasValue(decimal.MinValue);
+            })
+            .HasFunction(functionBuilder =>
+            {
+                functionBuilder
+                    .HasName("integerToDecimal")
+                    .HasReturnType(TypeBuilder.Decimal)
+                    .HasParameter(parameterBuilder =>
+                    {
+                        parameterBuilder
+                            .HasName("num")
+                            .HasType(TypeBuilder.Integer);
+                    })
+                    .HasBody(IntegerToDecimal);
             });
+    }
+
+    private static RazeFunctionReturnValue IntegerToDecimal(RazeFunctionParameters parameters)
+    {
+        var num = (Int128)parameters.Get("num")!;
+
+        decimal result = (decimal)num;
+
+        return RazeFunctionReturnValue.FromValue(result);
     }
 }
