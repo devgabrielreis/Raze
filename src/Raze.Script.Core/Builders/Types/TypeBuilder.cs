@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Runtime.Types;
+﻿using Raze.Script.Core.Exceptions;
+using Raze.Script.Core.Runtime.Types;
 
 namespace Raze.Script.Core.Builders.Types;
 
@@ -22,7 +23,7 @@ internal abstract class TypeBuilder
 
         if (blueprint.BaseType == null)
         {
-            throw new InvalidOperationException("The primitive type was not set");
+            ThrowHelper.ThrowInvalidOperationException("The primitive type was not set");
         }
 
         return TypeFactory.GetType(blueprint.BaseType.Value, blueprint.IsNullable);

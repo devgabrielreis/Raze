@@ -1,4 +1,6 @@
-﻿namespace Raze.Script.Core.Runtime.Values;
+﻿using Raze.Script.Core.Exceptions;
+
+namespace Raze.Script.Core.Runtime.Values;
 
 internal static class RuntimeValueUtils
 {
@@ -10,7 +12,7 @@ internal static class RuntimeValueUtils
             decimal decValue => new RuntimeValue(decValue),
             string strValue  => new RuntimeValue(strValue),
             bool boolValue   => boolValue ? RuntimeValue.True : RuntimeValue.False,
-            _ => throw new InvalidOperationException(
+            _ => ThrowHelper.ThrowInvalidOperationException<RuntimeValue>(
                 "The type of the value must be one of: Int128, decimal, bool, string"
             )
         };

@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Runtime.Types;
+﻿using Raze.Script.Core.Exceptions;
+using Raze.Script.Core.Runtime.Types;
 using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Script.Core.Result;
@@ -34,7 +35,7 @@ public sealed class RazeSuccess : RazeResult
     {
         if (ValueType != BaseType.Integer)
         {
-            throw new InvalidOperationException("This value is not an integer");
+            ThrowHelper.ThrowInvalidOperationException("This value is not an integer");
         }
         return (Int128)_value!;
     }
@@ -43,7 +44,7 @@ public sealed class RazeSuccess : RazeResult
     {
         if (ValueType != BaseType.Decimal)
         {
-            throw new InvalidOperationException("This value is not a decimal");
+            ThrowHelper.ThrowInvalidOperationException("This value is not a decimal");
         }
         return (decimal)_value!;
     }
@@ -52,7 +53,7 @@ public sealed class RazeSuccess : RazeResult
     {
         if (ValueType != BaseType.Boolean)
         {
-            throw new InvalidOperationException("This value is not a boolean");
+            ThrowHelper.ThrowInvalidOperationException("This value is not a boolean");
         }
         return (bool)_value!;
     }
@@ -61,7 +62,7 @@ public sealed class RazeSuccess : RazeResult
     {
         if (ValueType != BaseType.String)
         {
-            throw new InvalidOperationException("This value is not a string");
+            ThrowHelper.ThrowInvalidOperationException("This value is not a string");
         }
         return (string)_value!;
     }

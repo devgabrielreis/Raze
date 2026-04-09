@@ -1,4 +1,6 @@
-﻿namespace Raze.Script.Core.Runtime.Values;
+﻿using Raze.Script.Core.Exceptions;
+
+namespace Raze.Script.Core.Runtime.Values;
 
 internal sealed class RazeFunctionParameters
 {
@@ -13,7 +15,7 @@ internal sealed class RazeFunctionParameters
     {
         if (!_parameters.TryAdd(name, value))
         {
-            throw new InvalidOperationException($"Parameter \"{name}\" was already added");
+            ThrowHelper.ThrowInvalidOperationException($"Parameter \"{name}\" was already added");
         }
     }
 
@@ -21,7 +23,7 @@ internal sealed class RazeFunctionParameters
     {
         if (!_parameters.TryGetValue(name, out var value))
         {
-            throw new InvalidOperationException($"Parameter \"{name}\" was not found");
+            ThrowHelper.ThrowInvalidOperationException($"Parameter \"{name}\" was not found");
         }
 
         return value;

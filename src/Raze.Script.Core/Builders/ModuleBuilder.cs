@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Metadata;
+﻿using Raze.Script.Core.Exceptions;
+using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Scopes;
 using Raze.Script.Core.Runtime.Symbols;
 
@@ -25,7 +26,7 @@ internal sealed class ModuleBuilder
 
         if (!_members.TryAdd(constantBuilder.ConstantName, constant))
         {
-            throw new InvalidOperationException(
+            ThrowHelper.ThrowInvalidOperationException(
                 $"A member with the name \"{constantBuilder.ConstantName}\" has already been defined in this module"
             );
         }

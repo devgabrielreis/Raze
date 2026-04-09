@@ -1,4 +1,5 @@
 ﻿using Raze.Script.Core.Builders.Types;
+using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Symbols;
 using Raze.Script.Core.Runtime.Types;
@@ -13,7 +14,7 @@ internal sealed class ConstantBuilder
         {
             if (_constantName == null)
             {
-                throw new InvalidOperationException(
+                ThrowHelper.ThrowInvalidOperationException(
                     $"Constant name must be set by calling \"{nameof(HasName)}()\""
                 );
             }
@@ -36,7 +37,7 @@ internal sealed class ConstantBuilder
     {
         if (_type != null)
         {
-            throw new InvalidOperationException(
+            ThrowHelper.ThrowInvalidOperationException(
                 $"Constant type is already set to \"{_type}\". It cannot be changed"
             );
         }
@@ -50,7 +51,7 @@ internal sealed class ConstantBuilder
     {
         if (_constantName != null)
         {
-            throw new InvalidOperationException(
+            ThrowHelper.ThrowInvalidOperationException(
                 $"Constant name is already set to \"{_constantName}\". It cannot be changed to \"{constantName}\""
             );
         }
@@ -64,21 +65,21 @@ internal sealed class ConstantBuilder
     {
         if (_type == null)
         {
-            throw new InvalidOperationException(
+            ThrowHelper.ThrowInvalidOperationException(
                 $"Constant type must be set by calling \"{nameof(HasType)}()\""
             );
         }
 
         if (_value != null)
         {
-            throw new InvalidOperationException($"Constant value is already set to \"{_value}\". It cannot be changed");
+            ThrowHelper.ThrowInvalidOperationException($"Constant value is already set to \"{_value}\". It cannot be changed");
         }
 
         RuntimeValueUtils.ValueToRuntimeValue(value, out var runtimeValue);
 
         if (!_type!.IsCompatibleWith(in runtimeValue))
         {
-            throw new InvalidOperationException("The value is not compatible with the constant type");
+            ThrowHelper.ThrowInvalidOperationException("The value is not compatible with the constant type");
         }
 
         _value = runtimeValue;
@@ -90,19 +91,19 @@ internal sealed class ConstantBuilder
     {
         if (_type == null)
         {
-            throw new InvalidOperationException(
+            ThrowHelper.ThrowInvalidOperationException(
                 $"Constant type must be set by calling \"{nameof(HasType)}()\""
             );
         }
 
         if (_value != null)
         {
-            throw new InvalidOperationException($"Constant value is already set to \"{_value}\". It cannot be changed");
+            ThrowHelper.ThrowInvalidOperationException($"Constant value is already set to \"{_value}\". It cannot be changed");
         }
 
         if (!_type!.IsCompatibleWith(in RuntimeValue.Null))
         {
-            throw new InvalidOperationException("The value is not compatible with the constant type");
+            ThrowHelper.ThrowInvalidOperationException("The value is not compatible with the constant type");
         }
 
         _value = RuntimeValue.Null;
@@ -114,21 +115,21 @@ internal sealed class ConstantBuilder
     {
         if (_type == null)
         {
-            throw new InvalidOperationException(
+            ThrowHelper.ThrowInvalidOperationException(
                 $"Constant type must be set by calling \"{nameof(HasType)}()\""
             );
         }
 
         if (_constantName == null)
         {
-            throw new InvalidOperationException(
+            ThrowHelper.ThrowInvalidOperationException(
                 $"Constant name must be set by calling \"{nameof(HasName)}()\""
             );
         }
 
         if (_value == null)
         {
-            throw new InvalidOperationException(
+            ThrowHelper.ThrowInvalidOperationException(
                 $"Constant value must be set by calling either \"{nameof(HasValue)}()\" or \"{nameof(HasNullValue)}()\""
             );
         }

@@ -1,6 +1,5 @@
 ﻿using Raze.Script.Core.Constants;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
+using Raze.Script.Core.Exceptions;
 using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Tokens;
@@ -17,7 +16,9 @@ internal static class TokenTypeUtils
             TokenType.MultiplicationAssignment => Operators.MULTIPLICATION,
             TokenType.DivisionAssignment       => Operators.DIVISION,
             TokenType.ModuloAssignment         => Operators.MODULO,
-            _ => ThrowArgumentOutOfRangeException<string>(type)
+            _ => ThrowHelper.ThrowArgumentOutOfRangeException<string>(
+                $"The method \"{nameof(GetCompoundAssignmentTokenOperator)}\" does not support this token: {type}"
+            )
         };
     }
 
@@ -93,15 +94,9 @@ internal static class TokenTypeUtils
             TokenType.OpenParenthesis  => "opening parenthesis",
             TokenType.CloseParenthesis => "closing parenthesis",
 
-            _ => ThrowArgumentOutOfRangeException<string>(type)
+            _ => ThrowHelper.ThrowArgumentOutOfRangeException<string>(
+                $"The method \"{nameof(GetFriendlyName)}\" does not support this token: {type}"
+            )
         };
-    }
-
-    [DoesNotReturn]
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    [StackTraceHidden]
-    private static T ThrowArgumentOutOfRangeException<T>(TokenType unexpectedToken)
-    {
-        throw new ArgumentOutOfRangeException($"The method does not support this token: {unexpectedToken}");
     }
 }
