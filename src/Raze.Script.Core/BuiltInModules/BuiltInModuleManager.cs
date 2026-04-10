@@ -13,23 +13,26 @@ internal static class BuiltInModuleManager
 
     internal static NamespaceSymbol? TryGetModule(string name)
     {
-        if (_loadedModules.TryGetValue(name, out var loadedModule))
+        lock (_loadedModules)
         {
-            return loadedModule;
+            if (_loadedModules.TryGetValue(name, out var loadedModule))
+            {
+                return loadedModule;
+            }
+
+            if (_moduleBuilderFunctions.TryGetValue(name, out var moduleBuilderFunction))
+            {
+                var moduleBuilder = new ModuleBuilder(name);
+                moduleBuilderFunction(moduleBuilder);
+
+                var builtModule = moduleBuilder.Build();
+                _loadedModules.Add(name, builtModule);
+
+                return builtModule;
+            }
+
+            return null;
         }
-
-        if (_moduleBuilderFunctions.TryGetValue(name, out var moduleBuilderFunction))
-        {
-            var moduleBuilder = new ModuleBuilder(name);
-            moduleBuilderFunction(moduleBuilder);
-
-            var builtModule = moduleBuilder.Build();
-            _loadedModules.Add(name, builtModule);
-
-            return builtModule;
-        }
-
-        return null;
     }
 
     internal static bool HasModule(string name)
