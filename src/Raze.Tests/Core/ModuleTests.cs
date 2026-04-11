@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.RuntimeExceptions;
+﻿using Raze.Script.Core.Builders;
+using Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 namespace Raze.Tests.Core;
 
@@ -51,5 +52,21 @@ public class ModuleTests
         """;
 
         RazeAssert.ReturnsError<ScopeDeclarationException>(script);
+    }
+
+    [Theory]
+    [InlineData("math")]
+    public void Evaluate_CustomModuleWithSameNameAsBuiltInModule_ThrowsRedeclarationException(string builtInName)
+    {
+        var customModules = new Dictionary<string, Action<ModuleBuilder>>()
+        {
+            [builtInName] = moduleBuilder => { }
+        };
+
+        string script = $$"""
+            import {{builtInName}}
+        """;
+
+        RazeAssert.ReturnsError<RedeclarationException>(script, customModules: customModules);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Raze.Script.Core;
+using Raze.Script.Core.Builders;
 using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Result;
 using Raze.Script.Core.Runtime.Scopes;
@@ -12,10 +13,11 @@ internal class RazeAssert
         string script,
         Int128 expected,
         Scope? scope = null,
-        string context = "Raze.Tests"
+        string context = "Raze.Tests",
+        Dictionary<string, Action<ModuleBuilder>>? customModules = null
     )
     {
-        var result = RazeScript.Evaluate(script, context, scope);
+        var result = RazeScript.Evaluate(script, context, scope, customModules);
 
         var success = Assert.IsType<RazeSuccess>(result);
         Assert.Equal(BaseType.Integer, success.ValueType);
@@ -26,10 +28,11 @@ internal class RazeAssert
         string script,
         decimal expected,
         Scope? scope = null,
-        string context = "Raze.Tests"
+        string context = "Raze.Tests",
+        Dictionary<string, Action<ModuleBuilder>>? customModules = null
     )
     {
-        var result = RazeScript.Evaluate(script, context, scope);
+        var result = RazeScript.Evaluate(script, context, scope, customModules);
 
         var success = Assert.IsType<RazeSuccess>(result);
         Assert.Equal(BaseType.Decimal, success.ValueType);
@@ -40,10 +43,11 @@ internal class RazeAssert
         string script,
         bool expected,
         Scope? scope = null,
-        string context = "Raze.Tests"
+        string context = "Raze.Tests",
+        Dictionary<string, Action<ModuleBuilder>>? customModules = null
     )
     {
-        var result = RazeScript.Evaluate(script, context, scope);
+        var result = RazeScript.Evaluate(script, context, scope, customModules);
 
         var success = Assert.IsType<RazeSuccess>(result);
         Assert.Equal(BaseType.Boolean, success.ValueType);
@@ -54,10 +58,11 @@ internal class RazeAssert
         string script,
         string expected,
         Scope? scope = null,
-        string context = "Raze.Tests"
+        string context = "Raze.Tests",
+        Dictionary<string, Action<ModuleBuilder>>? customModules = null
     )
     {
-        var result = RazeScript.Evaluate(script, context, scope);
+        var result = RazeScript.Evaluate(script, context, scope, customModules);
 
         var success = Assert.IsType<RazeSuccess>(result);
         Assert.Equal(BaseType.String, success.ValueType);
@@ -67,10 +72,11 @@ internal class RazeAssert
     internal static void EvaluatesToNull(
         string script,
         Scope? scope = null,
-        string context = "Raze.Tests"
+        string context = "Raze.Tests",
+        Dictionary<string, Action<ModuleBuilder>>? customModules = null
     )
     {
-        var result = RazeScript.Evaluate(script, context, scope);
+        var result = RazeScript.Evaluate(script, context, scope, customModules);
 
         var success = Assert.IsType<RazeSuccess>(result);
         Assert.Equal(BaseType.Null, success.ValueType);
@@ -79,10 +85,11 @@ internal class RazeAssert
     internal static void EvaluatesToVoid(
         string script,
         Scope? scope = null,
-        string context = "Raze.Tests"
+        string context = "Raze.Tests",
+        Dictionary<string, Action<ModuleBuilder>>? customModules = null
     )
     {
-        var result = RazeScript.Evaluate(script, context, scope);
+        var result = RazeScript.Evaluate(script, context, scope, customModules);
 
         var success = Assert.IsType<RazeSuccess>(result);
         Assert.Equal(BaseType.Void, success.ValueType);
@@ -91,10 +98,11 @@ internal class RazeAssert
     internal static void ReturnsError<T>(
         string script,
         Scope? scope = null,
-        string context = "Raze.Tests"
+        string context = "Raze.Tests",
+        Dictionary<string, Action<ModuleBuilder>>? customModules = null
     ) where T: RazeException
     {
-        var result = RazeScript.Evaluate(script, context, scope);
+        var result = RazeScript.Evaluate(script, context, scope, customModules);
 
         var error = Assert.IsType<RazeError>(result);
         Assert.IsType<T>(error.Error);
