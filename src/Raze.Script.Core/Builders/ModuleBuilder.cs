@@ -5,7 +5,7 @@ using Raze.Script.Core.Runtime.Symbols;
 
 namespace Raze.Script.Core.Builders;
 
-internal sealed class ModuleBuilder
+public sealed class ModuleBuilder
 {
     private string _moduleName;
     private Dictionary<string, VariableSymbol> _members;
@@ -16,7 +16,7 @@ internal sealed class ModuleBuilder
         _members = [];
     }
 
-    internal ModuleBuilder HasConstant(Action<ConstantBuilder> builderFunction)
+    public ModuleBuilder HasConstant(Action<ConstantBuilder> builderFunction)
     {
         var constantBuilder = new ConstantBuilder();
 
@@ -34,7 +34,7 @@ internal sealed class ModuleBuilder
         return this;
     }
 
-    internal ModuleBuilder HasFunction(Action<SystemFunctionBuilder> builderFunction)
+    public ModuleBuilder HasFunction(Action<SystemFunctionBuilder> builderFunction)
     {
         var functionBuilder = new SystemFunctionBuilder();
 

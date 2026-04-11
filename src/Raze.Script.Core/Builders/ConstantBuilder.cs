@@ -7,7 +7,7 @@ using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Script.Core.Builders;
 
-internal sealed class ConstantBuilder
+public sealed class ConstantBuilder
 {
     internal string ConstantName {
         get
@@ -33,7 +33,7 @@ internal sealed class ConstantBuilder
         _value = null;
     }
 
-    internal ConstantBuilder HasType(TypeBuilder typeBuilder)
+    public ConstantBuilder HasType(TypeBuilder typeBuilder)
     {
         if (_type != null)
         {
@@ -47,7 +47,7 @@ internal sealed class ConstantBuilder
         return this;
     }
 
-    internal ConstantBuilder HasName(string constantName)
+    public ConstantBuilder HasName(string constantName)
     {
         if (_constantName != null)
         {
@@ -61,7 +61,7 @@ internal sealed class ConstantBuilder
         return this;
     }
 
-    internal ConstantBuilder HasValue<T>(T value)
+    public ConstantBuilder HasValue<T>(T value)
     {
         if (_type == null)
         {
@@ -87,7 +87,7 @@ internal sealed class ConstantBuilder
         return this;
     }
 
-    internal ConstantBuilder HasNullValue()
+    public ConstantBuilder HasNullValue()
     {
         if (_type == null)
         {

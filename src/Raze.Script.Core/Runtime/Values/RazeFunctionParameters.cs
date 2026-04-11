@@ -2,7 +2,7 @@
 
 namespace Raze.Script.Core.Runtime.Values;
 
-internal sealed class RazeFunctionParameters
+public sealed class RazeFunctionParameters
 {
     private readonly Dictionary<string, object?> _parameters;
 
@@ -19,7 +19,7 @@ internal sealed class RazeFunctionParameters
         }
     }
 
-    internal object? Get(string name)
+    public object? Get(string name)
     {
         if (!_parameters.TryGetValue(name, out var value))
         {

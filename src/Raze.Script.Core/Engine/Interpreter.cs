@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.BuiltInModules;
+﻿using Raze.Script.Core.Builders;
+using Raze.Script.Core.BuiltInModules;
 using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
@@ -19,9 +20,17 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 {
     private Runtime.Context.ExecutionContext _executionContext;
     private OperationDispatcher _operationDispatcher;
+    private Dictionary<string, Action<ModuleBuilder>>? _customModuleBuilders;
 
-    private Interpreter()
+    private Interpreter(Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders)
     {
+        if (customModuleBuilders != null)
+        {
+            ValidateCustomModuleBuilders(customModuleBuilders);
+        }
+
+        _customModuleBuilders = customModuleBuilders;
+
         _executionContext = new Runtime.Context.ExecutionContext();
 
         _operationDispatcher = new OperationDispatcher();
@@ -31,9 +40,13 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         _operationDispatcher.RegisterFrom<BooleanOperationRegistrar>();
     }
 
-    public static RuntimeValue Evaluate(ProgramExpression program, Scope scope)
+    internal static RuntimeValue Evaluate(
+        ProgramExpression program,
+        Scope scope,
+        Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders
+    )
     {
-        var interpreter = new Interpreter();
+        var interpreter = new Interpreter(customModuleBuilders);
         interpreter.EvaluateInternal(program, scope, out var result);
 
         return result;
@@ -97,6 +110,11 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     )
     {
         var module = BuiltInModuleManager.TryGetModule(statement.ModuleName);
+
+        if (module == null)
+        {
+            module = GetCustomModule(statement.ModuleName);
+        }
 
         if (module == null)
         {
@@ -495,6 +513,37 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result)
     {
         result = new RuntimeValue(expression.StrValue);
+    }
+
+    private static void ValidateCustomModuleBuilders(Dictionary<string, Action<ModuleBuilder>> customModuleBuilders)
+    {
+        foreach (var customModuleName in customModuleBuilders.Keys)
+        {
+            if (BuiltInModuleManager.HasModule(customModuleName))
+            {
+                var source = new SourceInfo($"{nameof(Interpreter)} initializer");
+                ThrowHelper.Throw<RedeclarationException>(
+                    $"The custom module \"{customModuleName}\" has the same name as a built in module",
+                    in source
+                );
+            }
+        }
+    }
+
+    private NamespaceSymbol? GetCustomModule(string name)
+    {
+        if (
+            _customModuleBuilders != null
+            && _customModuleBuilders.TryGetValue(name, out var moduleBuilderFunction)
+        )
+        {
+            var moduleBuilder = new ModuleBuilder(name);
+            moduleBuilderFunction(moduleBuilder);
+
+            return moduleBuilder.Build();
+        }
+
+        return null;
     }
 
     private bool GetValidBooleanValue(Expression condition, Scope scope)

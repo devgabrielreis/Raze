@@ -1,4 +1,6 @@
-﻿using Raze.Script.Core;
+﻿using Raze.Script.Console;
+using Raze.Script.Core;
+using Raze.Script.Core.Builders;
 using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Result;
@@ -10,6 +12,11 @@ internal class Program
     public static Version Version => Assembly.GetExecutingAssembly()
                                              .GetName()
                                              .Version!;
+
+    private static Dictionary<string, Action<ModuleBuilder>> customModules = new()
+    {
+        [ConsoleModule.Name] = ConsoleModule.Build
+    };
 
     private static void Main(string[] args)
     {
@@ -42,7 +49,7 @@ internal class Program
             var sourceName = $"interpreter-source-{sources.Count}";
             sources[sourceName] = command;
 
-            var result = RazeScript.Evaluate(command, sourceName, scope);
+            var result = RazeScript.Evaluate(command, sourceName, scope, customModules);
 
             if (result is RazeSuccess success && success.ValueType != BaseType.Void)
             {

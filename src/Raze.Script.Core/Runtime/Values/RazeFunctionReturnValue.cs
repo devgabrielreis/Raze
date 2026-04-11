@@ -1,9 +1,9 @@
 ﻿namespace Raze.Script.Core.Runtime.Values;
 
-internal sealed class RazeFunctionReturnValue
+public sealed class RazeFunctionReturnValue
 {
-    internal static RazeFunctionReturnValue Null => new(in RuntimeValue.Null);
-    internal static RazeFunctionReturnValue Void => new(in RuntimeValue.Void);
+    public static RazeFunctionReturnValue Null => new(in RuntimeValue.Null);
+    public static RazeFunctionReturnValue Void => new(in RuntimeValue.Void);
 
     internal readonly RuntimeValue Value;
 
@@ -12,7 +12,7 @@ internal sealed class RazeFunctionReturnValue
         Value = value;
     }
 
-    internal static RazeFunctionReturnValue FromValue<T>(T value)
+    public static RazeFunctionReturnValue FromValue<T>(T value)
     {
         RuntimeValueUtils.ValueToRuntimeValue(value, out var runtimeValue);
 

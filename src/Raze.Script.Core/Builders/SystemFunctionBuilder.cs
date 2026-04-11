@@ -7,7 +7,7 @@ using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Script.Core.Builders;
 
-internal sealed class SystemFunctionBuilder
+public sealed class SystemFunctionBuilder
 {
     internal string FunctionName
     {
@@ -36,7 +36,7 @@ internal sealed class SystemFunctionBuilder
         _parameters = [];
     }
 
-    internal SystemFunctionBuilder HasName(string functionName)
+    public SystemFunctionBuilder HasName(string functionName)
     {
         if (_functionName != null)
         {
@@ -50,7 +50,7 @@ internal sealed class SystemFunctionBuilder
         return this;
     }
 
-    internal SystemFunctionBuilder HasReturnType(TypeBuilder typeBuilder)
+    public SystemFunctionBuilder HasReturnType(TypeBuilder typeBuilder)
     {
         if (_returnType != null)
         {
@@ -64,7 +64,7 @@ internal sealed class SystemFunctionBuilder
         return this;
     }
 
-    internal SystemFunctionBuilder HasParameter(Action<FunctionParameterBuilder> parameterBuilderFunction)
+    public SystemFunctionBuilder HasParameter(Action<FunctionParameterBuilder> parameterBuilderFunction)
     {
         var parameterBuilder = new FunctionParameterBuilder();
 
@@ -95,7 +95,7 @@ internal sealed class SystemFunctionBuilder
         return this;
     }
 
-    internal SystemFunctionBuilder HasBody(Func<RazeFunctionParameters, RazeFunctionReturnValue> body)
+    public SystemFunctionBuilder HasBody(Func<RazeFunctionParameters, RazeFunctionReturnValue> body)
     {
         if (_body != null)
         {

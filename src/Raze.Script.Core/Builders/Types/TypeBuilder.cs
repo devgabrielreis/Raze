@@ -3,14 +3,15 @@ using Raze.Script.Core.Runtime.Types;
 
 namespace Raze.Script.Core.Builders.Types;
 
-internal abstract class TypeBuilder
+public abstract class TypeBuilder
 {
-    internal static TypeBuilder Integer => new PrimitiveType(BaseType.Integer);
-    internal static TypeBuilder Decimal => new PrimitiveType(BaseType.Decimal);
-    internal static TypeBuilder Boolean => new PrimitiveType(BaseType.Boolean);
-    internal static TypeBuilder String => new PrimitiveType(BaseType.String);
+    public static TypeBuilder Integer => new PrimitiveType(BaseType.Integer);
+    public static TypeBuilder Decimal => new PrimitiveType(BaseType.Decimal);
+    public static TypeBuilder Boolean => new PrimitiveType(BaseType.Boolean);
+    public static TypeBuilder String  => new PrimitiveType(BaseType.String);
+    public static TypeBuilder Void    => new PrimitiveType(BaseType.Void);
 
-    internal TypeBuilder AsNullable()
+    public TypeBuilder AsNullable()
     {
         return new NullableType(this);
     }

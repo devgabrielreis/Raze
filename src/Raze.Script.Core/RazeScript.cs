@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Engine;
+﻿using Raze.Script.Core.Builders;
+using Raze.Script.Core.Engine;
 using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Result;
 using Raze.Script.Core.Runtime.Scopes;
@@ -17,7 +18,12 @@ public static class RazeScript
         return Scope.CreateInterpreterScope();
     }
 
-    public static RazeResult Evaluate(string source, string sourceLocation, Scope? scope = null)
+    public static RazeResult Evaluate(
+        string source,
+        string sourceLocation,
+        Scope? scope = null,
+        Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders = null
+    )
     {
         if (scope is null)
         {
@@ -28,7 +34,7 @@ public static class RazeScript
         {
             var tokens = Lexer.Tokenize(source, sourceLocation);
             var program = Parser.Parse(tokens, sourceLocation);
-            var result = Interpreter.Evaluate(program, scope);
+            var result = Interpreter.Evaluate(program, scope, customModuleBuilders);
 
             return new RazeSuccess(result);
         }

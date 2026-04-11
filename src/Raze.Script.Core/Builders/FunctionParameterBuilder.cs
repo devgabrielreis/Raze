@@ -7,7 +7,7 @@ using Raze.Script.Core.Runtime.Values;
 
 namespace Raze.Script.Core.Builders;
 
-internal sealed class FunctionParameterBuilder
+public sealed class FunctionParameterBuilder
 {
     private string? _parameterName;
     private RuntimeType? _type;
@@ -20,7 +20,7 @@ internal sealed class FunctionParameterBuilder
         _defaultValue = null;
     }
 
-    internal FunctionParameterBuilder HasName(string parameterName)
+    public FunctionParameterBuilder HasName(string parameterName)
     {
         if (_parameterName != null)
         {
@@ -34,7 +34,7 @@ internal sealed class FunctionParameterBuilder
         return this;
     }
 
-    internal FunctionParameterBuilder HasType(TypeBuilder typeBuilder)
+    public FunctionParameterBuilder HasType(TypeBuilder typeBuilder)
     {
         if (_type != null)
         {
@@ -48,7 +48,7 @@ internal sealed class FunctionParameterBuilder
         return this;
     }
 
-    internal FunctionParameterBuilder HasDefaultValue<T>(T value)
+    public FunctionParameterBuilder HasDefaultValue<T>(T value)
     {
         if (_type == null)
         {
@@ -76,7 +76,7 @@ internal sealed class FunctionParameterBuilder
         return this;
     }
 
-    internal FunctionParameterBuilder HasNullDefaultValue()
+    public FunctionParameterBuilder HasNullDefaultValue()
     {
         if (_type == null)
         {
