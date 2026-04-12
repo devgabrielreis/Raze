@@ -1,5 +1,6 @@
 ﻿using Raze.Script.Core.Builders;
 using Raze.Script.Core.BuiltInModules;
+using Raze.Script.Core.Constants;
 using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
@@ -228,7 +229,12 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result
     )
     {
-        var variable = scope.GetVariable(statement.Target.Symbol, in statement.SourceInfo);
+        var variable = GetVariableFromExpression<InvalidAssignmentException>(
+            statement.Target,
+            scope,
+            throwIfNotInitialized: false,
+            "Assignment target must be a variable"
+        );
         EvaluateInternal(statement.Value, scope, out var newValue);
 
         variable.SetValue(ref newValue, in statement.SourceInfo);
@@ -270,8 +276,11 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result
     )
     {
-        var variable = scope.GetVariable(
-            expression.Operand.Symbol, in expression.SourceInfo, throwIfNotInitialized: true
+        var variable = GetVariableFromExpression<InvalidOperandException>(
+            expression.Operand,
+            scope,
+            throwIfNotInitialized: true,
+            $"The {expression.Operator} operator can only be applied to variables"
         );
 
         var valueBefore = variable.GetValue(in expression.SourceInfo);
@@ -290,7 +299,14 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result
     )
     {
-        EvaluateInternal(expression.Operand, scope, out var value);
+        var variable = GetVariableFromExpression<InvalidOperandException>(
+            expression.Operand,
+            scope,
+            throwIfNotInitialized: true,
+            $"The {Operators.NULL_CHECKER} operator can only be applied to variables"
+        );
+
+        var value = variable.GetValue(in expression.Operand.SourceInfo);
 
         result = value.Type == RuntimeType.Null ? RuntimeValue.True : RuntimeValue.False;
     }
@@ -702,6 +718,41 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             ThrowHelper.Throw<InvalidParameterListException>(
                 message, in callExpression.SourceInfo
             );
+        }
+    }
+
+    private static VariableSymbol GetVariableFromExpression<TErrorIfNotVariable>(
+        Expression expr,
+        Scope scope,
+        bool throwIfNotInitialized,
+        string notVariableErrorMessage
+    )
+        where TErrorIfNotVariable : RazeException, IThrowableByThrowHelper<TErrorIfNotVariable>
+    {
+        switch (expr)
+        {
+            case IdentifierExpression identifierExpression:
+                return scope.GetVariable(
+                    identifierExpression.Symbol,
+                    in identifierExpression.SourceInfo,
+                    throwIfNotInitialized
+                );
+            case NamespaceAccessExpression namespaceAccessExpression:
+                var namespaceSymbol = scope.GetNamespace(
+                    namespaceAccessExpression.NamespaceIdentifier.Symbol,
+                    in namespaceAccessExpression.SourceInfo
+                );
+
+                return namespaceSymbol.Scope.GetVariable(
+                    namespaceAccessExpression.MemberIdentifier.Symbol,
+                    in namespaceAccessExpression.SourceInfo,
+                    throwIfNotInitialized
+                );
+            default:
+                return ThrowHelper.Throw<TErrorIfNotVariable, VariableSymbol>(
+                    notVariableErrorMessage,
+                    in expr.SourceInfo
+                );
         }
     }
 }

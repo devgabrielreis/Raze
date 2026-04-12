@@ -6,10 +6,10 @@ namespace Raze.Script.Core.Statements;
 
 internal sealed class AssignmentStatement : Statement
 {
-    internal readonly IdentifierExpression Target;
+    internal readonly Expression Target;
     internal readonly Expression Value;
 
-    internal AssignmentStatement(IdentifierExpression target, Expression value, ref readonly SourceInfo source)
+    internal AssignmentStatement(Expression target, Expression value, ref readonly SourceInfo source)
         : base(in source, true)
     {
         Target = target;

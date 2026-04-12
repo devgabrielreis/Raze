@@ -549,19 +549,14 @@ internal sealed class Parser
         var op = CurrentToken;
         Advance();
 
-        Expression value = ParseOperatorExpression();
-
-        if (left is not IdentifierExpression)
-        {
-            ThrowHelper.Throw<InvalidAssignmentException>("Invalid assignment target", in left.SourceInfo);
-        }
+        var value = ParseOperatorExpression();
 
         if (op.Type.IsCompoundAssignmentOperator())
         {
             value = new BinaryExpression(left, op.Type.GetCompoundAssignmentTokenOperator(), value, in op.SourceInfo);
         }
         
-        return new AssignmentStatement((IdentifierExpression)left, value, in left.SourceInfo);
+        return new AssignmentStatement(left, value, in left.SourceInfo);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -619,15 +614,7 @@ internal sealed class Parser
 
             var operand = ParseUnaryExpression();
 
-            if (operand is not IdentifierExpression identifier)
-            {
-                return ThrowHelper.Throw<InvalidOperandException, Expression>(
-                    $"The {op.Lexeme} operator can only be applied to identifiers",
-                    in op.SourceInfo
-                );
-            }
-
-            return new UnaryMutationExpression(identifier, op.Lexeme, isPostfix: false, in op.SourceInfo);
+            return new UnaryMutationExpression(operand, op.Lexeme, isPostfix: false, in op.SourceInfo);
         }
 
         return ParsePostfixExpression();
@@ -650,17 +637,9 @@ internal sealed class Parser
                 var op = CurrentToken;
                 Advance();
 
-                if (expr is not IdentifierExpression)
-                {
-                    ThrowHelper.Throw<InvalidOperandException>(
-                        $"The {op.Lexeme} operator can only be applied to identifiers",
-                        in op.SourceInfo
-                    );
-                }
-
                 expr = op.Type == TokenType.NullChecker
-                    ? new NullCheckerExpression((IdentifierExpression)expr, in expr.SourceInfo)
-                    : new UnaryMutationExpression((IdentifierExpression)expr, op.Lexeme, isPostfix: true, in expr.SourceInfo);
+                    ? new NullCheckerExpression(expr, in expr.SourceInfo)
+                    : new UnaryMutationExpression(expr, op.Lexeme, isPostfix: true, in expr.SourceInfo);
                 continue;
             }
 
