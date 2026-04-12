@@ -56,6 +56,13 @@ public sealed class ConstantBuilder
             );
         }
 
+        if (string.IsNullOrEmpty(constantName))
+        {
+            ThrowHelper.ThrowInvalidOperationException(
+                $"Constant name cannot be null or empty"
+            );
+        }
+
         _constantName = constantName;
 
         return this;

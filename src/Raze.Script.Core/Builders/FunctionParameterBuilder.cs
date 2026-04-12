@@ -29,6 +29,13 @@ public sealed class FunctionParameterBuilder
             );
         }
 
+        if (string.IsNullOrEmpty(parameterName))
+        {
+            ThrowHelper.ThrowInvalidOperationException(
+                $"Parameter name cannot be null or empty"
+            );
+        }
+
         _parameterName = parameterName;
 
         return this;

@@ -45,6 +45,13 @@ public sealed class SystemFunctionBuilder
             );
         }
 
+        if (string.IsNullOrEmpty(functionName))
+        {
+            ThrowHelper.ThrowInvalidOperationException(
+                $"Function name cannot be null or empty"
+            );
+        }
+
         _functionName = functionName;
 
         return this;

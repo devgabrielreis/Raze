@@ -12,6 +12,13 @@ public sealed class ModuleBuilder
 
     internal ModuleBuilder(string moduleName)
     {
+        if (string.IsNullOrEmpty(moduleName))
+        {
+            ThrowHelper.ThrowInvalidOperationException(
+                $"Module name cannot be null or empty"
+            );
+        }
+
         _moduleName = moduleName;
         _members = [];
     }
