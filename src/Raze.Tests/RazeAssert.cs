@@ -107,4 +107,17 @@ internal class RazeAssert
         var error = Assert.IsType<RazeError>(result);
         Assert.IsType<T>(error.Error);
     }
+
+    internal static void ThrowsError<T>(
+        string script,
+        Scope? scope = null,
+        string context = "Raze.Tests",
+        Dictionary<string, Action<ModuleBuilder>>? customModules = null
+    ) where T : Exception
+    {
+        Assert.Throws<T>(() =>
+        {
+            RazeScript.Evaluate(script, context, scope, customModules);
+        });
+    }
 }
