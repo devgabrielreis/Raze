@@ -108,6 +108,25 @@ internal static class MathModule
             .HasFunction(functionBuilder =>
             {
                 functionBuilder
+                    .HasName("roundToDecimalPlaces")
+                    .HasReturnType(TypeBuilder.Decimal)
+                    .HasParameter(parameterBuilder =>
+                    {
+                        parameterBuilder
+                            .HasName("num")
+                            .HasType(TypeBuilder.Decimal);
+                    })
+                    .HasParameter(parameterBuilder =>
+                    {
+                        parameterBuilder
+                            .HasName("decimalPlaces")
+                            .HasType(TypeBuilder.Integer);
+                    })
+                    .HasBody(RoundToDecimalPlaces);
+            })
+            .HasFunction(functionBuilder =>
+            {
+                functionBuilder
                     .HasName("maxInteger")
                     .HasReturnType(TypeBuilder.Integer)
                     .HasParameter(parameterBuilder =>
@@ -291,6 +310,20 @@ internal static class MathModule
         var num = (decimal)parameters.Get("num")!;
 
         Int128 result = (Int128)Math.Round(num);
+
+        return RazeFunctionReturnValue.FromValue(result);
+    }
+
+    private static RazeFunctionReturnValue RoundToDecimalPlaces(RazeFunctionParameters parameters)
+    {
+        var num = (decimal)parameters.Get("num")!;
+        var decimalPlaces = (Int128)parameters.Get("decimalPlaces")!;
+
+        var decimalPlacesInt = (int)decimalPlaces;
+
+        decimalPlacesInt = Math.Clamp(decimalPlacesInt, 0, 28);
+
+        decimal result = Math.Round(num, decimalPlacesInt);
 
         return RazeFunctionReturnValue.FromValue(result);
     }

@@ -143,6 +143,28 @@ public class MathModuleTests
     }
 
     [Theory]
+    [InlineData("1.111", 1, "1.1")]
+    [InlineData("1.111", 2, "1.11")]
+    [InlineData("1.116", 2, "1.12")]
+    [InlineData("1.116", 0, "1.0")]
+    [InlineData("1.116", -1, "1.0")]
+    [InlineData("1.1234567890123456789012345678", 27, "1.123456789012345678901234568")]
+    [InlineData("1.1234567890123456789012345678", 28, "1.1234567890123456789012345678")]
+    [InlineData("1.1234567890123456789012345678", 29, "1.1234567890123456789012345678")]
+    [InlineData("1.0", 2, "1.0")]
+    public void Evaluate_RoundToDecimalPlaces_ReturnsExpectedValue(string numStr, int decimalPlaces, string expectedStr)
+    {
+        var script = $"""
+            import math;
+
+            math::roundToDecimalPlaces({numStr}, {decimalPlaces})
+        """;
+
+        decimal expected = decimal.Parse(expectedStr, CultureInfo.InvariantCulture);
+        RazeAssert.EvaluatesToDecimal(script, expected);
+    }
+
+    [Theory]
     [InlineData(1, 3, 3)]
     [InlineData(-3, 3, 3)]
     [InlineData(-3, -4, -3)]
