@@ -8,7 +8,8 @@ internal static class BuiltInModuleManager
     private static readonly Dictionary<string, NamespaceSymbol> _loadedModules = [];
     private static readonly Dictionary<string, Action<ModuleBuilder>> _moduleBuilderFunctions = new()
     {
-        [MathModule.Name] = MathModule.Build
+        [MathModule.Name] = MathModule.Build,
+        [StringsModule.Name] = StringsModule.Build
     };
 
     internal static NamespaceSymbol? TryGetModule(string name)

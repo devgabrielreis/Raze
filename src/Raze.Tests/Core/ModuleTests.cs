@@ -32,6 +32,7 @@ public class ModuleTests
 
     [Theory]
     [InlineData("math")]
+    [InlineData("strings")]
     public void Evaluate_CreatingNamespaceWithBuiltInModuleName_ThrowsRedeclarationException(string builtInName)
     {
         string script = $$"""
@@ -56,6 +57,7 @@ public class ModuleTests
 
     [Theory]
     [InlineData("math")]
+    [InlineData("strings")]
     public void Evaluate_CustomModuleWithSameNameAsBuiltInModule_ThrowsRedeclarationException(string builtInName)
     {
         var customModules = new Dictionary<string, Action<ModuleBuilder>>()
