@@ -165,6 +165,20 @@ public class MathModuleTests
     }
 
     [Theory]
+    [InlineData(true, 1)]
+    [InlineData(false, 0)]
+    public void Evaluate_BooleanToInteger_ReturnsExpectedValue(bool value, int expected)
+    {
+        var script = $"""
+            import math;
+
+            math::booleanToInteger({(value ? "true" : "false")})
+        """;
+
+        RazeAssert.EvaluatesToInteger(script, expected);
+    }
+
+    [Theory]
     [InlineData(1, 3, 3)]
     [InlineData(-3, 3, 3)]
     [InlineData(-3, -4, -3)]

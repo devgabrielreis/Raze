@@ -127,6 +127,19 @@ internal static class MathModule
             .HasFunction(functionBuilder =>
             {
                 functionBuilder
+                    .HasName("booleanToInteger")
+                    .HasReturnType(TypeBuilder.Integer)
+                    .HasParameter(parameterBuilder =>
+                    {
+                        parameterBuilder
+                            .HasName("value")
+                            .HasType(TypeBuilder.Boolean);
+                    })
+                    .HasBody(BooleanToInteger);
+            })
+            .HasFunction(functionBuilder =>
+            {
+                functionBuilder
                     .HasName("maxInteger")
                     .HasReturnType(TypeBuilder.Integer)
                     .HasParameter(parameterBuilder =>
@@ -326,6 +339,13 @@ internal static class MathModule
         decimal result = Math.Round(num, decimalPlacesInt);
 
         return RazeFunctionReturnValue.FromValue(result);
+    }
+
+    private static RazeFunctionReturnValue BooleanToInteger(RazeFunctionParameters parameters)
+    {
+        var value = (bool)parameters.Get("value")!;
+
+        return RazeFunctionReturnValue.FromValue(value ? (Int128)1 : (Int128)0);
     }
 
     private static RazeFunctionReturnValue MaxInteger(RazeFunctionParameters parameters)
