@@ -50,6 +50,13 @@ internal static class ConsoleModule
                             .HasNullDefaultValue();
                     })
                     .HasBody(ReadLine);
+            })
+            .HasFunction(functionBuilder =>
+            {
+                functionBuilder
+                    .HasName("clear")
+                    .HasReturnType(TypeBuilder.Void)
+                    .HasBody(Clear);
             });
     }
 
@@ -85,5 +92,12 @@ internal static class ConsoleModule
         return (result == null)
                 ? RazeFunctionReturnValue.Null
                 : RazeFunctionReturnValue.FromValue((string)result);
+    }
+
+    private static RazeFunctionReturnValue Clear(RazeFunctionParameters parameters)
+    {
+        System.Console.Clear();
+
+        return RazeFunctionReturnValue.Void;
     }
 }
