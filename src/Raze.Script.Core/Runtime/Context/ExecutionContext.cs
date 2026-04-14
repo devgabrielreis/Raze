@@ -38,16 +38,19 @@ internal sealed class ExecutionContext
 
     internal void SignalBreak()
     {
+        Debug.Assert(_contextSignal == ContextSignal.None);
         _contextSignal = ContextSignal.Break;
     }
 
     internal void SignalContinue()
     {
+        Debug.Assert(_contextSignal == ContextSignal.None);
         _contextSignal = ContextSignal.Continue;
     }
 
     internal void SignalReturn(ref readonly ReturnedValue? returnValue)
     {
+        Debug.Assert(_contextSignal == ContextSignal.None);
         _contextSignal = ContextSignal.Return;
         _returnValue = returnValue;
     }
