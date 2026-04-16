@@ -2,7 +2,7 @@
 using Raze.Script.Core.Builders.Types;
 using Raze.Script.Core.Runtime.Values;
 
-namespace Raze.Script.Console;
+namespace Raze.Script.Console.CustomModules;
 
 internal static class ConsoleModule
 {
