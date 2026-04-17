@@ -18,18 +18,31 @@ internal class Program
             Description = "Show version information"
         };
 
+        var fileArgument = new Argument<FileInfo>("script")
+        {
+            Description = "The Raze script to be executed",
+            Arity = ArgumentArity.ZeroOrOne
+        };
+
         RemoveDefaultVersionOption(rootCommand);
         rootCommand.Options.Add(versionOption);
+        rootCommand.Arguments.Add(fileArgument);
 
         rootCommand.SetAction(parseResult =>
         {
             if (parseResult.GetValue(versionOption))
             {
                 Console.WriteLine(Version.ToString());
+                return 0;
+            }
+            else if (parseResult.GetValue(fileArgument) is FileInfo script)
+            {
+                return RazeConsole.ExecuteScript(script);
             }
             else
             {
                 RazeConsole.RunInterpreter();
+                return 0;
             }
         });
 

@@ -45,6 +45,15 @@ public sealed class Scope
         return new Scope(null, ScopePermissions.All, "Interpreter");
     }
 
+    internal static Scope CreateGlobalScope()
+    {
+        return new Scope(
+            null,
+            ScopePermissions.DeclareConstants | ScopePermissions.DeclareNamespaces,
+            "Global"
+        );
+    }
+
     internal static Scope CreateLocalScope(Scope parent)
     {
         return new Scope(

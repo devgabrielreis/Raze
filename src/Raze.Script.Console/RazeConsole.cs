@@ -14,6 +14,24 @@ internal class RazeConsole
         [ConsoleModule.Name] = ConsoleModule.Build
     };
 
+    internal static int ExecuteScript(FileInfo script)
+    {
+        var result = RazeScript.ExecuteScript(script, customModules);
+
+        if (result is RazeError razeError)
+        {
+            RazeUtils.PrettyPrintRazeException(razeError.Error);
+            return 1;
+        }
+
+        if (result is RazeSuccess razeSuccess && razeSuccess.ValueType == BaseType.Integer)
+        {
+            return (int)razeSuccess.AsInteger();
+        }
+
+        return 0;
+    }
+
     internal static void RunInterpreter()
     {
         PrintHeader();
