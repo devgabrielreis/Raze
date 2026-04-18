@@ -24,6 +24,19 @@ internal class RazeAssert
         Assert.Equal(expected, success.AsInteger());
     }
 
+    internal static void EvaluatesToInteger(
+        FileInfo fileScript,
+        Int128 expected,
+        Dictionary<string, Action<ModuleBuilder>>? customModules = null
+    )
+    {
+        var result = RazeScript.ExecuteScript(fileScript, customModules);
+
+        var success = Assert.IsType<RazeSuccess>(result);
+        Assert.Equal(BaseType.Integer, success.ValueType);
+        Assert.Equal(expected, success.AsInteger());
+    }
+
     internal static void EvaluatesToDecimal(
         string script,
         decimal expected,
@@ -103,6 +116,17 @@ internal class RazeAssert
     ) where T: RazeException
     {
         var result = RazeScript.Evaluate(script, context, scope, customModules);
+
+        var error = Assert.IsType<RazeError>(result);
+        Assert.IsType<T>(error.Error);
+    }
+
+    internal static void ReturnsError<T>(
+        FileInfo fileScript,
+        Dictionary<string, Action<ModuleBuilder>>? customModules = null
+    ) where T : RazeException
+    {
+        var result = RazeScript.ExecuteScript(fileScript, customModules);
 
         var error = Assert.IsType<RazeError>(result);
         Assert.IsType<T>(error.Error);
