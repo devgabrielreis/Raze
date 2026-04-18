@@ -3,11 +3,9 @@ using Raze.Script.Core.Runtime.Types;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace Raze.Script.Core.Runtime.Values;
 
-[StructLayout(LayoutKind.Explicit)]
 internal readonly struct RuntimeValue
 {
     internal static readonly RuntimeValue True  = new(true);
@@ -15,44 +13,30 @@ internal readonly struct RuntimeValue
     internal static readonly RuntimeValue Null  = new(RuntimeType.Null);
     internal static readonly RuntimeValue Void  = new(RuntimeType.Void);
 
-    // O _refValue e o Type devem ser alocados separados dos outros valores, já que eles
-    // são ponteiros que o GC checa para limpar de tempos em tempos, sobrescreve-los
-    // pode fazer com que o GC tente limpar um endereço inválido na memória
-    [FieldOffset(0)] internal readonly RuntimeType Type;
-    [FieldOffset(8)] private readonly object? _refValue;
+    internal readonly RuntimeType Type;
 
-    // Todos esses campos ocupam o mesmo espaço na memória para
-    // economizar espaço, já que apenas um deles será usado por vez.
-    // Sempre verifique o Type antes de acessar o valor
-    [FieldOffset(16)] private readonly Int128 _integerValue;
-    [FieldOffset(16)] private readonly decimal _decimalValue;
-    [FieldOffset(16)] private readonly bool _boolValue;
+    private readonly ValueUnion _value;
+    private readonly object? _refValue;
 
     internal RuntimeValue(Int128 intValue)
     {
         _refValue = null;
-        _decimalValue = default;
-        _boolValue = default;
 
         Type = RuntimeType.Integer;
-        _integerValue = intValue;
+        _value = new ValueUnion(intValue);
     }
 
     internal RuntimeValue(decimal decimalValue)
     {
         _refValue = null;
-        _integerValue = default;
-        _boolValue = default;
 
         Type = RuntimeType.Decimal;
-        _decimalValue = decimalValue;
+        _value = new ValueUnion(decimalValue);
     }
 
     internal RuntimeValue(string stringValue)
     {
-        _integerValue = default;
-        _decimalValue = default;
-        _boolValue = default;
+        _value = default;
 
         Type = RuntimeType.String;
         _refValue = stringValue;
@@ -60,9 +44,7 @@ internal readonly struct RuntimeValue
 
     internal RuntimeValue(UserFunctionValue userFunctionValue)
     {
-        _integerValue = default;
-        _decimalValue = default;
-        _boolValue = default;
+        _value = default;
 
         var generics = userFunctionValue.Parameters.Select(p => p.Type).ToList();
         generics.Add(userFunctionValue.ReturnType);
@@ -73,9 +55,7 @@ internal readonly struct RuntimeValue
 
     internal RuntimeValue(SystemFunctionValue systemFunctionValue)
     {
-        _integerValue = default;
-        _decimalValue = default;
-        _boolValue = default;
+        _value = default;
 
         var generics = systemFunctionValue.Parameters.Select(p => p.Type).ToList();
         generics.Add(systemFunctionValue.ReturnType);
@@ -87,19 +67,15 @@ internal readonly struct RuntimeValue
     private RuntimeValue(bool boolValue)
     {
         _refValue = null;
-        _integerValue = default;
-        _decimalValue = default;
 
         Type = RuntimeType.Boolean;
-        _boolValue = boolValue;
+        _value = new ValueUnion(boolValue);
     }
 
     private RuntimeValue(RuntimeType type)
     {
         _refValue = null;
-        _integerValue = default;
-        _decimalValue = default;
-        _boolValue = default;
+        _value = default;
 
         Type = type;
     }
@@ -120,21 +96,21 @@ internal readonly struct RuntimeValue
     internal Int128 AsInteger()
     {
         Debug.Assert(Type == RuntimeType.Integer);
-        return _integerValue;
+        return _value.IntegerValue;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal decimal AsDecimal()
     {
         Debug.Assert(Type == RuntimeType.Decimal);
-        return _decimalValue;
+        return _value.DecimalValue;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool AsBoolean()
     {
         Debug.Assert(Type == RuntimeType.Boolean);
-        return _boolValue;
+        return _value.BoolValue;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -163,9 +139,9 @@ internal readonly struct RuntimeValue
     {
         return Type.Base switch
         {
-            BaseType.Integer        => _integerValue.ToString(),
+            BaseType.Integer        => _value.IntegerValue.ToString(),
             BaseType.Decimal        => GetDecimalString(),
-            BaseType.Boolean        => _boolValue ? Keywords.TRUE_LITERAL : Keywords.FALSE_LITERAL,
+            BaseType.Boolean        => _value.BoolValue ? Keywords.TRUE_LITERAL : Keywords.FALSE_LITERAL,
             BaseType.String         => $"\"{(string)_refValue!}\"",
             BaseType.UserFunction   => Type.ToString(),
             BaseType.SystemFunction => Type.ToString(),
@@ -179,7 +155,7 @@ internal readonly struct RuntimeValue
     {
         Debug.Assert(Type == RuntimeType.Decimal);
 
-        var decimalStr = _decimalValue.ToString(CultureInfo.InvariantCulture);
+        var decimalStr = _value.BoolValue.ToString(CultureInfo.InvariantCulture);
 
         if (!decimalStr.Contains('.'))
         {
