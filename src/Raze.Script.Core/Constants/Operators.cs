@@ -40,4 +40,8 @@ internal static class Operators
     internal const string CLOSE_BRACES      = "}";
 
     internal const string NAMESPACE_ACCESSOR = "::";
+
+    internal const string SINGLE_LINE_COMMENT     = "//";
+    internal const string OPEN_MULTILINE_COMMENT  = "/*";
+    internal const string CLOSE_MULTILINE_COMMENT = "*/";
 }

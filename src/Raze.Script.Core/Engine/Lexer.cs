@@ -114,6 +114,11 @@ internal sealed class Lexer
                 continue;
             }
 
+            if (SkipComments())
+            {
+                continue;
+            }
+
             tokens.Add(ProcessCurrentToken());
         }
 
@@ -145,6 +150,19 @@ internal sealed class Lexer
         return _sourceCode[_currentIndex];
     }
 
+    private bool CurrentIsSpan(ReadOnlySpan<char> span)
+    {
+        int remainingSourceLength = _sourceCode.Length - _currentIndex;
+        if (remainingSourceLength < span.Length)
+        {
+            return false;
+        }
+
+        var slice = _sourceCode.AsSpan(_currentIndex, span.Length);
+
+        return slice.SequenceEqual(span);
+    }
+
     private char? Peek(int howMuch = 1)
     {
         int target = _currentIndex + howMuch;
@@ -173,6 +191,48 @@ internal sealed class Lexer
 
             _currentIndex++;
         }
+    }
+
+    private bool SkipComments()
+    {
+        return SkipSingleLineComment() || SkipMultiLineComment();
+    }
+
+    private bool SkipSingleLineComment()
+    {
+        if (!CurrentIsSpan(Operators.SINGLE_LINE_COMMENT))
+        {
+            return false;
+        }
+
+        while (!HasEnded() && Current() != '\n')
+        {
+            Advance();
+        }
+
+        return true;
+    }
+
+    private bool SkipMultiLineComment()
+    {
+        if (!CurrentIsSpan(Operators.OPEN_MULTILINE_COMMENT))
+        {
+            return false;
+        }
+
+        Advance(Operators.OPEN_MULTILINE_COMMENT.Length);
+
+        var remaining = _sourceCode.AsSpan(_currentIndex);
+        int closeIndex = remaining.IndexOf(Operators.CLOSE_MULTILINE_COMMENT);
+
+        if (closeIndex == -1)
+        {
+            Advance(remaining.Length);
+            return true;
+        }
+
+        Advance(closeIndex + Operators.CLOSE_MULTILINE_COMMENT.Length);
+        return true;
     }
 
     private Token ProcessCurrentToken()
