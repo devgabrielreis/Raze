@@ -92,6 +92,20 @@ public class VariableTests
         RazeAssert.EvaluatesToBoolean(script, false);
     }
 
+    [Fact]
+    public void Evaluate_NullChecker_CanBeAppliedToNamespacesConstants()
+    {
+        var script = """
+            namespace test {
+                const string? MY_STR = null;
+            }
+
+            test::MY_STR??
+        """;
+
+        RazeAssert.EvaluatesToBoolean(script, true);
+    }
+
     [Theory]
     [InlineData(10, "+=", 10, 20)]
     [InlineData(10, "-=", 10, 0)]

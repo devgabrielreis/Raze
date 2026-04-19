@@ -5,9 +5,9 @@ namespace Raze.Script.Core.Statements.Expressions;
 
 internal sealed class NullCheckerExpression : Expression
 {
-    internal readonly IdentifierExpression Operand;
+    internal readonly Expression Operand;
 
-    internal NullCheckerExpression(IdentifierExpression operand, ref readonly SourceInfo source)
+    internal NullCheckerExpression(Expression operand, ref readonly SourceInfo source)
         : base(in source, true)
     {
         Operand = operand;

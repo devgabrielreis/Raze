@@ -1,9 +1,9 @@
 ﻿using Raze.Script.Core.Metadata;
 
-namespace Raze.Script.Core.Exceptions.ParseExceptions;
+namespace Raze.Script.Core.Exceptions.RuntimeExceptions;
 
 public sealed class InvalidAssignmentException
-    : ParseException, IThrowableByThrowHelper<InvalidAssignmentException>
+    : RuntimeException, IThrowableByThrowHelper<InvalidAssignmentException>
 {
     private InvalidAssignmentException(string message, SourceInfo source)
         : base(message, source, nameof(InvalidAssignmentException))

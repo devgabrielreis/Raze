@@ -1,132 +1,66 @@
-﻿using Raze.Script.Core;
-using Raze.Script.Core.Exceptions;
-using Raze.Script.Core.Metadata;
-using Raze.Script.Core.Result;
-using Raze.Script.Core.Runtime.Types;
-using System.Reflection;
+﻿using Raze.Script.Console;
+using System.CommandLine;
+using System.Globalization;
 
 internal class Program
 {
-    public static Version Version => Assembly.GetExecutingAssembly()
-                                             .GetName()
-                                             .Version!;
+    internal static Version Version => typeof(Program).Assembly.GetName().Version!;
 
-    private static void Main(string[] args)
+    internal static int Main(string[] args)
     {
-        RunInterpreter();
+        CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
+        CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
+
+        Console.InputEncoding = System.Text.Encoding.UTF8;
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+        var rootCommand = new RootCommand("Raze Script Console - A script runner and REPL for the Raze language");
+
+        var versionOption = new Option<bool>("--version", "-v")
+        {
+            Description = "Show version information"
+        };
+
+        var fileArgument = new Argument<FileInfo>("script")
+        {
+            Description = "The Raze script to be executed",
+            Arity = ArgumentArity.ZeroOrOne
+        };
+
+        RemoveDefaultVersionOption(rootCommand);
+        rootCommand.Options.Add(versionOption);
+        rootCommand.Arguments.Add(fileArgument);
+
+        rootCommand.SetAction(parseResult =>
+        {
+            if (parseResult.GetValue(versionOption))
+            {
+                Console.WriteLine(Version.ToString());
+                return 0;
+            }
+            else if (parseResult.GetValue(fileArgument) is FileInfo script)
+            {
+                return RazeConsole.ExecuteScript(script);
+            }
+            else
+            {
+                RazeConsole.RunInterpreter();
+                return 0;
+            }
+        });
+
+        return rootCommand.Parse(args).Invoke();
     }
 
-    private static void RunInterpreter()
+    private static void RemoveDefaultVersionOption(RootCommand rootCommand)
     {
-        Console.WriteLine("Raze Interpreter");
-        Console.WriteLine($"Raze.Console version {Version.ToString()}");
+        var helpOption = rootCommand.Options.FirstOrDefault(
+            o => o.Name == "--version"
+        );
 
-#if !RELEASE
-        Console.WriteLine($"[development build]");
-#endif
-
-        Console.WriteLine();
-
-        var scope = RazeScript.CreateInterpreterScope();
-        var sources = new Dictionary<string, string>();
-
-        while (true)
+        if (helpOption != null)
         {
-            string command = GetCommandFromUser();
-
-            if (command == "exit()")
-            {
-                break;
-            }
-
-            var sourceName = $"interpreter-source-{sources.Count}";
-            sources[sourceName] = command;
-
-            var result = RazeScript.Evaluate(command, sourceName, scope);
-
-            if (result is RazeSuccess success && success.ValueType != BaseType.Void)
-            {
-                Console.WriteLine(success.ValueString);
-            }
-            else if (result is RazeError error)
-            {
-                PrettyPrintRazeException(error.Error, sources);
-            }
+            rootCommand.Options.Remove(helpOption);
         }
-    }
-
-    private static string GetCommandFromUser()
-    {
-        Console.Write("> ");
-        string command = Console.ReadLine()!;
-
-        int level;
-        while ((level = GetIndentationLevel(command)) > 0)
-        {
-            command += '\n';
-
-            Console.Write("..");
-            command += Console.ReadLine()!;
-        }
-
-        return command;
-    }
-
-    public static int GetIndentationLevel(string command)
-    {
-        int level = 0;
-
-        foreach (var ch in command)
-        {
-            if (ch == '{')
-            {
-                level++;
-            }
-            else if (ch == '}')
-            {
-                level--;
-            }
-        }
-
-        return level;
-    }
-
-    private static void PrettyPrintRazeException(RazeException ex, IReadOnlyDictionary<string, string> sources)
-    {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine(ex.Message);
-        Console.ResetColor();
-        Console.WriteLine();
-
-        if (!sources.TryGetValue(ex.SourceInfo.Location, out string? source))
-        {
-            return;
-        }
-
-        Console.WriteLine($"At \"{ex.SourceInfo.Location}\".");
-        
-        if (ex.SourceInfo.SourcePosition is SourcePosition sourcePosition)
-        {
-            Console.WriteLine($"Line {sourcePosition.Line}, column {sourcePosition.Column}.");
-            Console.WriteLine();
-
-            string errorLine = source.Split('\n')[sourcePosition.Line - 1];
-            Console.WriteLine(errorLine);
-
-            for (int i = 0; i < sourcePosition.Column - 1; i++)
-            {
-                Console.Write(errorLine[i] == '\t' ? '\t' : ' ');
-            }
-
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine('^');
-            Console.ResetColor();
-        }
-        else
-        {
-            Console.WriteLine(source);
-        }
-
-        Console.WriteLine();
     }
 }

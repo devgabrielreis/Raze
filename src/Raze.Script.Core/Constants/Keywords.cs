@@ -15,4 +15,5 @@ internal static class Keywords
     internal const string BREAK                 = "break";
     internal const string CONTINUE              = "continue";
     internal const string RETURN                = "return";
+    internal const string IMPORT                = "import";
 }

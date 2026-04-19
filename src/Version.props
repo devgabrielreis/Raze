@@ -2,7 +2,7 @@
 
 <Project>
   <PropertyGroup>
-    <CoreVersion>0.1.0</CoreVersion>
+    <CoreVersion>0.2.0</CoreVersion>
     <ConsoleVersion>$(CoreVersion).0</ConsoleVersion>
   </PropertyGroup>
 </Project>

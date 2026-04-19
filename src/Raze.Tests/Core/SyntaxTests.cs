@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Exceptions.LexerExceptions;
+﻿using Raze.Script.Core;
+using Raze.Script.Core.Exceptions.LexerExceptions;
 using Raze.Script.Core.Exceptions.ParseExceptions;
 
 namespace Raze.Tests.Core;
@@ -118,5 +119,42 @@ public class SyntaxTests
     public void Evaluate_NullCheckerNotOnVariable_ThrowsInvalidOperandException(string expression)
     {
         RazeAssert.ReturnsError<InvalidOperandException>(expression);
+    }
+
+    [Fact]
+    public void Evaluate_CodeComments_ShouldBeIgnored()
+    {
+        var scope = RazeScript.CreateInterpreterScope();
+
+        var script = """
+            // initialize the variable
+            var integer test = 0;
+        """;
+        RazeAssert.EvaluatesToVoid(script, scope);
+
+        script = """
+            /*
+            this operation should be ignored
+            test = 100;
+            */
+            test //should still be 0
+        """;
+        RazeAssert.EvaluatesToInteger(script, 0, scope);
+
+        script = """
+            /*
+            this comment is not closed, so nothing should be executed here
+            test = "hihihi"
+        """;
+        RazeAssert.EvaluatesToVoid(script, scope);
+
+        script = """
+            /*/
+            * change test value
+            */
+            test = /*10*/ 9;
+            test /* should be 9
+        """;
+        RazeAssert.EvaluatesToInteger(script, 9, scope);
     }
 }

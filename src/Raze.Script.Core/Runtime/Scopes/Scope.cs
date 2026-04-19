@@ -45,6 +45,15 @@ public sealed class Scope
         return new Scope(null, ScopePermissions.All, "Interpreter");
     }
 
+    internal static Scope CreateGlobalScope()
+    {
+        return new Scope(
+            null,
+            ScopePermissions.DeclareConstants | ScopePermissions.DeclareNamespaces,
+            "Global"
+        );
+    }
+
     internal static Scope CreateLocalScope(Scope parent)
     {
         return new Scope(
@@ -54,7 +63,7 @@ public sealed class Scope
         );
     }
 
-    internal static Scope CreateNamespaceScope(Scope parent)
+    internal static Scope CreateNamespaceScope(Scope? parent)
     {
         return new Scope(parent, ScopePermissions.DeclareConstants, "Namespace");
     }
@@ -118,7 +127,12 @@ public sealed class Scope
         return null;
     }
 
-    internal void DeclareNamespace(string name, NamespaceSymbol namespaceSymbol, ref readonly SourceInfo source)
+    internal void DeclareNamespace(
+        string name,
+        NamespaceSymbol namespaceSymbol,
+        ref readonly SourceInfo source,
+        bool throwIfAlreadyDeclared = true
+    )
     {
         if (!Can(ScopePermissions.DeclareNamespaces))
         {
@@ -130,6 +144,11 @@ public sealed class Scope
 
         if (!_namespaces.TryAdd(name, namespaceSymbol))
         {
+            if (!throwIfAlreadyDeclared)
+            {
+                return;
+            }
+
             ThrowHelper.Throw<RedeclarationException>(
                 $"The namespace {name} is already declared",
                 in source

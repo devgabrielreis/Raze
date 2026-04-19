@@ -1,4 +1,7 @@
-﻿using Raze.Script.Core.Exceptions;
+﻿using Raze.Script.Core.Builders;
+using Raze.Script.Core.BuiltInModules;
+using Raze.Script.Core.Constants;
+using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Exceptions.ParseExceptions;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Metadata;
@@ -18,9 +21,17 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 {
     private Runtime.Context.ExecutionContext _executionContext;
     private OperationDispatcher _operationDispatcher;
+    private Dictionary<string, Action<ModuleBuilder>>? _customModuleBuilders;
 
-    private Interpreter()
+    private Interpreter(Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders)
     {
+        if (customModuleBuilders != null)
+        {
+            ValidateCustomModuleBuilders(customModuleBuilders);
+        }
+
+        _customModuleBuilders = customModuleBuilders;
+
         _executionContext = new Runtime.Context.ExecutionContext();
 
         _operationDispatcher = new OperationDispatcher();
@@ -30,9 +41,13 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         _operationDispatcher.RegisterFrom<BooleanOperationRegistrar>();
     }
 
-    public static RuntimeValue Evaluate(ProgramExpression program, Scope scope)
+    internal static RuntimeValue Evaluate(
+        ProgramExpression program,
+        Scope scope,
+        Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders
+    )
     {
-        var interpreter = new Interpreter();
+        var interpreter = new Interpreter(customModuleBuilders);
         interpreter.EvaluateInternal(program, scope, out var result);
 
         return result;
@@ -59,6 +74,14 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result
     )
     {
+        if (BuiltInModuleManager.HasModule(statement.Identifier))
+        {
+            ThrowHelper.Throw<RedeclarationException>(
+                "Cannot create a namespace with the same name as a default module",
+                in statement.SourceInfo
+            );
+        }
+
         Scope namespaceScope;
 
         if (scope.TryGetNamespace(statement.Identifier) is NamespaceSymbol namespaceSymbol)
@@ -77,6 +100,37 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         {
             EvaluateInternal(stmt, namespaceScope, out _);
         }
+
+        result = RuntimeValue.Void;
+    }
+
+    public void VisitImportStatement(
+        ImportStatement statement,
+        Scope scope,
+        out RuntimeValue result
+    )
+    {
+        var module = BuiltInModuleManager.TryGetModule(statement.ModuleName);
+
+        if (module == null)
+        {
+            module = GetCustomModule(statement.ModuleName);
+        }
+
+        if (module == null)
+        {
+            ThrowHelper.Throw<UndefinedIdentifierException>(
+                $"The module \"{statement.ModuleName}\" was not found",
+                in statement.SourceInfo
+            );
+        }
+
+        scope.DeclareNamespace(
+            statement.ModuleName,
+            module,
+            in statement.SourceInfo,
+            throwIfAlreadyDeclared: false
+        );
 
         result = RuntimeValue.Void;
     }
@@ -151,90 +205,22 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     {
         EvaluateInternal(callExpression.Caller, scope, out var value);
 
-        if (value.Type.Base != BaseType.UserFunction)
+        switch (value.Type.Base)
         {
-            ThrowHelper.Throw<InvalidCallExpressionException>(
-                $"Cannot call {value.Type}", in callExpression.SourceInfo
-            );
-        }
-
-        var function = value.AsUserFunction();
-
-        var parameters = function.Parameters;
-        int minExpectedArguments = parameters.Count(p => !p.HasDefaultValue());
-
-        if (callExpression.ArgumentList.Count < minExpectedArguments || callExpression.ArgumentList.Count > parameters.Count)
-        {
-            string message = minExpectedArguments == parameters.Count
-                                ? $"Function expects {parameters.Count} arguments, but {callExpression.ArgumentList.Count} were given"
-                                : $"Function expects between {minExpectedArguments} and {parameters.Count} arguments, but {callExpression.ArgumentList.Count} were given";
-
-            ThrowHelper.Throw<InvalidParameterListException>(
-                message, in callExpression.SourceInfo
-            );
-        }
-
-        var functionScope = Scope.CreateLocalScope(function.Scope);
-
-        for (int i = 0; i < function.Parameters.Count; i++)
-        {
-            RuntimeValue argumentValue;
-            SourceInfo argumentSource;
-
-            if (i < callExpression.ArgumentList.Count)
-            {
-                EvaluateInternal(callExpression.ArgumentList[i], scope, out argumentValue);
-                argumentSource = callExpression.ArgumentList[i].SourceInfo;
-            }
-            else
-            {
-                EvaluateInternal(function.Parameters[i].DefaultValue!, function.Scope, out argumentValue);
-                argumentSource = function.Parameters[i].SourceInfo;
-            }
-
-            if (!function.Parameters[i].Type.IsCompatibleWith(in argumentValue))
-            {
-                ThrowHelper.Throw<InvalidParameterListException>(
-                    $"Parameter {function.Parameters[i].Identifier} expects type {function.Parameters[i].Type}, but {argumentValue.Type} was given",
-                    in argumentSource
+            case BaseType.UserFunction:
+                CallUserFunction(callExpression, value.AsUserFunction(), scope, out result);
+                break;
+            case BaseType.SystemFunction:
+                CallSystemFunction(callExpression, value.AsSystemFunction(), scope, out result);
+                break;
+            default:
+                ThrowHelper.Throw<InvalidCallExpressionException, RuntimeValue>(
+                    $"Cannot call {value.Type}",
+                    in callExpression.SourceInfo,
+                    out result
                 );
-            }
-
-            var variable = new VariableSymbol(argumentValue, function.Parameters[i].Type, function.Parameters[i].IsConstant, ref argumentSource);
-
-            functionScope.DeclareVariable(function.Parameters[i].Identifier, variable, in argumentSource);
+                break;
         }
-
-        RuntimeValue returnedValue = RuntimeValue.Void;
-        SourceInfo returnedValueSource;
-
-        _executionContext.EnterFunction();
-
-        EvaluateInternal(function.Body, functionScope, out _);
-        returnedValueSource = function.Body.SourceInfo;
-
-        if (_executionContext.HasPending(ContextSignal.Return))
-        {
-            _executionContext.ConsumeReturn(out var returnedSignal);
-
-            if (returnedSignal != null)
-            {
-                returnedValue = returnedSignal.Value.Value;
-                returnedValueSource = returnedSignal.Value.Source;
-            }
-        }
-
-        _executionContext.ExitFunction(in returnedValueSource);
-
-        if (!function.ReturnType.IsCompatibleWith(in returnedValue))
-        {
-            ThrowHelper.Throw<UnexpectedReturnType>(
-                $"Function was expected to return {function.ReturnType} but {returnedValue.Type} was returned",
-                in returnedValueSource
-            );
-        }
-
-        result = returnedValue;
     }
 
     public void VisitAssignmentStatement(
@@ -243,7 +229,12 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result
     )
     {
-        var variable = scope.GetVariable(statement.Target.Symbol, in statement.SourceInfo);
+        var variable = GetVariableFromExpression<InvalidAssignmentException>(
+            statement.Target,
+            scope,
+            throwIfNotInitialized: false,
+            "Assignment target must be a variable"
+        );
         EvaluateInternal(statement.Value, scope, out var newValue);
 
         variable.SetValue(ref newValue, in statement.SourceInfo);
@@ -285,8 +276,11 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result
     )
     {
-        var variable = scope.GetVariable(
-            expression.Operand.Symbol, in expression.SourceInfo, throwIfNotInitialized: true
+        var variable = GetVariableFromExpression<InvalidOperandException>(
+            expression.Operand,
+            scope,
+            throwIfNotInitialized: true,
+            $"The {expression.Operator} operator can only be applied to variables"
         );
 
         var valueBefore = variable.GetValue(in expression.SourceInfo);
@@ -305,7 +299,14 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result
     )
     {
-        EvaluateInternal(expression.Operand, scope, out var value);
+        var variable = GetVariableFromExpression<InvalidOperandException>(
+            expression.Operand,
+            scope,
+            throwIfNotInitialized: true,
+            $"The {Operators.NULL_CHECKER} operator can only be applied to variables"
+        );
+
+        var value = variable.GetValue(in expression.Operand.SourceInfo);
 
         result = value.Type == RuntimeType.Null ? RuntimeValue.True : RuntimeValue.False;
     }
@@ -530,6 +531,37 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         result = new RuntimeValue(expression.StrValue);
     }
 
+    private static void ValidateCustomModuleBuilders(Dictionary<string, Action<ModuleBuilder>> customModuleBuilders)
+    {
+        foreach (var customModuleName in customModuleBuilders.Keys)
+        {
+            if (BuiltInModuleManager.HasModule(customModuleName))
+            {
+                var source = new SourceInfo($"{nameof(Interpreter)} initializer");
+                ThrowHelper.Throw<RedeclarationException>(
+                    $"The custom module \"{customModuleName}\" has the same name as a built in module",
+                    in source
+                );
+            }
+        }
+    }
+
+    private NamespaceSymbol? GetCustomModule(string name)
+    {
+        if (
+            _customModuleBuilders != null
+            && _customModuleBuilders.TryGetValue(name, out var moduleBuilderFunction)
+        )
+        {
+            var moduleBuilder = new ModuleBuilder(name);
+            moduleBuilderFunction(moduleBuilder);
+
+            return moduleBuilder.Build();
+        }
+
+        return null;
+    }
+
     private bool GetValidBooleanValue(Expression condition, Scope scope)
     {
         EvaluateInternal(condition, scope, out var conditionResult);
@@ -543,5 +575,184 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         }
 
         return conditionResult.AsBoolean();
+    }
+
+    private void CallUserFunction(
+        CallExpression callExpression,
+        UserFunctionValue userFunction,
+        Scope scope,
+        out RuntimeValue result
+    )
+    {
+        var parameters = userFunction.Parameters;
+        ValidateFunctionParameter(callExpression, parameters);
+
+        var functionScope = Scope.CreateLocalScope(userFunction.Scope);
+
+        for (int i = 0; i < userFunction.Parameters.Count; i++)
+        {
+            RuntimeValue argumentValue;
+            SourceInfo argumentSource;
+
+            if (i < callExpression.ArgumentList.Count)
+            {
+                EvaluateInternal(callExpression.ArgumentList[i], scope, out argumentValue);
+                argumentSource = callExpression.ArgumentList[i].SourceInfo;
+            }
+            else
+            {
+                EvaluateInternal(userFunction.Parameters[i].DefaultValue!, userFunction.Scope, out argumentValue);
+                argumentSource = userFunction.Parameters[i].SourceInfo;
+            }
+
+            if (!userFunction.Parameters[i].Type.IsCompatibleWith(in argumentValue))
+            {
+                ThrowHelper.Throw<InvalidParameterListException>(
+                    $"Parameter {userFunction.Parameters[i].Identifier} expects type {userFunction.Parameters[i].Type}, but {argumentValue.Type} was given",
+                    in argumentSource
+                );
+            }
+
+            var variable = new VariableSymbol(argumentValue, userFunction.Parameters[i].Type, userFunction.Parameters[i].IsConstant, ref argumentSource);
+
+            functionScope.DeclareVariable(userFunction.Parameters[i].Identifier, variable, in argumentSource);
+        }
+
+        RuntimeValue returnedValue = RuntimeValue.Void;
+        SourceInfo returnedValueSource;
+
+        _executionContext.EnterFunction();
+
+        EvaluateInternal(userFunction.Body, functionScope, out _);
+        returnedValueSource = userFunction.Body.SourceInfo;
+
+        if (_executionContext.HasPending(ContextSignal.Return))
+        {
+            _executionContext.ConsumeReturn(out var returnedSignal);
+
+            if (returnedSignal != null)
+            {
+                returnedValue = returnedSignal.Value.Value;
+                returnedValueSource = returnedSignal.Value.Source;
+            }
+        }
+
+        _executionContext.ExitFunction(in returnedValueSource);
+
+        if (!userFunction.ReturnType.IsCompatibleWith(in returnedValue))
+        {
+            ThrowHelper.Throw<UnexpectedReturnType>(
+                $"Function was expected to return {userFunction.ReturnType} but {returnedValue.Type} was returned",
+                in returnedValueSource
+            );
+        }
+
+        result = returnedValue;
+    }
+
+    private void CallSystemFunction(
+        CallExpression callExpression,
+        SystemFunctionValue systemFunction,
+        Scope scope,
+        out RuntimeValue result
+    )
+    {
+        var parameters = systemFunction.Parameters;
+        ValidateFunctionParameter(callExpression, parameters);
+
+        var functionParameters = new RazeFunctionParameters();
+
+        for (int i = 0; i < systemFunction.Parameters.Count; i++)
+        {
+            RuntimeValue argumentValue;
+            SourceInfo argumentSource;
+
+            if (i < callExpression.ArgumentList.Count)
+            {
+                EvaluateInternal(callExpression.ArgumentList[i], scope, out argumentValue);
+                argumentSource = callExpression.ArgumentList[i].SourceInfo;
+            }
+            else
+            {
+                EvaluateInternal(systemFunction.Parameters[i].DefaultValue!, scope, out argumentValue);
+                argumentSource = callExpression.SourceInfo;
+            }
+
+            if (!systemFunction.Parameters[i].Type.IsCompatibleWith(in argumentValue))
+            {
+                ThrowHelper.Throw<InvalidParameterListException>(
+                    $"Parameter {systemFunction.Parameters[i].Identifier} expects type {systemFunction.Parameters[i].Type}, but {argumentValue.Type} was given",
+                    in argumentSource
+                );
+            }
+
+            functionParameters.Add(systemFunction.Parameters[i].Identifier, argumentValue.AsObject());
+        }
+
+        var returnValueWrapper = systemFunction.Body(functionParameters);
+
+        if (!systemFunction.ReturnType.IsCompatibleWith(in returnValueWrapper.Value))
+        {
+            ThrowHelper.Throw<UnexpectedReturnType>(
+                $"Function was expected to return {systemFunction.ReturnType} but {returnValueWrapper.Value.Type} was returned",
+                in callExpression.SourceInfo
+            );
+        }
+
+        result = returnValueWrapper.Value;
+    }
+
+    private static void ValidateFunctionParameter(
+        CallExpression callExpression,
+        IReadOnlyList<ParameterSymbol> functionParameters
+    )
+    {
+        int minExpectedArguments = functionParameters.Count(p => !p.HasDefaultValue());
+
+        if (callExpression.ArgumentList.Count < minExpectedArguments || callExpression.ArgumentList.Count > functionParameters.Count)
+        {
+            string message = minExpectedArguments == functionParameters.Count
+                                ? $"Function expects {functionParameters.Count} arguments, but {callExpression.ArgumentList.Count} were given"
+                                : $"Function expects between {minExpectedArguments} and {functionParameters.Count} arguments, but {callExpression.ArgumentList.Count} were given";
+
+            ThrowHelper.Throw<InvalidParameterListException>(
+                message, in callExpression.SourceInfo
+            );
+        }
+    }
+
+    private static VariableSymbol GetVariableFromExpression<TErrorIfNotVariable>(
+        Expression expr,
+        Scope scope,
+        bool throwIfNotInitialized,
+        string notVariableErrorMessage
+    )
+        where TErrorIfNotVariable : RazeException, IThrowableByThrowHelper<TErrorIfNotVariable>
+    {
+        switch (expr)
+        {
+            case IdentifierExpression identifierExpression:
+                return scope.GetVariable(
+                    identifierExpression.Symbol,
+                    in identifierExpression.SourceInfo,
+                    throwIfNotInitialized
+                );
+            case NamespaceAccessExpression namespaceAccessExpression:
+                var namespaceSymbol = scope.GetNamespace(
+                    namespaceAccessExpression.NamespaceIdentifier.Symbol,
+                    in namespaceAccessExpression.SourceInfo
+                );
+
+                return namespaceSymbol.Scope.GetVariable(
+                    namespaceAccessExpression.MemberIdentifier.Symbol,
+                    in namespaceAccessExpression.SourceInfo,
+                    throwIfNotInitialized
+                );
+            default:
+                return ThrowHelper.Throw<TErrorIfNotVariable, VariableSymbol>(
+                    notVariableErrorMessage,
+                    in expr.SourceInfo
+                );
+        }
     }
 }

@@ -94,7 +94,7 @@ internal sealed class OperationDispatcher
     {
         if (_binaryOperations.ContainsKey(key))
         {
-            throw new InvalidOperationException("A value with this key already exists");
+            ThrowHelper.ThrowInvalidOperationException("An operation with this key already exists");
         }
 
         _binaryOperations.Add(key, operation);
@@ -104,7 +104,7 @@ internal sealed class OperationDispatcher
     {
         if (_unaryOperations.ContainsKey(key))
         {
-            throw new InvalidOperationException("A value with this key already exists");
+            ThrowHelper.ThrowInvalidOperationException("An operation with this key already exists");
         }
 
         _unaryOperations.Add(key, operation);

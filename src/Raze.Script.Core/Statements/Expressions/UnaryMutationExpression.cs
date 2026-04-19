@@ -5,14 +5,14 @@ namespace Raze.Script.Core.Statements.Expressions;
 
 internal sealed class UnaryMutationExpression : Expression
 {
-    internal readonly IdentifierExpression Operand;
+    internal readonly Expression Operand;
 
     internal readonly string Operator;
 
     internal readonly bool IsPostfix;
 
     internal UnaryMutationExpression(
-        IdentifierExpression operand,
+        Expression operand,
         string op,
         bool isPostfix,
         ref readonly SourceInfo source

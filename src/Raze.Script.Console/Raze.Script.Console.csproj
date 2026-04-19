@@ -8,7 +8,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Version>$(ConsoleVersion)</Version>
+	<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	<AssemblyName>raze</AssemblyName>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.6" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Raze.Script.Core\Raze.Script.Core.csproj" />
