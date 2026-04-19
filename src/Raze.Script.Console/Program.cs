@@ -11,6 +11,9 @@ internal class Program
         CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
         CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 
+        Console.InputEncoding = System.Text.Encoding.UTF8;
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+
         var rootCommand = new RootCommand("Raze Script Console - A script runner and REPL for the Raze language");
 
         var versionOption = new Option<bool>("--version", "-v")
