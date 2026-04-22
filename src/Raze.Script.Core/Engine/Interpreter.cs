@@ -569,7 +569,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         if (conditionResult.Type != RuntimeType.Boolean)
         {
             ThrowHelper.Throw<UnexpectedTypeException>(
-                $"Expected: {RuntimeType.Boolean}. Found: {conditionResult.GetType().Name}",
+                $"Expected: {RuntimeType.Boolean}. Found: {conditionResult.Type}",
                 in condition.SourceInfo
             );
         }
