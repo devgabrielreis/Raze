@@ -1,15 +1,38 @@
 {
   "name": "raze",
   "displayName": "Raze",
-  "description": "Raze Syntax Highlighting",
-  "version": "0.1.0",
+  "description": "Syntax highlighting and script execution for the Raze language",
+  "version": "1.0.0",
   "engines": {
-    "vscode": "^1.116.0"
+    "vscode": "^1.109.0"
   },
   "categories": [
     "Programming Languages"
   ],
+  "main": "./extension.js",
+  "activationEvents": [],
   "contributes": {
+    "commands": [{
+      "command": "raze.runFile",
+      "title": "Raze: Run File",
+      "icon": "$(play)"
+    }],
+    "menus": {
+      "commandPalette": [{
+        "command": "raze.runFile",
+        "when": "resourceExtname == .raze"
+      }],
+      "editor/context": [{
+        "command": "raze.runFile",
+        "when": "resourceExtname == .raze",
+        "group": "navigation"
+      }],
+      "editor/title": [{
+        "command": "raze.runFile",
+        "when": "resourceExtname == .raze",
+        "group": "navigation"
+      }]
+    },
     "languages": [{
       "id": "raze",
       "aliases": ["raze", "raze"],
@@ -20,6 +43,16 @@
       "language": "raze",
       "scopeName": "source.raze",
       "path": "./syntaxes/raze.tmLanguage.json"
-    }]
+    }],
+    "configuration": {
+      "title": "Raze",
+      "properties": {
+        "raze.executableName": {
+          "type": "string",
+          "default": "raze",
+          "description": "The executable used to run .raze files (e.g. 'raze', '/usr/local/bin/raze')."
+        }
+      }
+    }
   }
 }
