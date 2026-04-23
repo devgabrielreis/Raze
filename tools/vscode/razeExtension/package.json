@@ -1,0 +1,25 @@
+{
+  "name": "raze",
+  "displayName": "Raze",
+  "description": "Raze Syntax Highlighting",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.116.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "raze",
+      "aliases": ["raze", "raze"],
+      "extensions": [".raze"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "raze",
+      "scopeName": "source.raze",
+      "path": "./syntaxes/raze.tmLanguage.json"
+    }]
+  }
+}
