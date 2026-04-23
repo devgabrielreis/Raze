@@ -1,5 +1,6 @@
 {
   "name": "raze",
+  "publisher": "devgabrielreis",
   "displayName": "Raze",
   "description": "Syntax highlighting and script execution for the Raze language",
   "version": "1.0.0",
