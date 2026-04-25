@@ -20,8 +20,8 @@ jobs:
       - name: Extract version from Version.props
         id: get_version
         run: |
-          CORE=$(grep -oPm1 "(?<=<CoreVersion>)[^<]+" src/Version.props)
-          SUFFIX=$(grep -oPm1 "(?<=\$(CoreVersion)).*(?=</ConsoleVersion>)" src/Version.props)
+          CORE=$(grep -oPm1 '(?<=<CoreVersion>)[^<]+' src/Version.props)
+          SUFFIX=$(grep -oPm1 '(?<=<ConsoleVersion>\$\(CoreVersion\))[^<]+' src/Version.props)
           
           FULL_VERSION="${CORE}${SUFFIX}"
           
