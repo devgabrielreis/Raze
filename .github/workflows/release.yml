@@ -1,0 +1,88 @@
+name: Build and Release
+
+on:
+  workflow_run:
+    workflows: ["Run Raze Tests"]
+    branches: [main]
+    types:
+      - completed
+
+jobs:
+  on-success:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Extract version from Version.props
+        id: get_version
+        run: |
+          CORE=$(grep -oPm1 "(?<=<CoreVersion>)[^<]+" src/Version.props)
+          SUFFIX=$(grep -oPm1 "(?<=\$(CoreVersion)).*(?=</ConsoleVersion>)" src/Version.props)
+          
+          FULL_VERSION="${CORE}${SUFFIX}"
+          
+          echo "VERSION=$FULL_VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $FULL_VERSION"
+
+      - name: Use version for tagging
+        run: echo "The version to be used for the release tag is ${{ steps.get_version.outputs.VERSION }}"
+      
+      - name: Package Notepad++ tools
+        run: |
+          echo "Zipping Notepad++ syntax highlighting definitions..."
+          zip -j notepad_plus_plus_udls.zip tools/notepad-plus-plus/*.xml
+      
+      - name: Package VS Code extension
+        run: |
+          echo "Zipping VS Code extension folder..."
+          cd tools/vscode/extension
+          zip -r ../../../vscode_extension.zip ./*/
+          cd ../../../
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Publish Console Project
+        run: |
+          dotnet publish src/Raze.Script.Console/Raze.Script.Console.csproj \
+            -c Release \
+            -r win-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:PublishReadyToRun=true \
+            -p:PublishTrimmed=true \
+            -o ./publish
+
+      - name: Package Windows Binary
+        run: |
+          echo "Packaging the compiled executable..."
+          cd publish
+          zip ../raze-${{ steps.get_version.outputs.VERSION }}-win-x64.zip raze.exe
+          cd ..
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          name: Release ${{ steps.get_version.outputs.VERSION }}
+          body: |
+            Automated release created by GitHub Action.
+            
+            Contents:
+            - Raze Console Executable (win-x64)
+            - VS Code Extension
+            - Notepad++ Syntax Highlighting
+          draft: false
+          prerelease: false
+          files: |
+            raze-${{ steps.get_version.outputs.VERSION }}-win-x64.zip
+            vscode_extension.zip
+            notepad_plus_plus_udls.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

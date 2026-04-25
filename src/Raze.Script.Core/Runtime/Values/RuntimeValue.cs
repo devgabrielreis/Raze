@@ -155,7 +155,7 @@ internal readonly struct RuntimeValue
     {
         Debug.Assert(Type == RuntimeType.Decimal);
 
-        var decimalStr = _value.BoolValue.ToString(CultureInfo.InvariantCulture);
+        var decimalStr = _value.DecimalValue.ToString(CultureInfo.InvariantCulture);
 
         if (!decimalStr.Contains('.'))
         {

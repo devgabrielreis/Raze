@@ -1,0 +1,129 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "raze",
+	"patterns": [
+		{
+			"include": "#comments"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#constants"
+		},
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#operators"
+		},
+		{
+			"include": "#punctuation"
+		},
+		{
+			"include": "#types"
+		},
+		{
+			"include": "#numbers"
+		}
+	],
+	"repository": {
+		"comments": {
+			"patterns": [
+				{
+				"name": "comment.block.raze",
+				"begin": "/\\*",
+				"beginCaptures": { "0": { "name": "punctuation.definition.comment.raze" } },
+				"end": "\\*/",
+				"endCaptures": { "0": { "name": "punctuation.definition.comment.raze" } }
+				},
+				{
+				"name": "comment.line.double-slash.raze",
+				"begin": "//",
+				"beginCaptures": { "0": { "name": "punctuation.definition.comment.raze" } },
+				"end": "$"
+				}
+			]
+		},
+		"strings": {
+			"name": "string.quoted.double.raze",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.raze",
+					"match": "\\\\."
+				}
+			]
+		},
+		"constants": {
+			"patterns": [
+				{
+				"name": "constant.language.raze",
+				"match": "\\b(true|false|null)\\b"
+				}
+			]
+		},
+		"keywords": {
+			"patterns": [
+				{
+					"name": "keyword.control.import.raze",
+					"match": "\\bimport\\b"
+				},
+				{
+					"name": "keyword.other.namespace.raze",
+					"match": "\\bnamespace\\b"
+				},
+				{
+					"name": "keyword.control.raze",
+					"match": "\\b(if|else|while|for|break|continue|return)\\b"
+				},
+				{
+					"name": "storage.type.function.raze",
+					"match": "\\b(def|const|var)\\b"
+				}
+			]
+		},
+		"operators": {
+			"patterns": [
+				{
+				"name": "keyword.operator.raze",
+				"match": "(\\+\\+|--|\\+=|-=|\\*=|/=|%=|==|!=|<=|>=|&&|\\|\\||\\?\\?|\\+|-|\\*|/|%|=|!|<|>|\\?)"
+				}
+			]
+		},
+		"punctuation": {
+			"patterns": [
+				{
+				"name": "punctuation.accessor.raze",
+				"match": "::"
+				},
+				{
+				"name": "punctuation.terminator.raze",
+				"match": ";"
+				},
+				{
+				"name": "punctuation.separator.raze",
+				"match": ","
+				}
+			]
+		},
+		"types": {
+			"patterns": [
+				{
+					"name": "storage.type.raze",
+					"match": "\\b(boolean|integer|decimal|string|function|void)\\b"
+				}
+			]
+		},
+		"numbers": {
+			"patterns": [
+				{
+				"name": "constant.numeric.raze",
+				"match": "(\\b\\d+(\\.\\d+)?\\b)|(\\.\\d+\\b)"
+				}
+			]
+		}
+	},
+	"scopeName": "source.raze"
+}
