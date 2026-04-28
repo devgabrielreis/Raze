@@ -68,6 +68,17 @@ public sealed class Scope
         return new Scope(parent, ScopePermissions.DeclareConstants, "Namespace");
     }
 
+    internal void ThrowIfImportIsNotAllowed(ref readonly SourceInfo source)
+    {
+        if (!Can(ScopePermissions.DeclareNamespaces))
+        {
+            ThrowHelper.Throw<ScopeDeclarationException>(
+                $"Cannot use imports on {_kind.ToLower()} scope",
+                in source
+            );
+        }
+    }
+
     internal void DeclareVariable(string name, VariableSymbol variable, ref readonly SourceInfo source)
     {
         var permissionNeeded = variable.IsConstant

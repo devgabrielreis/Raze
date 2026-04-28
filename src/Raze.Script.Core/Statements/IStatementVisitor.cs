@@ -11,6 +11,8 @@ internal interface IStatementVisitor<TState, TResult>
 
     public void VisitImportModuleStatement(ImportModuleStatement statement, TState state, out TResult result);
 
+    public void VisitImportFileStatement(ImportFileStatement statement, TState state, out TResult result);
+
     public void VisitNamespaceAccessExpression(NamespaceAccessExpression expression, TState state, out TResult result);
 
     public void VisitVariableDeclarationStatement(VariableDeclarationStatement statement, TState state, out TResult result);

@@ -38,6 +38,7 @@ internal class RazeConsole
 
         var scope = RazeScript.CreateInterpreterScope();
         var sources = new Dictionary<string, string>();
+        var rootPath = Directory.GetCurrentDirectory();
 
         while (true)
         {
@@ -46,7 +47,7 @@ internal class RazeConsole
             var sourceName = $"interpreter-source-{sources.Count}";
             sources[sourceName] = command;
 
-            var result = RazeScript.Evaluate(command, sourceName, scope, customModules);
+            var result = RazeScript.Evaluate(command, sourceName, rootPath, scope, customModules);
 
             if (result is RazeSuccess success && success.ValueType != BaseType.Void)
             {

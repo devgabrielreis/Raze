@@ -159,11 +159,13 @@ internal sealed class Parser
         var source = CurrentToken.SourceInfo;
         Advance();
 
-        Expect(TokenType.Identifier);
-        var moduleName = CurrentToken.Lexeme;
+        Expect(TokenType.Identifier, TokenType.StringLiteral);
+        var importTargetToken = CurrentToken;
         Advance();
 
-        return new ImportModuleStatement(moduleName, in source);
+        return (importTargetToken.Type == TokenType.Identifier)
+            ? new ImportModuleStatement(importTargetToken.Lexeme, in source)
+            : new ImportFileStatement(importTargetToken.Lexeme, in source);
     }
 
     private BreakStatement ParseBreakStatement()

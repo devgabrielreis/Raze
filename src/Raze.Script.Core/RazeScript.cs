@@ -35,8 +35,9 @@ public static class RazeScript
         }
 
         var scope = Scope.CreateGlobalScope();
+        var rootPath = script.Directory!.FullName;
 
-        var result = Evaluate(source, script.FullName, scope, customModuleBuilders);
+        var result = Evaluate(source, script.FullName, rootPath, scope, customModuleBuilders);
         if (result is RazeError)
         {
             return result;
@@ -50,14 +51,27 @@ public static class RazeScript
 
         var entryPoint = BuildEntryPointCode(entryPointNamespace, entryPointFunction);
 
-        return Evaluate(entryPoint, "Script entry point", scope, customModuleBuilders);
+        return Evaluate(entryPoint, "Script entry point", rootPath, scope, customModuleBuilders);
     }
 
     public static RazeResult Evaluate(
         string source,
         string sourceLocation,
+        string rootPath,
         Scope? scope = null,
         Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders = null
+    )
+    {
+        return Evaluate(source, sourceLocation, rootPath, scope, customModuleBuilders, throwRazeError: false);
+    }
+
+    internal static RazeResult Evaluate(
+        string source,
+        string sourceLocation,
+        string rootPath,
+        Scope? scope,
+        Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders,
+        bool throwRazeError
     )
     {
         if (scope is null)
@@ -69,12 +83,17 @@ public static class RazeScript
         {
             var tokens = Lexer.Tokenize(source, sourceLocation);
             var program = Parser.Parse(tokens, sourceLocation);
-            var result = Interpreter.Evaluate(program, scope, customModuleBuilders);
+            var result = Interpreter.Evaluate(program, scope, rootPath, customModuleBuilders);
 
             return new RazeSuccess(result);
         }
         catch (RazeException razeEx)
         {
+            if (throwRazeError)
+            {
+                throw;
+            }
+
             return new RazeError(razeEx);
         }
     }

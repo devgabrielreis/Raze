@@ -14,16 +14,18 @@ using Raze.Script.Core.Runtime.Values;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
+using Raze.Shared.Utils;
 
 namespace Raze.Script.Core.Engine;
 
 internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 {
+    private string _rootPath;
     private Runtime.Context.ExecutionContext _executionContext;
     private OperationDispatcher _operationDispatcher;
     private Dictionary<string, Action<ModuleBuilder>>? _customModuleBuilders;
 
-    private Interpreter(Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders)
+    private Interpreter(string rootPath, Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders)
     {
         if (customModuleBuilders != null)
         {
@@ -31,6 +33,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         }
 
         _customModuleBuilders = customModuleBuilders;
+        _rootPath = rootPath;
 
         _executionContext = new Runtime.Context.ExecutionContext();
 
@@ -44,10 +47,11 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     internal static RuntimeValue Evaluate(
         ProgramExpression program,
         Scope scope,
+        string rootPath,
         Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders
     )
     {
-        var interpreter = new Interpreter(customModuleBuilders);
+        var interpreter = new Interpreter(rootPath, customModuleBuilders);
         interpreter.EvaluateInternal(program, scope, out var result);
 
         return result;
@@ -110,6 +114,8 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result
     )
     {
+        scope.ThrowIfImportIsNotAllowed(in statement.SourceInfo);
+
         var module = BuiltInModuleManager.TryGetModule(statement.ModuleName);
 
         if (module == null)
@@ -130,6 +136,35 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             module,
             in statement.SourceInfo,
             throwIfAlreadyDeclared: false
+        );
+
+        result = RuntimeValue.Void;
+    }
+
+    public void VisitImportFileStatement(
+        ImportFileStatement statement,
+        Scope scope,
+        out RuntimeValue result
+    )
+    {
+        scope.ThrowIfImportIsNotAllowed(in statement.SourceInfo);
+
+        var scriptToInclude = (Path.IsPathRooted(statement.FilePath))
+            ? new FileInfo(statement.FilePath)
+            : new FileInfo(Path.Combine(_rootPath, statement.FilePath));
+
+        if (!FileUtils.TryReadAllFileLines(scriptToInclude, out var source, out var errorMessage))
+        {
+            ThrowHelper.Throw<FileAccessException>(errorMessage, in statement.SourceInfo);
+        }
+
+        RazeScript.Evaluate(
+            source,
+            scriptToInclude.FullName,
+            scriptToInclude.Directory!.FullName,
+            scope,
+            _customModuleBuilders,
+            throwRazeError: true
         );
 
         result = RuntimeValue.Void;
