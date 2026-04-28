@@ -10,7 +10,7 @@ internal interface IStatementVisitor<TState, TResult>
 
     public void VisitNamespaceDeclarationStatement(NamespaceDeclarationStatement statement, TState state, out TResult result);
 
-    public void VisitImportStatement(ImportStatement statement, TState state, out TResult result);
+    public void VisitImportModuleStatement(ImportModuleStatement statement, TState state, out TResult result);
 
     public void VisitNamespaceAccessExpression(NamespaceAccessExpression expression, TState state, out TResult result);
 

@@ -104,8 +104,8 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         result = RuntimeValue.Void;
     }
 
-    public void VisitImportStatement(
-        ImportStatement statement,
+    public void VisitImportModuleStatement(
+        ImportModuleStatement statement,
         Scope scope,
         out RuntimeValue result
     )
