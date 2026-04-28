@@ -1,5 +1,4 @@
-﻿using Raze.Script.Core.Engine;
-using Raze.Script.Core.Metadata;
+﻿using Raze.Script.Core.Metadata;
 using Raze.Script.Core.Runtime.Symbols;
 using Raze.Script.Core.Runtime.Types;
 

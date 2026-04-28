@@ -1,8 +1,7 @@
-﻿using Raze.Script.Core.Statements;
-using Raze.Script.Core.Statements.Expressions;
+﻿using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 
-namespace Raze.Script.Core.Engine;
+namespace Raze.Script.Core.Statements;
 
 internal interface IStatementVisitor<TState, TResult>
 {
