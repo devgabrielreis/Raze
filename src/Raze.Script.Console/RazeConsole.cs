@@ -7,7 +7,7 @@ using Raze.Script.Core.Runtime.Types;
 
 namespace Raze.Script.Console;
 
-internal class RazeConsole
+internal sealed class RazeConsole
 {
     private static readonly Dictionary<string, Action<ModuleBuilder>> customModules = new()
     {
@@ -36,7 +36,7 @@ internal class RazeConsole
     {
         PrintHeader();
 
-        var scope = RazeScript.CreateInterpreterScope();
+        var session = new RazeSession(customModules);
         var sources = new Dictionary<string, string>();
         var rootPath = Directory.GetCurrentDirectory();
 
@@ -47,7 +47,7 @@ internal class RazeConsole
             var sourceName = $"interpreter-source-{sources.Count}";
             sources[sourceName] = command;
 
-            var result = RazeScript.Evaluate(command, sourceName, rootPath, scope, customModules);
+            var result = RazeScript.Evaluate(command, sourceName, rootPath, session);
 
             if (result is RazeSuccess success && success.ValueType != BaseType.Void)
             {

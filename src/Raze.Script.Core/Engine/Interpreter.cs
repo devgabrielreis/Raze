@@ -1,5 +1,4 @@
-﻿using Raze.Script.Core.Builders;
-using Raze.Script.Core.BuiltInModules;
+﻿using Raze.Script.Core.BuiltInModules;
 using Raze.Script.Core.Constants;
 using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Exceptions.ParseExceptions;
@@ -20,19 +19,14 @@ namespace Raze.Script.Core.Engine;
 
 internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 {
-    private string _rootPath;
-    private Runtime.Context.ExecutionContext _executionContext;
-    private OperationDispatcher _operationDispatcher;
-    private Dictionary<string, Action<ModuleBuilder>>? _customModuleBuilders;
+    private readonly RazeSession _session;
+    private readonly string _rootPath;
+    private readonly Runtime.Context.ExecutionContext _executionContext;
+    private readonly OperationDispatcher _operationDispatcher;
 
-    private Interpreter(string rootPath, Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders)
+    private Interpreter(string rootPath, RazeSession session)
     {
-        if (customModuleBuilders != null)
-        {
-            ValidateCustomModuleBuilders(customModuleBuilders);
-        }
-
-        _customModuleBuilders = customModuleBuilders;
+        _session = session;
         _rootPath = rootPath;
 
         _executionContext = new Runtime.Context.ExecutionContext();
@@ -46,13 +40,15 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
     internal static RuntimeValue Evaluate(
         ProgramExpression program,
-        Scope scope,
+        RazeSession session,
         string rootPath,
-        Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders
+        Scope? customRootScope = null
     )
     {
-        var interpreter = new Interpreter(rootPath, customModuleBuilders);
-        interpreter.EvaluateInternal(program, scope, out var result);
+        var rootScope = customRootScope ?? session.RootScope;
+
+        var interpreter = new Interpreter(rootPath, session);
+        interpreter.EvaluateInternal(program, rootScope, out var result);
 
         return result;
     }
@@ -120,7 +116,7 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 
         if (module == null)
         {
-            module = GetCustomModule(statement.ModuleName);
+            module = _session.GetCustomModule(statement.ModuleName);
         }
 
         if (module == null)
@@ -162,9 +158,9 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             source,
             scriptToInclude.FullName,
             scriptToInclude.Directory!.FullName,
-            scope,
-            _customModuleBuilders,
-            throwRazeError: true
+            _session,
+            throwRazeError: true,
+            scope
         );
 
         result = RuntimeValue.Void;
@@ -564,37 +560,6 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result)
     {
         result = new RuntimeValue(expression.StrValue);
-    }
-
-    private static void ValidateCustomModuleBuilders(Dictionary<string, Action<ModuleBuilder>> customModuleBuilders)
-    {
-        foreach (var customModuleName in customModuleBuilders.Keys)
-        {
-            if (BuiltInModuleManager.HasModule(customModuleName))
-            {
-                var source = new SourceInfo($"{nameof(Interpreter)} initializer");
-                ThrowHelper.Throw<RedeclarationException>(
-                    $"The custom module \"{customModuleName}\" has the same name as a built in module",
-                    in source
-                );
-            }
-        }
-    }
-
-    private NamespaceSymbol? GetCustomModule(string name)
-    {
-        if (
-            _customModuleBuilders != null
-            && _customModuleBuilders.TryGetValue(name, out var moduleBuilderFunction)
-        )
-        {
-            var moduleBuilder = new ModuleBuilder(name);
-            moduleBuilderFunction(moduleBuilder);
-
-            return moduleBuilder.Build();
-        }
-
-        return null;
     }
 
     private bool GetValidBooleanValue(Expression condition, Scope scope)
