@@ -2,7 +2,6 @@
 using Raze.Script.Core.Builders;
 using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Result;
-using Raze.Script.Core.Runtime.Scopes;
 using Raze.Script.Core.Runtime.Types;
 
 namespace Raze.Tests;
@@ -12,12 +11,14 @@ internal class RazeAssert
     internal static void EvaluatesToInteger(
         string script,
         Int128 expected,
-        Scope? scope = null,
+        RazeSession? session = null,
         string context = "Raze.Tests",
-        Dictionary<string, Action<ModuleBuilder>>? customModules = null
+        string? rootPath = null
     )
     {
-        var result = RazeScript.Evaluate(script, context, scope, customModules);
+        rootPath ??= Directory.GetCurrentDirectory();
+
+        var result = RazeScript.Evaluate(script, context, rootPath, session);
 
         var success = Assert.IsType<RazeSuccess>(result);
         Assert.Equal(BaseType.Integer, success.ValueType);
@@ -40,12 +41,14 @@ internal class RazeAssert
     internal static void EvaluatesToDecimal(
         string script,
         decimal expected,
-        Scope? scope = null,
+        RazeSession? session = null,
         string context = "Raze.Tests",
-        Dictionary<string, Action<ModuleBuilder>>? customModules = null
+        string? rootPath = null
     )
     {
-        var result = RazeScript.Evaluate(script, context, scope, customModules);
+        rootPath ??= Directory.GetCurrentDirectory();
+
+        var result = RazeScript.Evaluate(script, context, rootPath, session);
 
         var success = Assert.IsType<RazeSuccess>(result);
         Assert.Equal(BaseType.Decimal, success.ValueType);
@@ -55,12 +58,14 @@ internal class RazeAssert
     internal static void EvaluatesToBoolean(
         string script,
         bool expected,
-        Scope? scope = null,
+        RazeSession? session = null,
         string context = "Raze.Tests",
-        Dictionary<string, Action<ModuleBuilder>>? customModules = null
+        string? rootPath = null
     )
     {
-        var result = RazeScript.Evaluate(script, context, scope, customModules);
+        rootPath ??= Directory.GetCurrentDirectory();
+
+        var result = RazeScript.Evaluate(script, context, rootPath, session);
 
         var success = Assert.IsType<RazeSuccess>(result);
         Assert.Equal(BaseType.Boolean, success.ValueType);
@@ -70,12 +75,14 @@ internal class RazeAssert
     internal static void EvaluatesToString(
         string script,
         string expected,
-        Scope? scope = null,
+        RazeSession? session = null,
         string context = "Raze.Tests",
-        Dictionary<string, Action<ModuleBuilder>>? customModules = null
+        string? rootPath = null
     )
     {
-        var result = RazeScript.Evaluate(script, context, scope, customModules);
+        rootPath ??= Directory.GetCurrentDirectory();
+
+        var result = RazeScript.Evaluate(script, context, rootPath, session);
 
         var success = Assert.IsType<RazeSuccess>(result);
         Assert.Equal(BaseType.String, success.ValueType);
@@ -84,12 +91,14 @@ internal class RazeAssert
 
     internal static void EvaluatesToNull(
         string script,
-        Scope? scope = null,
+        RazeSession? session = null,
         string context = "Raze.Tests",
-        Dictionary<string, Action<ModuleBuilder>>? customModules = null
+        string? rootPath = null
     )
     {
-        var result = RazeScript.Evaluate(script, context, scope, customModules);
+        rootPath ??= Directory.GetCurrentDirectory();
+
+        var result = RazeScript.Evaluate(script, context, rootPath, session);
 
         var success = Assert.IsType<RazeSuccess>(result);
         Assert.Equal(BaseType.Null, success.ValueType);
@@ -97,12 +106,14 @@ internal class RazeAssert
 
     internal static void EvaluatesToVoid(
         string script,
-        Scope? scope = null,
+        RazeSession? session = null,
         string context = "Raze.Tests",
-        Dictionary<string, Action<ModuleBuilder>>? customModules = null
+        string? rootPath = null
     )
     {
-        var result = RazeScript.Evaluate(script, context, scope, customModules);
+        rootPath ??= Directory.GetCurrentDirectory();
+
+        var result = RazeScript.Evaluate(script, context, rootPath, session);
 
         var success = Assert.IsType<RazeSuccess>(result);
         Assert.Equal(BaseType.Void, success.ValueType);
@@ -110,12 +121,14 @@ internal class RazeAssert
 
     internal static void ReturnsError<T>(
         string script,
-        Scope? scope = null,
+        RazeSession? session = null,
         string context = "Raze.Tests",
-        Dictionary<string, Action<ModuleBuilder>>? customModules = null
+        string? rootPath = null
     ) where T: RazeException
     {
-        var result = RazeScript.Evaluate(script, context, scope, customModules);
+        rootPath ??= Directory.GetCurrentDirectory();
+
+        var result = RazeScript.Evaluate(script, context, rootPath, session);
 
         var error = Assert.IsType<RazeError>(result);
         Assert.IsType<T>(error.Error);
@@ -134,14 +147,16 @@ internal class RazeAssert
 
     internal static void ThrowsError<T>(
         string script,
-        Scope? scope = null,
+        RazeSession? session = null,
         string context = "Raze.Tests",
-        Dictionary<string, Action<ModuleBuilder>>? customModules = null
+        string? rootPath = null
     ) where T : Exception
     {
+        rootPath ??= Directory.GetCurrentDirectory();
+
         Assert.Throws<T>(() =>
         {
-            RazeScript.Evaluate(script, context, scope, customModules);
+            var result = RazeScript.Evaluate(script, context, rootPath, session);
         });
     }
 }

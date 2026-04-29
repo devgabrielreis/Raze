@@ -10,16 +10,16 @@ public class IntegerVariableTests
     [InlineData("var integer? test = null", "test", null)]
     public void Evaluate_IntegerVariableDeclaration_ReturnsExpectedValue(string expression, string varname, int? expected)
     {
-        var scope = RazeScript.CreateInterpreterScope();
-        RazeAssert.EvaluatesToVoid(expression, scope);
+        var session = new RazeSession();
+        RazeAssert.EvaluatesToVoid(expression, session);
 
         if (expected is null)
         {
-            RazeAssert.EvaluatesToNull(varname, scope);
+            RazeAssert.EvaluatesToNull(varname, session);
         }
         else
         {
-            RazeAssert.EvaluatesToInteger(varname, expected.Value, scope);
+            RazeAssert.EvaluatesToInteger(varname, expected.Value, session);
         }
     }
 
@@ -47,9 +47,9 @@ public class IntegerVariableTests
             {(isPostfix ? $"test{op}" : $"{op}test")}
         ";
 
-        var scope = RazeScript.CreateInterpreterScope();
+        var session = new RazeSession();
 
-        RazeAssert.EvaluatesToInteger(script, expressionResult, scope);
-        RazeAssert.EvaluatesToInteger("test", variableAfterValue, scope);
+        RazeAssert.EvaluatesToInteger(script, expressionResult, session);
+        RazeAssert.EvaluatesToInteger("test", variableAfterValue, session);
     }
 }

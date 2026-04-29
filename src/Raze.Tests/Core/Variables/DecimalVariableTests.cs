@@ -13,16 +13,16 @@ public class DecimalVariableTests
     {
         decimal? expected = decimalStr is null ? null : decimal.Parse(decimalStr, CultureInfo.InvariantCulture);
 
-        var scope = RazeScript.CreateInterpreterScope();
-        RazeAssert.EvaluatesToVoid(expression, scope);
+        var session = new RazeSession();
+        RazeAssert.EvaluatesToVoid(expression, session);
 
         if (expected is null)
         {
-            RazeAssert.EvaluatesToNull(varname, scope);
+            RazeAssert.EvaluatesToNull(varname, session);
         }
         else
         {
-            RazeAssert.EvaluatesToDecimal(varname, expected.Value, scope);
+            RazeAssert.EvaluatesToDecimal(varname, expected.Value, session);
         }
     }
 
@@ -50,12 +50,12 @@ public class DecimalVariableTests
             {(isPostfix ? $"test{op}" : $"{op}test")}
         ";
 
-        var scope = RazeScript.CreateInterpreterScope();
+        var session = new RazeSession();
 
         decimal expressionResult = decimal.Parse(expressionResultStr, CultureInfo.InvariantCulture);
-        RazeAssert.EvaluatesToDecimal(script, expressionResult, scope);
+        RazeAssert.EvaluatesToDecimal(script, expressionResult, session);
 
         decimal variableAfterValue = decimal.Parse(variableAfterValueStr, CultureInfo.InvariantCulture);
-        RazeAssert.EvaluatesToDecimal("test", variableAfterValue, scope);
+        RazeAssert.EvaluatesToDecimal("test", variableAfterValue, session);
     }
 }

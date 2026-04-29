@@ -10,16 +10,16 @@ public class StringVariableTests
     [InlineData("var string? test = null", "test", null)]
     public void Evaluate_StringVariableDeclaration_ReturnsExpectedValue(string expression, string varname, string? expected)
     {
-        var scope = RazeScript.CreateInterpreterScope();
-        RazeAssert.EvaluatesToVoid(expression, scope);
+        var session = new RazeSession();
+        RazeAssert.EvaluatesToVoid(expression, session);
 
         if (expected is null)
         {
-            RazeAssert.EvaluatesToNull(varname, scope);
+            RazeAssert.EvaluatesToNull(varname, session);
         }
         else
         {
-            RazeAssert.EvaluatesToString(varname, expected, scope);
+            RazeAssert.EvaluatesToString(varname, expected, session);
         }
     }
 

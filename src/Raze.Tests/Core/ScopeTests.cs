@@ -8,15 +8,15 @@ public class ScopeTests
     [Fact]
     public void Evaluate_DuplicateVariableDeclaration_ThrowsException()
     {
-        var scope = RazeScript.CreateInterpreterScope();
+        var session = new RazeSession();
 
-        RazeAssert.EvaluatesToVoid("var integer x = 1", scope);
-        RazeAssert.ReturnsError<RedeclarationException>("var integer x = 2", scope);
+        RazeAssert.EvaluatesToVoid("var integer x = 1", session);
+        RazeAssert.ReturnsError<RedeclarationException>("var integer x = 2", session);
 
-        var scope2 = RazeScript.CreateInterpreterScope();
+        var session2 = new RazeSession();
 
-        RazeAssert.EvaluatesToVoid("var integer x = 1", scope2);
-        RazeAssert.ReturnsError<RedeclarationException>("const integer x = 2", scope2);
+        RazeAssert.EvaluatesToVoid("var integer x = 1", session2);
+        RazeAssert.ReturnsError<RedeclarationException>("const integer x = 2", session2);
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public class ScopeTests
     [Fact]
     public void Evaluate_VariableDeclaredInsideForLoopConditionOutsideOfIt_ThrowsUndefinedIdentifierException()
     {
-        var scope = RazeScript.CreateInterpreterScope();
+        var session = new RazeSession();
 
         var script = @"
             for (var integer i = 0; i < 10; i = i + 1) {
@@ -63,15 +63,15 @@ public class ScopeTests
             }
         ";
 
-        RazeAssert.EvaluatesToVoid(script, scope);
-        RazeAssert.ReturnsError<UndefinedIdentifierException>("test", scope);
-        RazeAssert.ReturnsError<UndefinedIdentifierException>("i", scope);
+        RazeAssert.EvaluatesToVoid(script, session);
+        RazeAssert.ReturnsError<UndefinedIdentifierException>("test", session);
+        RazeAssert.ReturnsError<UndefinedIdentifierException>("i", session);
     }
 
     [Fact]
     public void Evaluate_VariableDeclaredInsideWhileLoopConditionOutsideOfIt_ThrowsUndefinedIdentifierException()
     {
-        var scope = RazeScript.CreateInterpreterScope();
+        var session = new RazeSession();
 
         var script = @"
             while (true) {
@@ -80,8 +80,8 @@ public class ScopeTests
             }
         ";
 
-        RazeAssert.EvaluatesToVoid(script, scope);
-        RazeAssert.ReturnsError<UndefinedIdentifierException>("test", scope);
+        RazeAssert.EvaluatesToVoid(script, session);
+        RazeAssert.ReturnsError<UndefinedIdentifierException>("test", session);
     }
 
     [Fact]

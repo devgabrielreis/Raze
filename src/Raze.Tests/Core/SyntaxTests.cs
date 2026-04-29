@@ -124,13 +124,13 @@ public class SyntaxTests
     [Fact]
     public void Evaluate_CodeComments_ShouldBeIgnored()
     {
-        var scope = RazeScript.CreateInterpreterScope();
+        var session = new RazeSession();
 
         var script = """
             // initialize the variable
             var integer test = 0;
         """;
-        RazeAssert.EvaluatesToVoid(script, scope);
+        RazeAssert.EvaluatesToVoid(script, session);
 
         script = """
             /*
@@ -139,14 +139,14 @@ public class SyntaxTests
             */
             test //should still be 0
         """;
-        RazeAssert.EvaluatesToInteger(script, 0, scope);
+        RazeAssert.EvaluatesToInteger(script, 0, session);
 
         script = """
             /*
             this comment is not closed, so nothing should be executed here
             test = "hihihi"
         """;
-        RazeAssert.EvaluatesToVoid(script, scope);
+        RazeAssert.EvaluatesToVoid(script, session);
 
         script = """
             /*/
@@ -155,6 +155,6 @@ public class SyntaxTests
             test = /*10*/ 9;
             test /* should be 9
         """;
-        RazeAssert.EvaluatesToInteger(script, 9, scope);
+        RazeAssert.EvaluatesToInteger(script, 9, session);
     }
 }

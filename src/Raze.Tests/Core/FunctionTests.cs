@@ -76,11 +76,11 @@ public class FunctionTests
                 return param + param2;
             }
         ";
-        var scope = RazeScript.CreateInterpreterScope();
+        var session = new RazeSession();
 
-        RazeAssert.EvaluatesToVoid(function, scope);
-        RazeAssert.EvaluatesToInteger("myFunc(5)", 20, scope);
-        RazeAssert.EvaluatesToInteger("myFunc(5, 25)", 30, scope);
+        RazeAssert.EvaluatesToVoid(function, session);
+        RazeAssert.EvaluatesToInteger("myFunc(5)", 20, session);
+        RazeAssert.EvaluatesToInteger("myFunc(5, 25)", 30, session);
     }
 
     [Fact]
@@ -122,13 +122,13 @@ public class FunctionTests
             const function<integer> counter2 = makeCounter(50);
         ";
 
-        var scope = RazeScript.CreateInterpreterScope();
+        var session = new RazeSession();
 
-        RazeAssert.EvaluatesToVoid(script, scope);
-        RazeAssert.EvaluatesToInteger("counter2()", 51, scope);
-        RazeAssert.EvaluatesToInteger("counter1()", 101, scope);
-        RazeAssert.EvaluatesToInteger("counter2()", 52, scope);
-        RazeAssert.EvaluatesToInteger("counter1()", 102, scope);
+        RazeAssert.EvaluatesToVoid(script, session);
+        RazeAssert.EvaluatesToInteger("counter2()", 51, session);
+        RazeAssert.EvaluatesToInteger("counter1()", 101, session);
+        RazeAssert.EvaluatesToInteger("counter2()", 52, session);
+        RazeAssert.EvaluatesToInteger("counter1()", 102, session);
     }
 
     [Fact]

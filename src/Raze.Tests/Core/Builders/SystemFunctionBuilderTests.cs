@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Builders;
+﻿using Raze.Script.Core;
+using Raze.Script.Core.Builders;
 using Raze.Script.Core.Builders.Types;
 using Raze.Script.Core.Exceptions.RuntimeExceptions;
 using Raze.Script.Core.Runtime.Values;
@@ -48,8 +49,9 @@ public class SystemFunctionBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 
     [Fact]
@@ -94,8 +96,9 @@ public class SystemFunctionBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 
     [Fact]
@@ -141,8 +144,9 @@ public class SystemFunctionBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 
     [Fact]
@@ -188,8 +192,9 @@ public class SystemFunctionBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 
     [Fact]
@@ -234,8 +239,9 @@ public class SystemFunctionBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 
     [Fact]
@@ -280,8 +286,9 @@ public class SystemFunctionBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 
     [Fact]
@@ -335,8 +342,9 @@ public class SystemFunctionBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 
     [Fact]
@@ -380,8 +388,9 @@ public class SystemFunctionBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 
     [Fact]
@@ -417,8 +426,9 @@ public class SystemFunctionBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 
     [Fact]
@@ -460,7 +470,8 @@ public class SystemFunctionBuilderTests
 
             testModule::testFunction(10, 10)
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ReturnsError<UnexpectedReturnType>(script, customModules: customModules);
+        RazeAssert.ReturnsError<UnexpectedReturnType>(script, session);
     }
 }
