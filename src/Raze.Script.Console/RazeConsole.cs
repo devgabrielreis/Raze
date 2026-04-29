@@ -75,14 +75,14 @@ internal sealed class RazeConsole
     private static string GetCommandFromUser()
     {
         System.Console.Write("> ");
-        string command = System.Console.ReadLine()!;
+        string command = System.Console.ReadLine() ?? string.Empty;
 
         while (RazeUtils.GetScriptIndentationLevel(command) > 0)
         {
             command += '\n';
 
             System.Console.Write("..");
-            command += System.Console.ReadLine()!;
+            command += System.Console.ReadLine() ?? string.Empty;
         }
 
         return command;
