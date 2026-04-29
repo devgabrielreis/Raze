@@ -42,10 +42,12 @@ internal sealed class OperationDispatcher
         _unaryOperations = new Dictionary<UnaryOperationKey, UnaryOperation>();
     }
 
-    internal void RegisterFrom<TOperationRegistrar>() where TOperationRegistrar: IOperationRegistrar
+    internal OperationDispatcher RegisterFrom<TOperationRegistrar>() where TOperationRegistrar: IOperationRegistrar
     {
         TOperationRegistrar.RegisterBinaryOperations(this);
         TOperationRegistrar.RegisterUnaryOperations(this);
+
+        return this;
     }
 
     internal void ExecuteBinaryOperation(

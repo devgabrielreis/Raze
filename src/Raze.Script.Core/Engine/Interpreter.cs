@@ -22,7 +22,12 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     private readonly RazeSession _session;
     private readonly string _rootPath;
     private readonly Runtime.Context.ExecutionContext _executionContext;
-    private readonly OperationDispatcher _operationDispatcher;
+
+    private static readonly OperationDispatcher _operationDispatcher = new OperationDispatcher()
+                                                                        .RegisterFrom<IntegerOperationRegistrar>()
+                                                                        .RegisterFrom<DecimalOperationRegistrar>()
+                                                                        .RegisterFrom<StringOperationRegistrar>()
+                                                                        .RegisterFrom<BooleanOperationRegistrar>();
 
     private Interpreter(string rootPath, RazeSession session)
     {
@@ -30,12 +35,6 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         _rootPath = rootPath;
 
         _executionContext = new Runtime.Context.ExecutionContext();
-
-        _operationDispatcher = new OperationDispatcher();
-        _operationDispatcher.RegisterFrom<IntegerOperationRegistrar>();
-        _operationDispatcher.RegisterFrom<DecimalOperationRegistrar>();
-        _operationDispatcher.RegisterFrom<StringOperationRegistrar>();
-        _operationDispatcher.RegisterFrom<BooleanOperationRegistrar>();
     }
 
     internal static RuntimeValue Evaluate(
