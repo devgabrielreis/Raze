@@ -84,7 +84,7 @@ public static class RazeScript
         {
             var tokens = Lexer.Tokenize(source, sourceLocation);
             var program = Parser.Parse(tokens, sourceLocation);
-            var result = Interpreter.Evaluate(program, session, rootPath, customRootScope);
+            var result = Interpreter.Evaluate(program, session, sourceLocation, rootPath, customRootScope);
 
             return new RazeSuccess(result);
         }

@@ -40,11 +40,13 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
     internal static RuntimeValue Evaluate(
         ProgramExpression program,
         RazeSession session,
+        string sourceLocation,
         string rootPath,
         Scope? customRootScope = null
     )
     {
         var rootScope = customRootScope ?? session.RootScope;
+        session.RegisterReadFile(sourceLocation);
 
         var interpreter = new Interpreter(rootPath, session);
         interpreter.EvaluateInternal(program, rootScope, out var result);
