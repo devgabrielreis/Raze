@@ -110,7 +110,15 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result
     )
     {
+        result = RuntimeValue.Void;
+
         scope.ThrowIfImportIsNotAllowed(in statement.SourceInfo);
+
+        if (_session.HasImportedModule(statement.ModuleName))
+        {
+            return;
+        }
+        _session.RegisterImportedModule(statement.ModuleName);
 
         var module = BuiltInModuleManager.TryGetModule(statement.ModuleName);
 
@@ -130,11 +138,8 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         scope.DeclareNamespace(
             statement.ModuleName,
             module,
-            in statement.SourceInfo,
-            throwIfAlreadyDeclared: false
+            in statement.SourceInfo
         );
-
-        result = RuntimeValue.Void;
     }
 
     public void VisitImportFileStatement(
@@ -143,11 +148,19 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result
     )
     {
+        result = RuntimeValue.Void;
+
         scope.ThrowIfImportIsNotAllowed(in statement.SourceInfo);
 
         var scriptToInclude = (Path.IsPathRooted(statement.FilePath))
             ? new FileInfo(statement.FilePath)
             : new FileInfo(Path.Combine(_rootPath, statement.FilePath));
+
+        if (_session.HasReadFile(scriptToInclude.FullName))
+        {
+            return;
+        }
+        _session.RegisterReadFile(scriptToInclude.FullName);
 
         if (!FileUtils.TryReadAllFileLines(scriptToInclude, out var source, out var errorMessage))
         {
@@ -162,8 +175,6 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
             throwRazeError: true,
             scope
         );
-
-        result = RuntimeValue.Void;
     }
 
     public void VisitNamespaceAccessExpression(

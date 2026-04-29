@@ -16,6 +16,8 @@ public sealed class RazeSession
     internal readonly Scope RootScope;
 
     private readonly Dictionary<string, Action<ModuleBuilder>>? _customModuleBuilders;
+    private readonly HashSet<string> _readFiles;
+    private readonly HashSet<string> _importedModules;
 
     public RazeSession(Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders = null)
         : this(Scope.CreateInterpreterScope(), customModuleBuilders)
@@ -31,6 +33,8 @@ public sealed class RazeSession
 
         RootScope = mainScope;
         _customModuleBuilders = customModuleBuilders;
+        _readFiles = new HashSet<string>();
+        _importedModules = new HashSet<string>();
     }
 
     internal NamespaceSymbol? GetCustomModule(string name)
@@ -47,6 +51,26 @@ public sealed class RazeSession
         }
 
         return null;
+    }
+
+    internal void RegisterReadFile(string fileFullPath)
+    {
+        _readFiles.Add(fileFullPath);
+    }
+
+    internal bool HasReadFile(string fileFullPath)
+    {
+        return _readFiles.Contains(fileFullPath);
+    }
+
+    internal void RegisterImportedModule(string moduleName)
+    {
+        _importedModules.Add(moduleName);
+    }
+
+    internal bool HasImportedModule(string moduleName)
+    {
+        return _importedModules.Contains(moduleName);
     }
 
     private static void ValidateCustomModuleBuilders(Dictionary<string, Action<ModuleBuilder>> customModuleBuilders)
