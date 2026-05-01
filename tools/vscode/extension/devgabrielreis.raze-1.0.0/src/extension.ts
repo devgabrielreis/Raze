@@ -1,6 +1,6 @@
-const vscode = require('vscode');
+import * as vscode from 'vscode';
 
-function runFile() {
+function runFile(): void {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
     vscode.window.showErrorMessage('No files open.');
@@ -16,12 +16,10 @@ function runFile() {
   terminal.sendText(`${executable} "${filePath}"`);
 }
 
-function activate(context) {
+export function activate(context: vscode.ExtensionContext): void {
   let disposable = vscode.commands.registerCommand('raze.runFile', runFile);
 
   context.subscriptions.push(disposable);
 }
 
-function deactivate() {}
-
-module.exports = { activate, deactivate };
+export function deactivate(): void {}
