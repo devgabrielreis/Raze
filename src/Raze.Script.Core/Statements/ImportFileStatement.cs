@@ -2,11 +2,14 @@
 
 namespace Raze.Script.Core.Statements;
 
-internal sealed class ContinueStatement : Statement
+internal sealed class ImportFileStatement : Statement
 {
-    internal ContinueStatement(ref readonly SourceInfo source)
+    internal readonly string FilePath;
+
+    internal ImportFileStatement(string filePath, ref readonly SourceInfo source)
         : base(in source, true)
     {
+        FilePath = filePath;
     }
 
     internal override void AcceptVisitor<TState, TResult>(
@@ -15,6 +18,6 @@ internal sealed class ContinueStatement : Statement
         out TResult result
     )
     {
-        visitor.VisitContinueStatement(this, state, out result);
+        visitor.VisitImportFileStatement(this, state, out result);
     }
 }

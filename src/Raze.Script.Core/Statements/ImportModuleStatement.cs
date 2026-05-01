@@ -1,13 +1,12 @@
-﻿using Raze.Script.Core.Engine;
-using Raze.Script.Core.Metadata;
+﻿using Raze.Script.Core.Metadata;
 
 namespace Raze.Script.Core.Statements;
 
-internal sealed class ImportStatement : Statement
+internal sealed class ImportModuleStatement : Statement
 {
     internal readonly string ModuleName;
 
-    internal ImportStatement(string moduleName, ref readonly SourceInfo source)
+    internal ImportModuleStatement(string moduleName, ref readonly SourceInfo source)
         : base(in source, true)
     {
         ModuleName = moduleName;
@@ -19,6 +18,6 @@ internal sealed class ImportStatement : Statement
         out TResult result
     )
     {
-        visitor.VisitImportStatement(this, state, out result);
+        visitor.VisitImportModuleStatement(this, state, out result);
     }
 }

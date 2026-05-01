@@ -3,14 +3,14 @@
   "publisher": "devgabrielreis",
   "displayName": "Raze",
   "description": "Syntax highlighting and script execution for the Raze language",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "engines": {
     "vscode": "^1.109.0"
   },
   "categories": [
     "Programming Languages"
   ],
-  "main": "./extension.js",
+  "main": "./out/extension.js",
   "activationEvents": [],
   "contributes": {
     "commands": [{
@@ -55,5 +55,13 @@
         }
       }
     }
-  }
+  },
+  "scripts": {
+		"build": "tsc -p ./"
+	},
+  "devDependencies": {
+		"@types/node": "25.6.0",
+		"@types/vscode": "1.118.0",
+		"typescript": "6.0.3"
+	}
 }

@@ -1,8 +1,7 @@
-﻿using Raze.Script.Core.Statements;
-using Raze.Script.Core.Statements.Expressions;
+﻿using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
 
-namespace Raze.Script.Core.Engine;
+namespace Raze.Script.Core.Statements;
 
 internal interface IStatementVisitor<TState, TResult>
 {
@@ -10,7 +9,9 @@ internal interface IStatementVisitor<TState, TResult>
 
     public void VisitNamespaceDeclarationStatement(NamespaceDeclarationStatement statement, TState state, out TResult result);
 
-    public void VisitImportStatement(ImportStatement statement, TState state, out TResult result);
+    public void VisitImportModuleStatement(ImportModuleStatement statement, TState state, out TResult result);
+
+    public void VisitImportFileStatement(ImportFileStatement statement, TState state, out TResult result);
 
     public void VisitNamespaceAccessExpression(NamespaceAccessExpression expression, TState state, out TResult result);
 

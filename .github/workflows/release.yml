@@ -38,8 +38,15 @@ jobs:
       
       - name: Package VS Code extension
         run: |
-          echo "Zipping VS Code extension folder..."
+          echo "Building and zipping VS Code extension..."
           cd tools/vscode/extension
+          EXTENSION_DIR=$(ls -d devgabrielreis.raze-*/ | head -n 1)
+          echo "Found extension directory: $EXTENSION_DIR"
+          cd "$EXTENSION_DIR"
+          npm install
+          npm run build
+          rm -rf node_modules
+          cd ..
           zip -r ../../../vscode_extension.zip ./*/
           cd ../../../
       

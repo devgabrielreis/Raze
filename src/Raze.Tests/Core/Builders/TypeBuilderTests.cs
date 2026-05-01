@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Builders;
+﻿using Raze.Script.Core;
+using Raze.Script.Core.Builders;
 using Raze.Script.Core.Builders.Types;
 
 namespace Raze.Tests.Core.Builders;
@@ -26,7 +27,8 @@ public class TypeBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 }

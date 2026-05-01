@@ -9,34 +9,34 @@ public class VariableTests
     [Fact]
     public void Evaluate_VariableAssignment_CreatesCopy()
     {
-        var scope = RazeScript.CreateInterpreterScope();
+        var session = new RazeSession();
 
-        RazeAssert.EvaluatesToVoid("var integer a = 10", scope);
-        RazeAssert.EvaluatesToVoid("var integer b = a", scope);
-        RazeAssert.EvaluatesToVoid("a = 20", scope);
+        RazeAssert.EvaluatesToVoid("var integer a = 10", session);
+        RazeAssert.EvaluatesToVoid("var integer b = a", session);
+        RazeAssert.EvaluatesToVoid("a = 20", session);
 
-        RazeAssert.EvaluatesToInteger("b", 10, scope);
+        RazeAssert.EvaluatesToInteger("b", 10, session);
     }
 
     [Fact]
     public void Evaluate_ConstantAssignment_ThrowsConstantAssignmentException()
     {
-        var scope = RazeScript.CreateInterpreterScope();
+        var session = new RazeSession();
 
-        RazeAssert.EvaluatesToVoid("const integer test = 10", scope);
-        RazeAssert.ReturnsError<ConstantAssignmentException>("test = 11", scope);
+        RazeAssert.EvaluatesToVoid("const integer test = 10", session);
+        RazeAssert.ReturnsError<ConstantAssignmentException>("test = 11", session);
     }
 
     [Fact]
     public void Evaluate_AccessingUninitializedVariable_ThrowsUninitializedVariableException()
     {
-        var scope = RazeScript.CreateInterpreterScope();
+        var session = new RazeSession();
 
-        RazeAssert.EvaluatesToVoid("var integer variable", scope);
-        RazeAssert.EvaluatesToVoid("var integer? nullableVariable", scope);
+        RazeAssert.EvaluatesToVoid("var integer variable", session);
+        RazeAssert.EvaluatesToVoid("var integer? nullableVariable", session);
 
-        RazeAssert.ReturnsError<UninitializedVariableException>("variable", scope);
-        RazeAssert.ReturnsError<UninitializedVariableException>("nullableVariable", scope);
+        RazeAssert.ReturnsError<UninitializedVariableException>("variable", session);
+        RazeAssert.ReturnsError<UninitializedVariableException>("nullableVariable", session);
     }
 
     [Fact]

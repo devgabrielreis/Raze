@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Builders;
+﻿using Raze.Script.Core;
+using Raze.Script.Core.Builders;
 using Raze.Script.Core.Builders.Types;
 using Raze.Script.Core.Runtime.Values;
 
@@ -47,8 +48,9 @@ public class ParameterBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 
     [Fact]
@@ -93,8 +95,9 @@ public class ParameterBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 
     [Fact]
@@ -140,8 +143,9 @@ public class ParameterBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 
     [Fact]
@@ -186,8 +190,9 @@ public class ParameterBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 
     [Fact]
@@ -233,8 +238,9 @@ public class ParameterBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 
     [Fact]
@@ -279,8 +285,9 @@ public class ParameterBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 
     [Fact]
@@ -324,7 +331,8 @@ public class ParameterBuilderTests
         string script = $"""
             import testModule
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 }

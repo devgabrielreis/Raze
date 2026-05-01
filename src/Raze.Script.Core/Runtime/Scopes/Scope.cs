@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace Raze.Script.Core.Runtime.Scopes;
 
-public sealed class Scope
+internal sealed class Scope
 {
     [Flags]
     private enum ScopePermissions : byte
@@ -19,17 +19,15 @@ public sealed class Scope
         All = DeclareVariables | DeclareConstants | DeclareNamespaces
     }
 
-    public string Kind => _kind;
+    internal readonly string Kind;
 
-    private Scope? _parent;
+    private readonly Scope? _parent;
 
-    private Dictionary<string, VariableSymbol> _variables;
+    private readonly Dictionary<string, VariableSymbol> _variables;
 
-    private Dictionary<string, NamespaceSymbol> _namespaces;
+    private readonly Dictionary<string, NamespaceSymbol> _namespaces;
 
-    private ScopePermissions _permissions;
-
-    private string _kind;
+    private readonly ScopePermissions _permissions;
 
     private Scope(Scope? parent, ScopePermissions permissions, string kind)
     {
@@ -37,7 +35,7 @@ public sealed class Scope
         _variables = [];
         _namespaces = [];
         _permissions = permissions;
-        _kind = kind;
+        Kind = kind;
     }
 
     internal static Scope CreateInterpreterScope()
@@ -68,6 +66,17 @@ public sealed class Scope
         return new Scope(parent, ScopePermissions.DeclareConstants, "Namespace");
     }
 
+    internal void ThrowIfImportIsNotAllowed(ref readonly SourceInfo source)
+    {
+        if (!Can(ScopePermissions.DeclareNamespaces))
+        {
+            ThrowHelper.Throw<ScopeDeclarationException>(
+                $"Cannot use imports on {Kind.ToLower()} scope",
+                in source
+            );
+        }
+    }
+
     internal void DeclareVariable(string name, VariableSymbol variable, ref readonly SourceInfo source)
     {
         var permissionNeeded = variable.IsConstant
@@ -78,7 +87,7 @@ public sealed class Scope
         {
             var variableKind = variable.IsConstant ? "constant" : "variable";
             ThrowHelper.Throw<ScopeDeclarationException>(
-                $"Cannot declare {variableKind} on {_kind.ToLower()} scope",
+                $"Cannot declare {variableKind} on {Kind.ToLower()} scope",
                 in source
             );
         }
@@ -130,25 +139,19 @@ public sealed class Scope
     internal void DeclareNamespace(
         string name,
         NamespaceSymbol namespaceSymbol,
-        ref readonly SourceInfo source,
-        bool throwIfAlreadyDeclared = true
+        ref readonly SourceInfo source
     )
     {
         if (!Can(ScopePermissions.DeclareNamespaces))
         {
             ThrowHelper.Throw<ScopeDeclarationException>(
-                $"Cannot declare namespace on {_kind.ToLower()} scope",
+                $"Cannot declare namespace on {Kind.ToLower()} scope",
                 in source
             );
         }
 
         if (!_namespaces.TryAdd(name, namespaceSymbol))
         {
-            if (!throwIfAlreadyDeclared)
-            {
-                return;
-            }
-
             ThrowHelper.Throw<RedeclarationException>(
                 $"The namespace {name} is already declared",
                 in source

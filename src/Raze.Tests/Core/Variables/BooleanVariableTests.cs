@@ -11,16 +11,16 @@ public class BooleanVariableTests
     [InlineData("var boolean? test = null", "test", null)]
     public void Evaluate_BooleanVariableDeclaration_ReturnsExpectedValue(string expression, string varname, bool? expected)
     {
-        var scope = RazeScript.CreateInterpreterScope();
-        RazeAssert.EvaluatesToVoid(expression, scope);
+        var session = new RazeSession();
+        RazeAssert.EvaluatesToVoid(expression, session);
 
         if (expected is null)
         {
-            RazeAssert.EvaluatesToNull(varname, scope);
+            RazeAssert.EvaluatesToNull(varname, session);
         }
         else
         {
-            RazeAssert.EvaluatesToBoolean(varname, expected.Value, scope);
+            RazeAssert.EvaluatesToBoolean(varname, expected.Value, session);
         }
     }
 

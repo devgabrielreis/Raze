@@ -16,11 +16,6 @@ public static class RazeScript
 {
     public static Version Version => typeof(RazeScript).Assembly.GetName().Version!;
 
-    public static Scope CreateInterpreterScope()
-    {
-        return Scope.CreateInterpreterScope();
-    }
-
     public static RazeResult ExecuteScript(
         FileInfo script,
         Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders = null,
@@ -34,15 +29,19 @@ public static class RazeScript
             return new RazeError(error);
         }
 
-        var scope = Scope.CreateGlobalScope();
+        var session = new RazeSession(
+            Scope.CreateGlobalScope(),
+            customModuleBuilders
+        );
+        var rootPath = script.Directory!.FullName;
 
-        var result = Evaluate(source, script.FullName, scope, customModuleBuilders);
+        var result = Evaluate(source, script.FullName, rootPath, session);
         if (result is RazeError)
         {
             return result;
         }
 
-        if (!ScopeHasValidEntryPoint(scope, out errorMessage, entryPointNamespace, entryPointFunction))
+        if (!ScopeHasValidEntryPoint(session.RootScope, out errorMessage, entryPointNamespace, entryPointFunction))
         {
             var error = new InvalidEntryPointException(errorMessage, new SourceInfo(script.FullName));
             return new RazeError(error);
@@ -50,31 +49,52 @@ public static class RazeScript
 
         var entryPoint = BuildEntryPointCode(entryPointNamespace, entryPointFunction);
 
-        return Evaluate(entryPoint, "Script entry point", scope, customModuleBuilders);
+        return Evaluate(entryPoint, "Script entry point", rootPath, session);
     }
 
     public static RazeResult Evaluate(
         string source,
         string sourceLocation,
-        Scope? scope = null,
-        Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders = null
+        string rootPath,
+        RazeSession? session = null
     )
     {
-        if (scope is null)
-        {
-            scope = Scope.CreateInterpreterScope();
-        }
+        return Evaluate(
+            source,
+            sourceLocation,
+            rootPath,
+            session,
+            throwRazeError: false,
+            customRootScope: null
+        );
+    }
+
+    internal static RazeResult Evaluate(
+        string source,
+        string sourceLocation,
+        string rootPath,
+        RazeSession? session,
+        bool throwRazeError,
+        Scope? customRootScope
+    )
+    {
+        session ??= new RazeSession();
 
         try
         {
             var tokens = Lexer.Tokenize(source, sourceLocation);
             var program = Parser.Parse(tokens, sourceLocation);
-            var result = Interpreter.Evaluate(program, scope, customModuleBuilders);
+            var result = Interpreter.Evaluate(program, session, sourceLocation, rootPath, customRootScope);
 
             return new RazeSuccess(result);
         }
         catch (RazeException razeEx)
         {
+            if (throwRazeError)
+            {
+                throw;
+            }
+
             return new RazeError(razeEx);
         }
     }

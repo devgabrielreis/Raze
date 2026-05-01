@@ -1,5 +1,4 @@
-﻿using Raze.Script.Core.Builders;
-using Raze.Script.Core.BuiltInModules;
+﻿using Raze.Script.Core.BuiltInModules;
 using Raze.Script.Core.Constants;
 using Raze.Script.Core.Exceptions;
 using Raze.Script.Core.Exceptions.ParseExceptions;
@@ -14,41 +13,43 @@ using Raze.Script.Core.Runtime.Values;
 using Raze.Script.Core.Statements;
 using Raze.Script.Core.Statements.Expressions;
 using Raze.Script.Core.Statements.Expressions.LiteralExpressions;
+using Raze.Shared.Utils;
 
 namespace Raze.Script.Core.Engine;
 
 internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
 {
-    private Runtime.Context.ExecutionContext _executionContext;
-    private OperationDispatcher _operationDispatcher;
-    private Dictionary<string, Action<ModuleBuilder>>? _customModuleBuilders;
+    private readonly RazeSession _session;
+    private readonly string _rootPath;
+    private readonly Runtime.Context.ExecutionContext _executionContext;
 
-    private Interpreter(Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders)
+    private static readonly OperationDispatcher _operationDispatcher = new OperationDispatcher()
+                                                                        .RegisterFrom<IntegerOperationRegistrar>()
+                                                                        .RegisterFrom<DecimalOperationRegistrar>()
+                                                                        .RegisterFrom<StringOperationRegistrar>()
+                                                                        .RegisterFrom<BooleanOperationRegistrar>();
+
+    private Interpreter(string rootPath, RazeSession session)
     {
-        if (customModuleBuilders != null)
-        {
-            ValidateCustomModuleBuilders(customModuleBuilders);
-        }
-
-        _customModuleBuilders = customModuleBuilders;
+        _session = session;
+        _rootPath = rootPath;
 
         _executionContext = new Runtime.Context.ExecutionContext();
-
-        _operationDispatcher = new OperationDispatcher();
-        _operationDispatcher.RegisterFrom<IntegerOperationRegistrar>();
-        _operationDispatcher.RegisterFrom<DecimalOperationRegistrar>();
-        _operationDispatcher.RegisterFrom<StringOperationRegistrar>();
-        _operationDispatcher.RegisterFrom<BooleanOperationRegistrar>();
     }
 
     internal static RuntimeValue Evaluate(
         ProgramExpression program,
-        Scope scope,
-        Dictionary<string, Action<ModuleBuilder>>? customModuleBuilders
+        RazeSession session,
+        string sourceLocation,
+        string rootPath,
+        Scope? customRootScope = null
     )
     {
-        var interpreter = new Interpreter(customModuleBuilders);
-        interpreter.EvaluateInternal(program, scope, out var result);
+        var rootScope = customRootScope ?? session.RootScope;
+        session.RegisterReadFile(sourceLocation);
+
+        var interpreter = new Interpreter(rootPath, session);
+        interpreter.EvaluateInternal(program, rootScope, out var result);
 
         return result;
     }
@@ -104,17 +105,27 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         result = RuntimeValue.Void;
     }
 
-    public void VisitImportStatement(
-        ImportStatement statement,
+    public void VisitImportModuleStatement(
+        ImportModuleStatement statement,
         Scope scope,
         out RuntimeValue result
     )
     {
+        result = RuntimeValue.Void;
+
+        scope.ThrowIfImportIsNotAllowed(in statement.SourceInfo);
+
+        if (_session.HasImportedModule(statement.ModuleName))
+        {
+            return;
+        }
+        _session.RegisterImportedModule(statement.ModuleName);
+
         var module = BuiltInModuleManager.TryGetModule(statement.ModuleName);
 
         if (module == null)
         {
-            module = GetCustomModule(statement.ModuleName);
+            module = _session.GetCustomModule(statement.ModuleName);
         }
 
         if (module == null)
@@ -128,11 +139,43 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         scope.DeclareNamespace(
             statement.ModuleName,
             module,
-            in statement.SourceInfo,
-            throwIfAlreadyDeclared: false
+            in statement.SourceInfo
         );
+    }
 
+    public void VisitImportFileStatement(
+        ImportFileStatement statement,
+        Scope scope,
+        out RuntimeValue result
+    )
+    {
         result = RuntimeValue.Void;
+
+        scope.ThrowIfImportIsNotAllowed(in statement.SourceInfo);
+
+        var scriptToInclude = (Path.IsPathRooted(statement.FilePath))
+            ? new FileInfo(statement.FilePath)
+            : new FileInfo(Path.Combine(_rootPath, statement.FilePath));
+
+        if (_session.HasReadFile(scriptToInclude.FullName))
+        {
+            return;
+        }
+        _session.RegisterReadFile(scriptToInclude.FullName);
+
+        if (!FileUtils.TryReadAllFileLines(scriptToInclude, out var source, out var errorMessage))
+        {
+            ThrowHelper.Throw<FileAccessException>(errorMessage, in statement.SourceInfo);
+        }
+
+        RazeScript.Evaluate(
+            source,
+            scriptToInclude.FullName,
+            scriptToInclude.Directory!.FullName,
+            _session,
+            throwRazeError: true,
+            scope
+        );
     }
 
     public void VisitNamespaceAccessExpression(
@@ -529,37 +572,6 @@ internal sealed class Interpreter: IStatementVisitor<Scope, RuntimeValue>
         out RuntimeValue result)
     {
         result = new RuntimeValue(expression.StrValue);
-    }
-
-    private static void ValidateCustomModuleBuilders(Dictionary<string, Action<ModuleBuilder>> customModuleBuilders)
-    {
-        foreach (var customModuleName in customModuleBuilders.Keys)
-        {
-            if (BuiltInModuleManager.HasModule(customModuleName))
-            {
-                var source = new SourceInfo($"{nameof(Interpreter)} initializer");
-                ThrowHelper.Throw<RedeclarationException>(
-                    $"The custom module \"{customModuleName}\" has the same name as a built in module",
-                    in source
-                );
-            }
-        }
-    }
-
-    private NamespaceSymbol? GetCustomModule(string name)
-    {
-        if (
-            _customModuleBuilders != null
-            && _customModuleBuilders.TryGetValue(name, out var moduleBuilderFunction)
-        )
-        {
-            var moduleBuilder = new ModuleBuilder(name);
-            moduleBuilderFunction(moduleBuilder);
-
-            return moduleBuilder.Build();
-        }
-
-        return null;
     }
 
     private bool GetValidBooleanValue(Expression condition, Scope scope)

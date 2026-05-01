@@ -1,4 +1,5 @@
-﻿using Raze.Script.Core.Builders;
+﻿using Raze.Script.Core;
+using Raze.Script.Core.Builders;
 using Raze.Script.Core.Builders.Types;
 using Raze.Script.Core.Runtime.Values;
 
@@ -31,8 +32,9 @@ public class ModuleBuilderTests
 
             testModule::testConstant
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.EvaluatesToInteger(script, expected, customModules: customModules);
+        RazeAssert.EvaluatesToInteger(script, expected, session);
     }
 
     [Fact]
@@ -79,8 +81,9 @@ public class ModuleBuilderTests
 
             testModule::testFunction(10)
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.EvaluatesToInteger(script, 20, customModules: customModules);
+        RazeAssert.EvaluatesToInteger(script, 20, session);
     }
 
     [Fact]
@@ -111,7 +114,8 @@ public class ModuleBuilderTests
         string script = $"""
             import testModule;
         """;
+        var session = new RazeSession(customModules);
 
-        RazeAssert.ThrowsError<InvalidOperationException>(script, customModules: customModules);
+        RazeAssert.ThrowsError<InvalidOperationException>(script, session);
     }
 }
