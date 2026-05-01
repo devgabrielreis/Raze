@@ -70,6 +70,66 @@ public class ScriptFileTests : IDisposable
         RazeAssert.ReturnsError<InvalidEntryPointException>(scriptFile);
     }
 
+    [Fact]
+    public void Evaluate_ImportingFiles_ReturnsExpectedValue()
+    {
+        var importScript = """
+            namespace test {
+                def integer getNumber() {
+                    return 20;
+                }
+            }
+        """;
+
+        var importFile = CreateScriptFile(importScript);
+        var importedFilePath = importFile.FullName.Replace('\\', '/');
+
+        var mainScript = $$"""
+            import "{{importedFilePath}}";
+
+            namespace main {
+                def integer main() {
+                    return test::getNumber();
+                }
+            }
+        """;
+
+        var mainFile = CreateScriptFile(mainScript);
+
+        RazeAssert.EvaluatesToInteger(mainFile, 20);
+    }
+
+    [Fact]
+    public void Evaluate_ImportingFilesMultipleTimes_HasNoEffect()
+    {
+        var importScript = """
+            namespace test {
+                def integer getNumber() {
+                    return 20;
+                }
+            }
+        """;
+
+        var importFile = CreateScriptFile(importScript);
+        var importedFilePath = importFile.FullName.Replace('\\', '/');
+
+        var mainScript = $$"""
+            import "{{importedFilePath}}";
+            import "{{importedFilePath}}";
+            import "{{importedFilePath}}";
+
+            namespace main {
+                def integer main() {
+                    return test::getNumber();
+                }
+            }
+        """;
+
+        var mainFile = CreateScriptFile(mainScript);
+
+        RazeAssert.EvaluatesToInteger(mainFile, 20);
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_tempDirectory))
