@@ -2,7 +2,11 @@ import * as vscode from 'vscode';
 
 const TERMINAL_NAME = 'Raze';
 
-function runFile(): void {
+async function sleep(ms: number) {
+  return new Promise(res => setTimeout(res, ms));
+}
+
+async function runFile(): Promise<void> {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
     vscode.window.showErrorMessage('No files open.');
@@ -20,11 +24,19 @@ function runFile(): void {
   }
 
   terminal.show();
+
+  terminal.sendText('\x03'); // Ctrl+C
+  await sleep(500);
+
   terminal.sendText(`${executable} "${filePath}"`);
 }
 
 export function activate(context: vscode.ExtensionContext): void {
-  let disposable = vscode.commands.registerCommand('raze.runFile', runFile);
+  let disposable = vscode.commands.registerCommand('raze.runFile', () => {
+    runFile().catch(err => {
+      vscode.window.showErrorMessage(`Error: ${err.message}`);
+    });
+  });
 
   context.subscriptions.push(disposable);
 }
