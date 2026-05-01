@@ -79,8 +79,12 @@
 					"match": "\\b(if|else|while|for|break|continue|return)\\b"
 				},
 				{
+					"name": "storage.modifier.raze",
+					"match": "\\b(const|var)\\b"
+				},
+				{
 					"name": "storage.type.function.raze",
-					"match": "\\b(def|const|var)\\b"
+					"match": "\\b(def)\\b"
 				}
 			]
 		},
