@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 
+const TERMINAL_NAME = 'Raze';
+
 function runFile(): void {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
@@ -11,7 +13,12 @@ function runFile(): void {
   const config = vscode.workspace.getConfiguration('raze');
   const executable = config.get('executableName') || 'raze';
 
-  const terminal = vscode.window.createTerminal('Raze');
+  let terminal = vscode.window.terminals.find(t => t.name == TERMINAL_NAME);
+
+  if (!terminal) {
+    terminal = vscode.window.createTerminal(TERMINAL_NAME);
+  }
+
   terminal.show();
   terminal.sendText(`${executable} "${filePath}"`);
 }
